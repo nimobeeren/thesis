@@ -1,0 +1,21 @@
+name: Build main LaTeX document
+on:
+  push:
+    paths:
+      - 'docs/**'
+jobs:
+  build_latex:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out latest changes
+        uses: actions/checkout@v2
+      - name: Build LaTeX
+        uses: xu-cheng/latex-action@v2
+        with:
+          working_directory: docs
+          root_file: main.tex
+      - name: Upload document
+        uses: actions/upload-artifact@v2
+        with:
+          name: Report PDF
+          path: docs/main.pdf
