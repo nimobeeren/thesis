@@ -1,0 +1,109 @@
+\documentclass[a4paper]{article}
+
+\usepackage{hyperref}
+\usepackage{parskip}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{note}[theorem]{Note}
+\newtheorem{example}[theorem]{Example}
+
+\newcommand{\ptype}{\tau}
+\newcommand{\rtype}{\tau^r}
+\newcommand{\ctype}{\tau^c}
+\newcommand{\ntype}{\tau^n}
+\newcommand{\etype}{\tau^e}
+
+% Semantics (double brackets)
+\newcommand{\lsem}{\ensuremath{[\![}}
+\newcommand{\rsem}{\ensuremath{]\!]}}
+\newcommand{\sem}[1]{\ensuremath{\lsem #1 \rsem}}
+
+% Partial function
+\makeatletter
+\newcommand{\pto}{}% just for safety
+\DeclareRobustCommand{\pto}{\mathrel{\mathpalette\p@to@gets\to}}
+\newcommand{\p@to@gets}[2]{%
+  \ooalign{\hidewidth$\m@th#1\mapstochar\mkern5mu$\hidewidth\cr$\m@th#1\to$\cr}%
+}
+\makeatother
+
+\title{Typing of Property Graphs}
+\author{Nimo Beeren}
+
+
+\begin{document}
+
+\section{Property Graphs}
+
+We postulate the following sets: the set of labels $\mathcal{L}$, the set of property values $\mathcal{V}$ and the set of property names $\mathcal{N}$.
+
+\begin{definition}[Record]
+  A \emph{record} is a finite partial function $r : \mathcal{N} \pto \mathcal{V}$ that maps some property names to property values. The set of all records is denoted as $\mathcal{R}$.
+\end{definition}
+
+\begin{definition}[Property graph]
+  A \emph{property graph} is a tuple $(N, E, \rho, \lambda, \pi)$ where
+  \begin{itemize}
+    \item $N$ is a finite set of node identifiers,
+    \item $E$ is a finite set of edge identifiers such that $N \cap E = \emptyset$,
+    \item $\rho : E \to (N \times N) \cup \{\{u, v\} \mid u, v \in N\}$ is a total function mapping edges to ordered or unordered pairs of nodes,
+    \item $\lambda : (N \cup E) \to 2^{\mathcal{L}}$ is a total function mapping nodes and edges to a (possibly empty) set of labels,
+    \item $\pi : (N \cup E) \to \mathcal{R}$ is a total function mapping nodes and edges to a record.
+  \end{itemize}
+\end{definition}
+
+We call an edge $e \in E$ \emph{directed} if $\rho(e) \in (N \times N)$ and \emph{undirected} if $\rho(e) \in \{\{u, v\} \mid u, v \in N\}$.
+
+\section{Property Graph Schemas}
+
+% TODO: optional properties
+
+\begin{definition}[Property types]
+  We assume the existence of a set of \emph{property types} $\mathcal{T}$. For each property type $\ptype \in \mathcal{T}$ there is a set $\sem{\ptype} \subseteq \mathcal{V}$ that contains all property values that \emph{conform} to the type $\ptype$.
+\end{definition}
+
+\begin{definition}[Record type]
+  A \emph{record type} is a finite partial function $\rtype : \mathcal{N} \pto \mathcal{T}$ that maps some property names to a property type. We will denote such record types as $\langle a_1 : \rtype_1, \ldots, a_n : \rtype_n \rangle$.
+\end{definition}
+
+\begin{definition}[Record conformance]
+  We say that a record $r$ \emph{conforms} to a record type $\rtype$ if for each property name $k \in \mathcal{N}$ it holds that (1) $r(k)$ is defined iff $\rtype(k)$ is defined and (2) $r(k) \in \sem{\rtype(k)}$ if $r(k)$ and $\rtype(k)$ are defined.
+\end{definition}
+
+Next, we introduce a \emph{content type}, which describes the labels and properties that can be associated with a node or edge.
+
+\begin{definition}[Content type]
+  A \emph{content type} is a pair $\ctype = (L, \rtype)$ where $L \subseteq \mathcal{L}$ is a finite set of labels and and $\rtype$ a record type. We will denote such content types also simply as $L \rtype$ or $\{ l_1 \ldots l_k \} \langle a_1 : \rtype_1, \ldots, a_n : \rtype_n \rangle$.
+\end{definition}
+
+\begin{definition}[Node type]
+  A \emph{node type} is a singleton tuple $\ntype = (\ctype)$ where $\ctype$ is a content type.
+\end{definition}
+
+\begin{definition}[Node conformance]
+  Given a property graph $(N, E, \rho, \lambda, \pi)$ we say that a node $n \in N$ \emph{conforms} to a node type $(L\rtype)$ iff (1) $\lambda(n) = L$ and (2) $\pi(n)$ conforms to $\rtype$.
+\end{definition}
+
+\begin{definition}[Edge type]
+  An \emph{edge type} is a tuple $\etype = (\ntype_1, \ctype, \ntype_2)$ where $\ntype_1$ is a node type describing the start node, $\ctype$ is a content type describing the content of the edge and $\ntype_2$ is a node type describing the end node.
+\end{definition}
+  
+\begin{definition}[Edge conformance]
+  Given a property graph $(N, E, \rho, \lambda, \pi)$ we say that an edge $e \in E$ \emph{conforms} to an edge type $(\ntype_1, \ctype, \ntype_2)$, where $\ctype = (L, \rtype)$, iff:
+  % (1) for the pair $(n_1, n_2) = \rho(e)$ it holds that $n_1$ conforms to $\ntype_1$ and $n_2$ conforms to $\ntype_2$, 
+  % (2) $\lambda(e) = L$ and 
+  % (3) $\pi(e)$ conforms to $\rtype$.
+  \begin{enumerate}
+    \item if $e$ is directed, then for the ordered pair $(n_1, n_2) = \rho(e)$ it holds that $n_1$ conforms to $\ntype_1$ and $n_2$ conforms to $\ntype_2$;
+    \item if $e$ is undirected, then for the unordered pair $\{n_1, n_2\} = \rho(e)$ it holds that $n_1$ conforms to $\ntype_1$ and $n_2$ conforms to $\ntype_2$, or $n_1$ conforms to $\ntype_2$ and $n_2$ conforms to $\ntype_1$;
+    \item $\lambda(e) = L$; and
+    \item $\pi(e)$ conforms to $\rtype$.
+  \end{enumerate}
+\end{definition}
+
+\begin{definition}[Property graph type]
+  A \emph{property graph type} is \ldots
+\end{definition}
+
+\end{document}
