@@ -91,9 +91,6 @@ Next, we introduce a \emph{content type}, which describes the labels and propert
   
 \begin{definition}[Edge conformance]
   Given a property graph $(N, E, \rho, \lambda, \pi)$ we say that an edge $e \in E$ \emph{conforms} to an edge type $(\ntype_1, \ctype, \ntype_2)$, where $\ctype = (L, \rtype)$, iff:
-  % (1) for the pair $(n_1, n_2) = \rho(e)$ it holds that $n_1$ conforms to $\ntype_1$ and $n_2$ conforms to $\ntype_2$, 
-  % (2) $\lambda(e) = L$ and 
-  % (3) $\pi(e)$ conforms to $\rtype$.
   \begin{enumerate}
     \item if $e$ is directed, then for the ordered pair $(n_1, n_2) = \rho(e)$ it holds that $n_1$ conforms to $\ntype_1$ and $n_2$ conforms to $\ntype_2$;
     \item if $e$ is undirected, then for the unordered pair $\{n_1, n_2\} = \rho(e)$ it holds that $n_1$ conforms to $\ntype_1$ and $n_2$ conforms to $\ntype_2$, or $n_1$ conforms to $\ntype_2$ and $n_2$ conforms to $\ntype_1$;
