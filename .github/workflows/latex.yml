@@ -1,4 +1,4 @@
-name: Build thesis PDF
+name: Build PDF
 on:
   push:
     paths:
@@ -14,7 +14,7 @@ jobs:
         with:
           working_directory: docs
           root_file: main.tex
-      - name: Upload thesis PDF
+      - name: Upload PDF
         uses: actions/upload-artifact@v2
         with:
           name: Thesis PDF
