@@ -1,4 +1,4 @@
-name: Build main LaTeX document
+name: Build thesis PDF
 on:
   push:
     paths:
@@ -14,8 +14,8 @@ jobs:
         with:
           working_directory: docs
           root_file: main.tex
-      - name: Upload document
+      - name: Upload thesis PDF
         uses: actions/upload-artifact@v2
         with:
-          name: Report PDF
+          name: Thesis PDF
           path: docs/main.pdf
