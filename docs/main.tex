@@ -8,10 +8,12 @@
 \newtheorem{note}[theorem]{Note}
 \newtheorem{example}[theorem]{Example}
 
+% Schema elements
 \newcommand{\ptype}{\tau}
 \newcommand{\rtype}{\tau^r}
 \newcommand{\ctype}{\tau^c}
 \newcommand{\ntype}{\tau^n}
+\newcommand{\dtype}{\tau^d}
 \newcommand{\etype}{\tau^e}
 
 % Semantics (double brackets)
@@ -59,7 +61,7 @@ We call an edge $e \in E$ \emph{directed} if $\rho(e) \in (N \times N)$ and \emp
 
 % TODO: optional properties
 
-\begin{definition}[Property types]
+\begin{definition}[Property type]
   We assume the existence of a set of \emph{property types} $\mathcal{T}$. For each property type $\ptype \in \mathcal{T}$ there is a set $\sem{\ptype} \subseteq \mathcal{V}$ that contains all property values that \emph{conform} to the type $\ptype$.
 \end{definition}
 
@@ -78,22 +80,26 @@ Next, we introduce a \emph{content type}, which describes the labels and propert
 \end{definition}
 
 \begin{definition}[Node type]
-  A \emph{node type} is a singleton tuple $\ntype = (\ctype)$ where $\ctype$ is a content type.
+  We assume the existence of a set of \emph{node types} $\mathcal{T}^n$. A node type is a singleton tuple $\ntype = (\ctype)$ where $\ctype$ is a content type.
 \end{definition}
 
 \begin{definition}[Node conformance]
   Given a property graph $(N, E, \rho, \lambda, \pi)$ we say that a node $n \in N$ \emph{conforms} to a node type $(L\rtype)$ iff (1) $\lambda(n) = L$ and (2) $\pi(n)$ conforms to $\rtype$.
 \end{definition}
 
+\begin{definition}[Direction type]
+  An \emph{direction type} $\dtype$ is a structure describing the two endpoints of an edge and whether the edge is directed. It is either an ordered pair $\dtype = (\ntype_1, \ntype_2)$ to describe a directed edge, or an unordered pair $\dtype = \{\ntype_1, \ntype_2\}$ to describe an undirected edge, where $\ntype_1$ and $\ntype_2$ are node types.
+\end{definition}
+
 \begin{definition}[Edge type]
-  An \emph{edge type} is a tuple $\etype = (\ntype_1, \ctype, \ntype_2)$ where $\ntype_1$ is a node type describing the start node, $\ctype$ is a content type describing the content of the edge and $\ntype_2$ is a node type describing the end node.
+  An \emph{edge type} is a tuple $\etype = (\ctype, \dtype)$ where $\ctype$ is a content type describing the content of the edge and $\dtype$ is a direction type describing the endpoints and directionality of the edge.
 \end{definition}
   
 \begin{definition}[Edge conformance]
-  Given a property graph $(N, E, \rho, \lambda, \pi)$ we say that an edge $e \in E$ \emph{conforms} to an edge type $(\ntype_1, \ctype, \ntype_2)$, where $\ctype = (L, \rtype)$, iff:
+  Given a property graph $(N, E, \rho, \lambda, \pi)$ we say that an edge $e \in E$ \emph{conforms} to an edge type $(\ctype, \dtype)$, where $\ctype = (L, \rtype)$, iff:
   \begin{enumerate}
-    \item if $e$ is directed, then for the ordered pair $(n_1, n_2) = \rho(e)$ it holds that $n_1$ conforms to $\ntype_1$ and $n_2$ conforms to $\ntype_2$;
-    \item if $e$ is undirected, then for the unordered pair $\{n_1, n_2\} = \rho(e)$ it holds that $n_1$ conforms to $\ntype_1$ and $n_2$ conforms to $\ntype_2$, or $n_1$ conforms to $\ntype_2$ and $n_2$ conforms to $\ntype_1$;
+    \item if $\dtype \in (\mathcal{T}^n \times \mathcal{T}^n)$, then $\rho(e) \in (N \times N)$, and for the ordered pair $(n_1, n_2) = \rho(e)$ it holds that $n_1$ conforms to $\ntype_1$ and $n_2$ conforms to $\ntype_2$;
+    \item if $\dtype \in \{\{\ntype_1, \ntype_2\} \mid \ntype_1, \ntype_2 \in \mathcal{T}^n\}$, then $\rho(e) \in \{\{u, v\} \mid u, v \in N\}$, and for the unordered pair $\{n_1, n_2\} = \rho(e)$ it holds that $n_1$ conforms to $\ntype_1$ and $n_2$ conforms to $\ntype_2$;
     \item $\lambda(e) = L$; and
     \item $\pi(e)$ conforms to $\rtype$.
   \end{enumerate}
