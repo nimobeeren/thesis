@@ -74,6 +74,7 @@ We call an edge $e \in E$ \emph{directed} if $\rho(e) \in (N \times N)$ and \emp
 \section{Property Graph Schemas}
 
 % TODO: optional properties
+% TODO: "any" types, i.e. record with any property, allow edge to any node
 
 We postulate the set of property types $\mathcal{T}$.
 
@@ -111,11 +112,13 @@ Next, we introduce a \emph{content type}, which describes the labels and propert
   Given a property graph $(N, E, \rho, \lambda, \pi)$ we say that an edge $e \in E$ \emph{conforms} to an edge type $\etype = (\ntype_1, d, \ntype_2, L\rtype)$, denoted $e \in \sem{\etype}$, if and only if:
   \begin{enumerate}
     \item $d = \rightarrow$ implies $\rho(e) \in (N \times N)$ and for the ordered pair $(n_1, n_2) = \rho(e)$ it holds that $n_1$ conforms to $\ntype_1$ and $n_2$ conforms to $\ntype_2$;
-    \item $d = -$ implies $\rho(e) \in \{\{u, v\} \mid u, v \in N\}$ and for the unordered pair $\{n_1, n_2\} = \rho(e)$ it holds that $n_1$ conforms to $\ntype_1$ and $n_2$ conforms to $\ntype_2$;
+    \item $d = -$ implies $\rho(e) \in \{\{u, v\} \mid u, v \in N\}$ and for the unordered pair $\{n_1, n_2\} = \rho(e)$ it holds that $n_1$ conforms to $\ntype_1$ and $n_2$ conforms to $\ntype_2$, or equivalently $n_1$ conforms to $\ntype_2$ and $n_2$ conforms to $\ntype_1$;
     \item $\lambda(e) = L$; and
     \item $\pi(e)$ conforms to $\rtype$.
   \end{enumerate}
 \end{definition}
+
+% TODO: combine nu and eps
 
 \begin{definition}[Property graph type]
   A \emph{property graph type} is given by a tuple $\gtype = (N, E, \rho, \nu, \varepsilon, \ell, u)$ where 
@@ -129,20 +132,33 @@ Next, we introduce a \emph{content type}, which describes the labels and propert
   \end{itemize}
 \end{definition}
 
-\begin{definition}[Incident edges]
-  Given a set of nodes $N$, a set of edges $E$ and a total function $\rho : E \to (N \times N) \cup \{\{u, v\} \mid u, v \in N\}$, we define a total function $\inc : N \to 2^E$ mapping nodes to sets of \emph{incident edges}. Given a node $n \in N$, the set of its incident edges is defined as $\inc(n) = \{e \in E \mid \exists_{m \in N} \rho(e) = (n, m) \vee \rho(e) = (m, n) \vee \rho(e) = \{n, m\}\}$.
-\end{definition}
+% TODO: explain how a PG type can be interpreted as an augmented PG
+
+% \begin{definition}[Incident edges]
+%   Given a set of nodes $N$, a set of edges $E$ and a total function $\rho : E \to (N \times N) \cup \{\{u, v\} \mid u, v \in N\}$, we define a total function $\inc : N \to 2^E$ mapping nodes to sets of \emph{incident edges}. Given a node $n \in N$, the set of its incident edges is defined as $\inc(n) = \{e \in E \mid \exists_{m \in N} \rho(e) = (n, m) \vee \rho(e) = (m, n) \vee \rho(e) = \{n, m\}\}$.
+% \end{definition}
 
 \begin{definition}[Property graph conformance]
-  We say that a property graph $G = (N, E, \rho, \lambda, \pi)$ \emph{conforms} to a property graph type $\gtype = (N', E', \rho', \nu, \varepsilon, \ell, u)$ if and only if:
+  We say that a property graph $G = (N, E, \rho, \lambda, \pi)$ \emph{conforms} to a property graph type $\gtype = (N', E', \rho', \nu, \varepsilon, \ell, u)$ if and only if all of the following rules hold.
 
-  $$\forall_{n \in N} \exists_{n' \in N'} n \in \sem{\nu(n')} \wedge \forall_{e \in \inc(n)} \exists_{e' \in E'} e \in \sem{\varepsilon(e')}$$
+  \begin{enumerate}
+    \item To capture the vocabulary for nodes and edges:
+    \begin{enumerate}
+      \item $\forall_{n \in N} \exists_{n' \in N'} n \in \sem{\nu(n')}$
+      \item $\forall_{e \in E} \exists_{e' \in E'} e \in \sem{\varepsilon(e')}$
+    \end{enumerate}
+    \item To capture that edges are mandatory:
+    \begin{enumerate}
+      \item $\forall_{e' \in E'} \rho'(e') = (n'_1, n'_2) \implies
+      \\\\(\forall_{n_1 \in \sem{\nu(n'_1)}} \exists_{e \in E} e \in \sem{\varepsilon(e')} \wedge \exists_{m \in N} \rho(e) = (n_1, m) \wedge
+      \\\\ \forall_{n_2 \in \sem{\nu(n'_2)}} \exists_{e \in E} e \in \sem{\varepsilon(e')} \wedge \exists_{m \in N} \rho(e) = (m, n_2))$
 
-  and
-
-  % FIXME: this only works when all edges are undirected. Otherwise \exists^l(e') doesn't make sense
-
-  $$\forall_{n' \in N'} \forall_{n \in N} n \in \sem{\nu(n')} \implies \forall_{e' \in \inc(n')} \exists^{\geq \ell(e')}_{e \in E} e \in \sem{\varepsilon(e')} \wedge \exists^{\leq u(e')}_{e \in E} e \in \sem{\varepsilon(e')}.$$
+      \item $\forall_{e' \in E'} \rho'(e') = \{n'_1, n'_2\} \implies
+      \\\\\forall_{n_1 \in \sem{\nu(n'_1)}} \exists_{e \in E} e \in \sem{\varepsilon(e')} \wedge \exists_{m \in N} \rho(e) = \{n_1, m\}$
+    \end{enumerate}
+  \end{enumerate}
 \end{definition}
+
+Under these definitions, all edges in the schema are mandatory. That is, if a schema node $n' \in N'$ has an incident edge $e'$ (i.e. an incoming, outgoing, or undirected edge), then any node $n \in N$ that conforms to $n'$ must also have one or more incident edges that conform to $e'$.
 
 \end{document}
