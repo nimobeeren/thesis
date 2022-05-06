@@ -48,7 +48,7 @@
 
 \section{Property Graphs}
 
-We postulate the following sets: the set of labels $\mathcal{L}$, the set of property values $\mathcal{V}$ and the set of property names $\mathcal{N}$.
+We postulate the following countably infinite sets: the set of labels $\mathcal{L}$, the set of property names $\mathcal{N}$ and the set of property values $\mathcal{V}$.
 
 \begin{definition}[Record]
   A \emph{record} is a finite partial function $r : \mathcal{N} \pto \mathcal{V}$ that maps some property names to property values. The set of all records is denoted as $\mathcal{R}$.
@@ -65,7 +65,7 @@ We postulate the following sets: the set of labels $\mathcal{L}$, the set of pro
   \end{itemize}
 \end{definition}
 
-We call an edge $e \in E$ \emph{directed} if $\rho(e) \in (N \times N)$ and \emph{undirected} if $\rho(e) \in \{\{u, v\} \mid u, v \in N\}$.
+We call an edge $e \in E$ \emph{directed} if $\rho(e) \in (N \times N)$ and \emph{undirected} if $\rho(e) \in \{\{u, v\} \mid u, v \in N\}$. We use the umbrella term \emph{elements} to refer to nodes and edges.
 
 \section{Property Graph Schemas}
 
@@ -103,7 +103,7 @@ Next, we introduce an \emph{element type}\footnote{We typically use the symbol \
   \end{itemize}
 \end{definition}
 
-% TODO: explain how a PG type can be interpreted as a PG
+The similarity between property graph types and property graphs is intentional. This allows us to visualize them in a similar ways, and to use the same mental model to think about them. Indeed, a property graph type can be simulated by a property graph if we allow properties to take property types as values, i.e. $\ptypes \subseteq \mathcal{V}$. Then we let $\beta$ take the role of both $\lambda$ and $\pi$, in the sense that $\beta(b) = L\rtype$ if $\lambda(b) = L$ and $\pi(b) = \rtype$ for all elements $b$ in the property graph.
 
 \begin{definition}[Property graph conformance]
   We say that a property graph $G = (N, E, \rho, \lambda, \pi)$ \emph{conforms} to a property graph type $\gtype = (N', E', \rho', \beta)$ if and only if all of the following rules hold.
