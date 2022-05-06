@@ -89,7 +89,11 @@ We postulate the set of property types $\mathcal{T}$.
 Next, we introduce an \emph{element type}\footnote{We typically use the symbol \emph{b} to refer to elements, since \emph{e} is already reserved for edges.}, which describes the labels and properties that can be associated with a node or edge.
 
 \begin{definition}[Element type]
-  A \emph{element type} is a pair $\btype = (L, \rtype)$ where $L \subseteq \mathcal{L}$ is a finite set of labels and and $\rtype$ a record type. We will denote such element types also simply as $L \rtype$ or $\{ l_1 \ldots l_k \} \langle a_1 : \rtype_1, \ldots, a_n : \rtype_n \rangle$. The set of all element types is denoted as $\btypes$.
+  A \emph{element type} is a pair $\btype = (L, \rtype)$ where $L \subseteq \mathcal{L}$ is a finite set of labels and and $\rtype$ a record type. We will denote such element types also simply as $L\rtype$ or $\{ l_1 \ldots l_k \} \langle a_1 : \rtype_1, \ldots, a_n : \rtype_n \rangle$. The set of all element types is denoted as $\btypes$.
+\end{definition}
+
+\begin{definition}[Element conformance]
+  Given a property graph $(N, E, \rho, \lambda, \pi)$ we say that an element $b \in (N \cup E)$ \emph{conforms} to an element type $\btype = L\rtype$, denoted $b \in \sem{\btype}$, iff (1) $\lambda(b) = L$ and (2) $\pi(b)$ conforms to $\rtype$.
 \end{definition}
 
 \begin{definition}[Property graph type]
@@ -127,8 +131,9 @@ The similarity between property graph types and property graphs is intentional. 
   \end{enumerate}
 \end{definition}
 
-Under these definitions, all edges in the schema are mandatory. That is, if a schema node $n' \in N'$ has an incident edge $e'$ (i.e. an incoming, outgoing, or undirected edge that $n'$ participates in), then any node $n \in N$ that conforms to the element type associated with $n'$ must also have one or more incident edges that conform to $e'$.
-% TODO: add that the other endpoint of the data edge needs to conform to the other endpoint of the schema edge
+Under these definitions, all edges in the schema are mandatory. That is, if a schema node $n' \in N'$ has an incident edge $e'$ (i.e. an incoming, outgoing, or undirected edge that $n'$ participates in), then any node $n \in N$ that conforms to the element type associated with $n'$ must also have one or more incident edges $e$ that conform to $e'$. Furthermore, the other endpoint of $e$ must conform to the element type associated with the other endpoint of the schema edge. In the following, we will relax this requirement, as well as allow stricter requirements on cardinality.
+
+\subsection{Cardinality constraints}
 
 % TODO add cardinality back
 
