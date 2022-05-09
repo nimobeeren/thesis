@@ -28,9 +28,6 @@
 \newcommand{\rsem}{\ensuremath{]\!]}}
 \newcommand{\sem}[1]{\ensuremath{\lsem #1 \rsem}}
 
-% Incident edges
-\DeclareMathOperator{\inc}{inc}
-
 % Partial function
 \makeatletter
 \newcommand{\pto}{}% just for safety
@@ -119,20 +116,18 @@ The similarity between property graph types and property graphs is intentional. 
       \item $\forall_{e \in E} \exists_{e' \in E'} e \in \sem{\beta(e')}$
     \end{enumerate}
     \item To capture that edges are mandatory:
-    % FIXME: need to restrict the type of m
     \begin{enumerate}
-      \item $\forall_{e' \in E'} \exists_{n'_1, n'_2 \in N'} \rho'(e') = (n'_1, n'_2) \implies
-      \\\\(\forall_{n_1 \in \sem{\beta(n'_1)}} \exists_{e \in E} e \in \sem{\beta(e')} \wedge \exists_{m \in N} \rho(e) = (n_1, m) \wedge
-      \\\\ \forall_{n_2 \in \sem{\beta(n'_2)}} \exists_{e \in E} e \in \sem{\beta(e')} \wedge \exists_{m \in N} \rho(e) = (m, n_2))$
+      \item $\forall_{e' \in E'} \forall_{n'_1, n'_2 \in N'} \rho'(e') = (n'_1, n'_2) \implies
+      \\\\(\forall_{n_1 \in \sem{\beta(n'_1)}} \exists_{e \in E} e \in \sem{\beta(e')} \wedge \exists_{m_2 \in N} m_2 \in \sem{\beta(n'_2)} \wedge \rho(e) = (n_1, m_2) \wedge
+      \\\\ \forall_{n_2 \in \sem{\beta(n'_2)}} \exists_{e \in E} e \in \sem{\beta(e')} \wedge \exists_{m_1 \in N} m_1 \in \sem{\beta(n'_1)} \wedge \rho(e) = (m_1, n_2))$
 
-      % TODO: is this enough? don't we need to say something about n'2?
-      \item $\forall_{e' \in E'} \exists_{n'_1, n'_2 \in N'} \rho'(e') = \{n'_1, n'_2\} \implies
-      \\\\\forall_{n_1 \in \sem{\beta(n'_1)}} \exists_{e \in E} e \in \sem{\beta(e')} \wedge \exists_{m \in N} \rho(e) = \{n_1, m\}$
+      \item $\forall_{e' \in E'} \forall_{n'_1, n'_2 \in N'} \rho'(e') = \{n'_1, n'_2\} \implies
+      \\\\\forall_{n_1 \in \sem{\beta(n'_1)}} \exists_{e \in E} e \in \sem{\beta(e')} \wedge \exists_{n_2 \in N} n_2 \in \sem{\beta(n'_2)} \wedge \rho(e) = \{n_1, n_2\}$
     \end{enumerate}
   \end{enumerate}
 \end{definition}
 
-Under these definitions, all edges in the schema are mandatory. That is, if a schema node $n' \in N'$ has an incident edge $e'$ (i.e. an incoming, outgoing, or undirected edge that $n'$ participates in), then any node $n \in N$ that conforms to the element type associated with $n'$ must also have one or more incident edges $e$ that conform to $e'$. Furthermore, the other endpoint of $e$ must conform to the element type associated with the other endpoint of the schema edge. In the following, we will relax this requirement and allow stricter requirements on cardinality.
+Under these definitions, all edges in the schema are mandatory. That is, if a schema node $n' \in N'$ has an incident edge $e'$ (i.e. an incoming, outgoing, or undirected edge that $n'$ participates in), then any node $n \in N$ that conforms to $\beta(n')$ must also have one or more incident edges $e$ (in the same direction) that conform to $\beta(e')$. Furthermore, the other endpoint of $e$ must conform to the element type associated with the other endpoint of the schema edge. In the following, we will relax this requirement and allow stricter requirements on cardinality.
 
 % TODO add cardinality back
 
