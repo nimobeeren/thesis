@@ -110,20 +110,21 @@ The similarity between property graph types and property graphs is intentional. 
   We say that a property graph $G = (N, E, \rho, \lambda, \pi)$ \emph{conforms} to a property graph type $\gtype = (N', E', \rho', \beta)$ if and only if all of the following rules hold.
 
   \begin{enumerate}
-    \item To capture the vocabulary for nodes and edges:
-    \begin{enumerate}
-      \item $\forall_{n \in N} \exists_{n' \in N'} n \in \sem{\beta(n')}$
-      \item $\forall_{e \in E} \exists_{e' \in E'} e \in \sem{\beta(e')}$
-    \end{enumerate}
-    \item To capture that edges are mandatory:
-    \begin{enumerate}
-      \item $\forall_{e' \in E'} \forall_{n'_1, n'_2 \in N'} \rho'(e') = (n'_1, n'_2) \implies
-      \\\\(\forall_{n_1 \in \sem{\beta(n'_1)}} \exists_{e \in E} e \in \sem{\beta(e')} \wedge \exists_{m_2 \in N} m_2 \in \sem{\beta(n'_2)} \wedge \rho(e) = (n_1, m_2) \wedge
-      \\\\ \forall_{n_2 \in \sem{\beta(n'_2)}} \exists_{e \in E} e \in \sem{\beta(e')} \wedge \exists_{m_1 \in N} m_1 \in \sem{\beta(n'_1)} \wedge \rho(e) = (m_1, n_2))$
+    \item To capture the vocabulary for nodes:\\
+    $\forall_{n \in N} \exists_{n' \in N'} n \in \sem{\beta(n')}$
+    \item To capture the vocabulary for edges:\\
+    $\forall_{e \in E} \exists_{e' \in E'} e \in \sem{\beta(e')}$
+    \item To capture that outgoing edges are mandatory:\\
+    $\forall_{e' \in E'} \forall_{n'_1, n'_2 \in N'} \rho'(e') = (n'_1, n'_2) \implies
+    \\\forall_{n_1 \in \sem{\beta(n'_1)}} \exists_{e \in \sem{\beta(e')}} \exists_{n_2 \in \sem{\beta(n'_2)}} \rho(e) = (n_1, n_2)$
 
-      \item $\forall_{e' \in E'} \forall_{n'_1, n'_2 \in N'} \rho'(e') = \{n'_1, n'_2\} \implies
-      \\\\\forall_{n_1 \in \sem{\beta(n'_1)}} \exists_{e \in E} e \in \sem{\beta(e')} \wedge \exists_{n_2 \in N} n_2 \in \sem{\beta(n'_2)} \wedge \rho(e) = \{n_1, n_2\}$
-    \end{enumerate}
+    \item To capture that incoming edges are mandatory:\\
+    $\forall_{e' \in E'} \forall_{n'_1, n'_2 \in N'} \rho'(e') = (n'_1, n'_2) \implies
+    \\\forall_{n_2 \in \sem{\beta(n'_2)}} \exists_{e \in \sem{\beta(e')}} \exists_{n_1 \in \sem{\beta(n'_1)}} \rho(e) = (n_1, n_2)$
+    
+    \item To capture that undirected edges are mandatory:\\
+    $\forall_{e' \in E'} \forall_{n'_1, n'_2 \in N'} \rho'(e') = \{n'_1, n'_2\} \implies
+    \\\forall_{n_1 \in \sem{\beta(n'_1)}} \exists_{e \in \sem{\beta(e')}} \exists_{n_2 \in \sem{\beta(n'_2)}} \rho(e) = \{n_1, n_2\}$
   \end{enumerate}
 \end{definition}
 
