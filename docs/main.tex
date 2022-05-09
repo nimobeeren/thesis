@@ -86,7 +86,7 @@ We postulate the set of property types $\mathcal{T}$.
   We say that a record $r$ \emph{conforms} to a record type $\rtype$, denoted $r \in \sem{\rtype}$, if for each property name $k \in \mathcal{N}$ it holds that (1) $r(k)$ is defined iff $\rtype(k)$ is defined and (2) $r(k) \in \sem{\rtype(k)}$ if $r(k)$ and $\rtype(k)$ are defined.
 \end{definition}
 
-Next, we introduce an \emph{element type}\footnote{We typically use the symbol \emph{b} to refer to elements, since \emph{e} is already reserved for edges.}, which describes the labels and properties that can be associated with a node or edge.
+Next, we introduce an \emph{element type}\footnote{We typically use the symbol \emph{b} to refer to elements, since \emph{e} is reserved for edges.}, which describes the labels and properties that can be associated with a node or edge.
 
 \begin{definition}[Element type]
   A \emph{element type} is a pair $\btype = (L, \rtype)$ where $L \subseteq \mathcal{L}$ is a finite set of labels and and $\rtype$ a record type. We will denote such element types also simply as $L\rtype$ or $\{ l_1 \ldots l_k \} \langle a_1 : \rtype_1, \ldots, a_n : \rtype_n \rangle$. The set of all element types is denoted as $\btypes$.
@@ -107,7 +107,7 @@ Next, we introduce an \emph{element type}\footnote{We typically use the symbol \
   \end{itemize}
 \end{definition}
 
-The similarity between property graph types and property graphs is intentional. This allows us to visualize them in a similar ways, and to use the same mental model to think about them. Indeed, a property graph type can be simulated by a property graph if we allow properties to take property types as values, i.e. $\ptypes \subseteq \mathcal{V}$. Then we let $\beta$ take the role of both $\lambda$ and $\pi$, in the sense that $\beta(b) = L\rtype$ if $\lambda(b) = L$ and $\pi(b) = \rtype$ for all elements $b$ in the property graph.
+The similarity between property graph types and property graphs is intentional. This allows us to visualize them in a similar ways, and to use the same mental model to think about them. Indeed, a property graph type can be simulated by a property graph if we allow properties to take property types as values, i.e. $\ptypes \subseteq \mathcal{V}$. Then we let $\lambda$ and $\pi$ take the role of $\beta$, in the sense that $\lambda(b) = L$ and $\pi(b) = \rtype$ if $\beta(b) = L\rtype$ for all elements $b$ of the property graph.
 
 \begin{definition}[Property graph conformance]
   We say that a property graph $G = (N, E, \rho, \lambda, \pi)$ \emph{conforms} to a property graph type $\gtype = (N', E', \rho', \beta)$ if and only if all of the following rules hold.
@@ -121,19 +121,18 @@ The similarity between property graph types and property graphs is intentional. 
     \item To capture that edges are mandatory:
     % FIXME: need to restrict the type of m
     \begin{enumerate}
-      \item $\forall_{e' \in E'} \rho'(e') = (n'_1, n'_2) \implies
+      \item $\forall_{e' \in E'} \exists_{n'_1, n'_2 \in N'} \rho'(e') = (n'_1, n'_2) \implies
       \\\\(\forall_{n_1 \in \sem{\beta(n'_1)}} \exists_{e \in E} e \in \sem{\beta(e')} \wedge \exists_{m \in N} \rho(e) = (n_1, m) \wedge
       \\\\ \forall_{n_2 \in \sem{\beta(n'_2)}} \exists_{e \in E} e \in \sem{\beta(e')} \wedge \exists_{m \in N} \rho(e) = (m, n_2))$
 
-      \item $\forall_{e' \in E'} \rho'(e') = \{n'_1, n'_2\} \implies
+      % TODO: is this enough? don't we need to say something about n'2?
+      \item $\forall_{e' \in E'} \exists_{n'_1, n'_2 \in N'} \rho'(e') = \{n'_1, n'_2\} \implies
       \\\\\forall_{n_1 \in \sem{\beta(n'_1)}} \exists_{e \in E} e \in \sem{\beta(e')} \wedge \exists_{m \in N} \rho(e) = \{n_1, m\}$
     \end{enumerate}
   \end{enumerate}
 \end{definition}
 
-Under these definitions, all edges in the schema are mandatory. That is, if a schema node $n' \in N'$ has an incident edge $e'$ (i.e. an incoming, outgoing, or undirected edge that $n'$ participates in), then any node $n \in N$ that conforms to the element type associated with $n'$ must also have one or more incident edges $e$ that conform to $e'$. Furthermore, the other endpoint of $e$ must conform to the element type associated with the other endpoint of the schema edge. In the following, we will relax this requirement, as well as allow stricter requirements on cardinality.
-
-\subsection{Cardinality constraints}
+Under these definitions, all edges in the schema are mandatory. That is, if a schema node $n' \in N'$ has an incident edge $e'$ (i.e. an incoming, outgoing, or undirected edge that $n'$ participates in), then any node $n \in N$ that conforms to the element type associated with $n'$ must also have one or more incident edges $e$ that conform to $e'$. Furthermore, the other endpoint of $e$ must conform to the element type associated with the other endpoint of the schema edge. In the following, we will relax this requirement and allow stricter requirements on cardinality.
 
 % TODO add cardinality back
 
