@@ -66,9 +66,6 @@ We call an edge $e \in E$ \emph{directed} if $\rho(e) \in (N \times N)$ and \emp
 
 \section{Property Graph Schemas}
 
-% TODO: optional properties
-% TODO: "any" types, i.e. record with any property, allow edge to any node
-
 We postulate the set of property types $\mathcal{T}$.
 
 \begin{definition}[Property conformance]
@@ -100,7 +97,6 @@ Next, we introduce an \emph{element type}\footnote{We typically use the symbol \
     \item $E$ is a finite set of schema edges;
     \item $\rho : E \to (N \times N) \cup \{\{u, v\} \mid u, v \in N\}$ is a total function mapping schema edges to ordered or unordered pairs of schema nodes;
     \item $\beta : (N \cup E) \to \btypes$ is a total function mapping schema elements to element types.
-    % \item $\ell, u : E \to (\N^\infty \times \N^\infty) \cup \N^\infty$ are total functions mapping edges to cardinality constraints, where $\N^\infty$ is defined as $\{0, 1, 2, \ldots, \infty\}$.
   \end{itemize}
 \end{definition}
 
@@ -112,11 +108,15 @@ The similarity between property graph types and property graphs is intentional. 
   \begin{enumerate}
     \item To capture the vocabulary for nodes:\\
     $\forall_{n \in N} \exists_{n' \in N'} n \in \sem{\beta(n')}$
+    
     \item To capture the vocabulary for edges:\\
     $\forall_{e \in E} \exists_{e' \in E'} e \in \sem{\beta(e')}$
+    
     \item To capture that outgoing edges are mandatory:\\
     $\forall_{e' \in E'} \forall_{n'_1, n'_2 \in N'} \rho'(e') = (n'_1, n'_2) \implies
     \\\forall_{n_1 \in \sem{\beta(n'_1)}} \exists_{e \in \sem{\beta(e')}} \exists_{n_2 \in \sem{\beta(n'_2)}} \rho(e) = (n_1, n_2)$
+
+    % FIXME: n in [[beta(n')]] doesn't really make sense
 
     \item To capture that incoming edges are mandatory:\\
     $\forall_{e' \in E'} \forall_{n'_1, n'_2 \in N'} \rho'(e') = (n'_1, n'_2) \implies
@@ -128,8 +128,57 @@ The similarity between property graph types and property graphs is intentional. 
   \end{enumerate}
 \end{definition}
 
-Under these definitions, all edges in the schema are mandatory. That is, if a schema node $n' \in N'$ has an incident edge $e'$ (i.e. an incoming, outgoing, or undirected edge that $n'$ participates in), then any node $n \in N$ that conforms to $\beta(n')$ must also have one or more incident edges $e$ (in the same direction) that conform to $\beta(e')$. Furthermore, the other endpoint of $e$ must conform to the element type associated with the other endpoint of the schema edge. In the following, we will relax this requirement and allow stricter requirements on cardinality.
+Under these definitions, all edges in the schema are mandatory. That is, if a schema node $n' \in N'$ has an incident edge $e'$ (i.e. an incoming, outgoing, or undirected edge that $n'$ participates in), then any node $n \in N$ that conforms to $\beta(n')$ must also have one or more incident edges $e$ (in the same direction) that conform to $\beta(e')$. Furthermore, the other endpoint of $e$ must conform to the element type associated with the other endpoint of the schema edge. In the following, we will relax this requirement and allow stronger requirements on cardinality.
 
-% TODO add cardinality back
+\subsection{Cardinality constraints}
+
+To enable stronger cardinality constraints on edges, and to allow optional edges, we revise the definitions of property graph type and property graph conformance.
+
+\begin{definition}[Property graph type]
+  A \emph{property graph type} is given by a tuple $\gtype = (N, E, \rho, \beta, \ell, u)$ where 
+  \begin{itemize}
+    \item $N$ is a finite set of schema nodes;
+    \item $E$ is a finite set of schema edges;
+    \item $\rho : E \to (N \times N) \cup \{\{u, v\} \mid u, v \in N\}$ is a total function mapping schema edges to ordered or unordered pairs of schema nodes;
+    \item $\beta : (N \cup E) \to \btypes$ is a total function mapping schema elements to element types.
+    \item $\ell, u : E \to (\N \times \N^\infty) \cup \N$ are total functions mapping edges to cardinality constraints, where $\N$ is defined as $\{0, 1, 2, \ldots\}$ and $\N^\infty$ is defined as $\N \cup \{\infty\}$.
+  \end{itemize}
+\end{definition}
+
+Define $\exists^{\geq n}_{x \in X} P(x)$ as $\exists_{x_1, x_2, \ldots, x_n \in X} P(x_1) \wedge \ldots \wedge P(x_n) \wedge \forall_{1 \leq i < j \leq n} x_i \neq x_j$.
+
+% FIXME: "not exists" might not work on infinite sets
+Define $\exists^{\leq n}_{x \in X} P(x)$ as $\not \exists^{\geq n+1}_{x \in X} P(x)$.
+
+Define $\exists^{[n, m]}_{x \in X} P(x)$ as $\exists^{\geq n}_{x \in X} P(x) \wedge \exists^{\leq m}_{x' \in X} P(x')$,
+% FIXME: this sucks
+and $\exists^{[n, \infty]}_{x \in X}$ as $\exists^{\geq n}_{x \in X}$.
+
+\begin{definition}[Property graph conformance]
+  We say that a property graph $G = (N, E, \rho, \lambda, \pi)$ \emph{conforms} to a property graph type $\gtype = (N', E', \rho', \beta, \ell, u)$ if and only if all of the following rules hold.
+
+  \begin{enumerate}
+    \item To capture the vocabulary for nodes:\\
+    $\forall_{n \in N} \exists_{n' \in N'} n \in \sem{\beta(n')}$
+
+    \item To capture the vocabulary for edges:\\
+    $\forall_{e \in E} \exists_{e' \in E'} e \in \sem{\beta(e')}$
+
+    \item To capture that outgoing edges are mandatory:\\
+    $\forall_{e' \in E'} \forall_{n'_1, n'_2 \in N'} \rho'(e') = (n'_1, n'_2) \implies
+    \\\forall_{n_1 \in \sem{\beta(n'_1)}} \exists^{[\ell(e'), u(e')]}_{e \in \sem{\beta(e')}} \exists_{n_2 \in \sem{\beta(n'_2)}} \rho(e) = (n_1, n_2)$
+
+    \item To capture that incoming edges are mandatory:\\
+    $\forall_{e' \in E'} \forall_{n'_1, n'_2 \in N'} \rho'(e') = (n'_1, n'_2) \implies
+    \\\forall_{n_2 \in \sem{\beta(n'_2)}} \exists^{[\ell(e'), u(e')]}_{e \in \sem{\beta(e')}} \exists_{n_1 \in \sem{\beta(n'_1)}} \rho(e) = (n_1, n_2)$
+    
+    \item To capture that undirected edges are mandatory:\\
+    $\forall_{e' \in E'} \forall_{n'_1, n'_2 \in N'} \rho'(e') = \{n'_1, n'_2\} \implies
+    \\\forall_{n_1 \in \sem{\beta(n'_1)}} \exists^{[\ell(e'), u(e')]}_{e \in \sem{\beta(e')}} \exists_{n_2 \in \sem{\beta(n'_2)}} \rho(e) = \{n_1, n_2\}$
+  \end{enumerate}
+\end{definition}
+
+% TODO: optional properties
+% TODO: "any" types, i.e. record with any property, allow edge to any node
 
 \end{document}
