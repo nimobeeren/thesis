@@ -164,15 +164,15 @@ and $\exists^{[n, \infty]}_{x \in X}$ as $\exists^{\geq n}_{x \in X}$.
     \item To capture the vocabulary for edges:\\
     $\forall_{e \in E} \exists_{e' \in E'} e \in \sem{\beta(e')}$
 
-    \item To capture that outgoing edges are mandatory:\\
+    \item To capture cardinality constraints on outgoing edges:\\
     $\forall_{e' \in E'} \forall_{n'_1, n'_2 \in N'} \rho'(e') = (n'_1, n'_2) \implies
     \\\forall_{n_1 \in \sem{\beta(n'_1)}} \exists^{[\ell(e'), u(e')]}_{e \in \sem{\beta(e')}} \exists_{n_2 \in \sem{\beta(n'_2)}} \rho(e) = (n_1, n_2)$
 
-    \item To capture that incoming edges are mandatory:\\
+    \item To capture cardinality constraints on incoming edges::\\
     $\forall_{e' \in E'} \forall_{n'_1, n'_2 \in N'} \rho'(e') = (n'_1, n'_2) \implies
     \\\forall_{n_2 \in \sem{\beta(n'_2)}} \exists^{[\ell(e'), u(e')]}_{e \in \sem{\beta(e')}} \exists_{n_1 \in \sem{\beta(n'_1)}} \rho(e) = (n_1, n_2)$
     
-    \item To capture that undirected edges are mandatory:\\
+    \item To capture cardinality constraints on undirected edges:\\
     $\forall_{e' \in E'} \forall_{n'_1, n'_2 \in N'} \rho'(e') = \{n'_1, n'_2\} \implies
     \\\forall_{n_1 \in \sem{\beta(n'_1)}} \exists^{[\ell(e'), u(e')]}_{e \in \sem{\beta(e')}} \exists_{n_2 \in \sem{\beta(n'_2)}} \rho(e) = \{n_1, n_2\}$
   \end{enumerate}
