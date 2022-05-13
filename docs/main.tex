@@ -132,6 +132,20 @@ Under these definitions, all edges in the schema are mandatory. That is, if a sc
 
 \subsection{Cardinality constraints}
 
+We first introduce a generalization of the existential quantifier, which enables counting the number of elements that satisfy a predicate.
+
+\begin{definition}[Counting existential quantifier]
+  The \emph{counting existential quantifier} is defined as follows. For natural numbers $n, m \in \N$ with $n > m$, define
+  \begin{itemize}
+    \item $\exists^{\geq n} x \in X : P(x) \equiv \exists x_1, x_2, \ldots, x_n \in X : P(x_1) \wedge \ldots \wedge P(x_n) \wedge \forall 1 \leq i < j \leq n : x_i \neq x_j$;
+    % FIXME: "not exists" might not work on infinite sets
+    \item $\exists^{\leq n} x \in X : P(x) \equiv \not \exists^{\geq n+1} x \in X : P(x)$;
+    \item $\exists^{[n, m]} x \in X : P(x) \equiv \exists^{\geq n} x \in X : P(x) \wedge \exists^{\leq m} x' \in X : P(x')$; and
+    % FIXME: this is a bit weird
+    \item $\exists^{[n, \infty]} x \in X \equiv \exists^{\geq n} x \in X$.
+  \end{itemize}
+\end{definition}
+
 To enable stronger cardinality constraints on edges, and to allow optional edges, we revise the definitions of property graph type and property graph conformance.
 
 \begin{definition}[Property graph type]
@@ -144,15 +158,6 @@ To enable stronger cardinality constraints on edges, and to allow optional edges
     \item $\ell, u : E \to (\N \times \N^\infty) \cup \N$ are total functions mapping edges to cardinality constraints, where $\N$ is defined as $\{0, 1, 2, \ldots\}$ and $\N^\infty$ is defined as $\N \cup \{\infty\}$.
   \end{itemize}
 \end{definition}
-
-Define $\exists^{\geq n} x \in X : P(x)$ as $\exists x_1, x_2, \ldots, x_n \in X : P(x_1) \wedge \ldots \wedge P(x_n) \wedge \forall 1 \leq i < j \leq n : x_i \neq x_j$.
-
-% FIXME: "not exists" might not work on infinite sets
-Define $\exists^{\leq n} x \in X : P(x)$ as $\not \exists^{\geq n+1} x \in X : P(x)$.
-
-Define $\exists^{[n, m]} x \in X : P(x)$ as $\exists^{\geq n} x \in X : P(x) \wedge \exists^{\leq m} x' \in X : P(x')$,
-% FIXME: this is a bit weird
-and $\exists^{[n, \infty]} x \in X$ as $\exists^{\geq n} x \in X$.
 
 \begin{definition}[Property graph conformance]
   We say that a property graph $G = (N, E, \rho, \lambda, \pi)$ \emph{conforms} to a property graph type $\gtype = (N', E', \rho', \beta, \ell, u)$ if and only if all of the following rules hold.
