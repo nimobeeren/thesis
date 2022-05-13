@@ -87,7 +87,7 @@ Next, we introduce an \emph{element type}\footnote{We typically use the symbol \
 \end{definition}
 
 \begin{definition}[Element conformance]
-  Given a property graph $(N, E, \rho, \lambda, \pi)$ we say that an element $b \in (N \cup E)$ \emph{conforms} to an element type $\btype = L\rtype$, denoted $b \in \sem{\btype}$, iff (1) $\lambda(b) = L$ and (2) $\pi(b)$ conforms to $\rtype$.
+  Let $G = (N, E, \rho, \lambda, \pi)$ be a property graph and $\btype = L\rtype$ an element type. The set of elements that \emph{conform} to $\btype$ is defined as $\sem{\btype} = \{b \in N \cup E \mid \lambda(b) = L \wedge \pi(b) \in \sem{\rtype}\}$.
 \end{definition}
 
 \begin{definition}[Property graph type]
@@ -114,17 +114,15 @@ The similarity between property graph types and property graphs is intentional. 
     
     \item To capture that outgoing edges are mandatory:\\
     $\forall e' \in E' \forall n'_1, n'_2 \in N' : \rho'(e') = (n'_1, n'_2) \implies
-    \\\forall n_1 \in \sem{\beta(n'_1)} \exists e \in \sem{\beta(e')} \exists n_2 \in \sem{\beta(n'_2)} : \rho(e) = (n_1, n_2)$
-
-    % FIXME: n in [[beta(n')]] doesn't really make sense
+    \\\forall n_1 \in N \cap \sem{\beta(n'_1)} \exists e \in E \cap \sem{\beta(e')} \exists n_2 \in N \cap \sem{\beta(n'_2)} : \rho(e) = (n_1, n_2)$
 
     \item To capture that incoming edges are mandatory:\\
     $\forall e' \in E' \forall n'_1, n'_2 \in N' : \rho'(e') = (n'_1, n'_2) \implies
-    \\\forall n_2 \in \sem{\beta(n'_2)} \exists e \in \sem{\beta(e')} \exists n_1 \in \sem{\beta(n'_1)} : \rho(e) = (n_1, n_2)$
+    \\\forall n_2 \in N \cap \sem{\beta(n'_2)} \exists e \in E \cap \sem{\beta(e')} \exists n_1 \in N \cap \sem{\beta(n'_1)} : \rho(e) = (n_1, n_2)$
     
     \item To capture that undirected edges are mandatory:\\
     $\forall e' \in E' \forall n'_1, n'_2 \in N' : \rho'(e') = \{n'_1, n'_2\} \implies
-    \\\forall n_1 \in \sem{\beta(n'_1)} \exists e \in \sem{\beta(e')} \exists n_2 \in \sem{\beta(n'_2)} : \rho(e) = \{n_1, n_2\}$
+    \\\forall n_1 \in N \cap \sem{\beta(n'_1)} \exists e \in E \cap \sem{\beta(e')} \exists n_2 \in N \cap \sem{\beta(n'_2)} : \rho(e) = \{n_1, n_2\}$
   \end{enumerate}
 \end{definition}
 
@@ -157,6 +155,8 @@ To enable stronger cardinality constraints on edges, and to allow optional edges
   \end{itemize}
 \end{definition}
 
+% FIXME: this does not make sense considering the definition of l and u
+
 \begin{definition}[Property graph conformance]
   We say that a property graph $G = (N, E, \rho, \lambda, \pi)$ \emph{conforms} to a property graph type $\gtype = (N', E', \rho', \beta, \ell, u)$ if and only if all of the following rules hold.
 
@@ -169,15 +169,15 @@ To enable stronger cardinality constraints on edges, and to allow optional edges
 
     \item To capture cardinality constraints on outgoing edges:\\
     $\forall e' \in E' \forall n'_1, n'_2 \in N' : \rho'(e') = (n'_1, n'_2) \implies
-    \\\forall n_1 \in \sem{\beta(n'_1)} \exists^{[\ell(e'), u(e')]} e \in \sem{\beta(e')} \exists n_2 \in \sem{\beta(n'_2)} : \rho(e) = (n_1, n_2)$
+    \\\forall n_1 \in N \cap \sem{\beta(n'_1)} \exists^{[\ell(e'), u(e')]} e \in E \cap \sem{\beta(e')} \exists n_2 \in N \cap \sem{\beta(n'_2)} : \rho(e) = (n_1, n_2)$
 
-    \item To capture cardinality constraints on incoming edges::\\
+    \item To capture cardinality constraints on incoming edges:\\
     $\forall e' \in E' \forall n'_1, n'_2 \in N' : \rho'(e') = (n'_1, n'_2) \implies
-    \\\forall n_2 \in \sem{\beta(n'_2)} \exists^{[\ell(e'), u(e')]} e \in \sem{\beta(e')} \exists n_1 \in \sem{\beta(n'_1)} : \rho(e) = (n_1, n_2)$
+    \\\forall n_2 \in N \cap \sem{\beta(n'_2)} \exists^{[\ell(e'), u(e')]} e \in E \cap \sem{\beta(e')} \exists n_1 \in N \cap \sem{\beta(n'_1)} : \rho(e) = (n_1, n_2)$
     
     \item To capture cardinality constraints on undirected edges:\\
     $\forall e' \in E' \forall n'_1, n'_2 \in N' : \rho'(e') = \{n'_1, n'_2\} \implies
-    \\\forall n_1 \in \sem{\beta(n'_1)} \exists^{[\ell(e'), u(e')]} e \in \sem{\beta(e')} \exists n_2 \in \sem{\beta(n'_2)} : \rho(e) = \{n_1, n_2\}$
+    \\\forall n_1 \in N \cap \sem{\beta(n'_1)} \exists^{[\ell(e'), u(e')]} e \in E \cap \sem{\beta(e')} \exists n_2 \in N \cap \sem{\beta(n'_2)} : \rho(e) = \{n_1, n_2\}$
   \end{enumerate}
 \end{definition}
 
