@@ -134,14 +134,12 @@ Under these definitions, all edges in the schema are mandatory. That is, if a sc
 
 We first introduce a generalization of the existential quantifier, which enables counting the number of elements that satisfy a predicate.
 
-\begin{definition}[Counting existential quantifier]
-  The \emph{counting existential quantifier} is defined as follows. For natural numbers $n, m \in \N$ with $n > m$, define
+\begin{definition}[Counting quantifier]
+  The \emph{counting quantifier} is defined as follows. For natural numbers $n, m \in \N$ with $n \leq m$, define
   \begin{itemize}
     \item $\exists^{\geq n} x \in X : P(x) \equiv \exists x_1, x_2, \ldots, x_n \in X : P(x_1) \wedge \ldots \wedge P(x_n) \wedge \forall 1 \leq i < j \leq n : x_i \neq x_j$;
-    % FIXME: "not exists" might not work on infinite sets
-    \item $\exists^{\leq n} x \in X : P(x) \equiv \not \exists^{\geq n+1} x \in X : P(x)$;
+    \item $\exists^{\leq n} x \in X : P(x) \equiv \exists x_1, \ldots, x_n, x_{n+1}, \ldots, x_m \in X : P(x) \implies \forall n < i < j \leq m : x_i = x_j$;
     \item $\exists^{[n, m]} x \in X : P(x) \equiv \exists^{\geq n} x \in X : P(x) \wedge \exists^{\leq m} x' \in X : P(x')$; and
-    % FIXME: this is a bit weird
     \item $\exists^{[n, \infty]} x \in X \equiv \exists^{\geq n} x \in X$.
   \end{itemize}
 \end{definition}
