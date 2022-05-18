@@ -58,7 +58,7 @@ We postulate the following countably infinite sets: the set of labels $\mathcal{
     \item $E_d$ is a finite set of directed edges;
     \item $E_u$ is a finite set of undirected edges;
     % FIXME: could map "directed" edges to unordered pairs and vice versa
-    \item $\rho : (E_d \cup E_u) \to (N \times N) \cup \{\{u, v\} \mid u, v \in N\}$ is a total function mapping edges to pairs of nodes;
+    \item $\rho : (E_d \cup E_u) \to (N \times N) \cup \{\{u, v\} \mid u, v \in N\}$ is a total function mapping edges to  ordered or unordered pairs of nodes;
     \item $\lambda : (N \cup E_d \cup E_u) \to 2^{\mathcal{L}}$ is a total function mapping nodes and edges to a (possibly empty) set of labels;
     \item $\pi : (N \cup E_d \cup E_u) \to \mathcal{R}$ is a total function mapping nodes and edges to a record;
     \item the sets $N$, $E_d$, $E_u$ are disjoint.
@@ -99,7 +99,7 @@ Next, we introduce an \emph{element type}\footnote{We typically use the symbol \
     \item $N$ is a finite set of schema nodes;
     \item $E_d$ is a finite set of directed schema edges;
     \item $E_u$ is a finite set of undirected schema edges;
-    \item $\rho : (E_d \cup E_u) \to (N \times N)$ is a total function mapping schema edges to pairs of schema nodes;
+    \item $\rho : (E_d \cup E_u) \to (N \times N) \cup \{\{u, v\} \mid u, v \in N\}$ is a total function mapping schema edges to ordered or unordered pairs of schema nodes;
     \item $\beta : (N \cup E_d \cup E_u) \to \btypes$ is a total function mapping schema elements to element types;
     \item the sets $N$, $E_d$ and $E_u$ are disjoint.
   \end{itemize}
@@ -158,7 +158,7 @@ To enable more general cardinality constraints on edges, we revise the definitio
     \item $N$ is a finite set of schema nodes;
     \item $E_d$ is a finite set of directed schema edges;
     \item $E_u$ is a finite set of undirected schema edges;
-    \item $\rho : (E_d \cup E_u) \to (N \times N)$ is a total function mapping schema edges to pairs of schema nodes;
+    \item $\rho : (E_d \cup E_u) \to (N \times N) \cup \{\{u, v\} \mid u, v \in N\}$ is a total function mapping schema edges to ordered or unordered pairs of schema nodes;
     \item $\beta : (N \cup E_d \cup E_u) \to \btypes$ is a total function mapping schema elements to element types;
     \item $\gamma : (N \times E) \pto (\N \times \N^\infty)$ is a partial function mapping some pairs of schema nodes and schema edges to cardinality constraints, where $\N$ is defined as $\{0, 1, 2, \ldots\}$ and $\N^\infty$ is defined as $\N \cup \{\infty\}$.
   \end{itemize}
