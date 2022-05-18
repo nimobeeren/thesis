@@ -13,6 +13,15 @@
 % Natural numbers
 \newcommand{\N}{\mathbb{N}}
 
+% Partial function
+\makeatletter
+\newcommand{\pto}{}% just for safety
+\DeclareRobustCommand{\pto}{\mathrel{\mathpalette\p@to@gets\to}}
+\newcommand{\p@to@gets}[2]{%
+  \ooalign{\hidewidth$\m@th#1\mapstochar\mkern5mu$\hidewidth\cr$\m@th#1\to$\cr}%
+}
+\makeatother
+
 % Schema elements
 \newcommand{\ptype}{\tau}
 \newcommand{\ptypes}{\mathcal{T}}
@@ -28,14 +37,8 @@
 \newcommand{\rsem}{\ensuremath{]\!]}}
 \newcommand{\sem}[1]{\ensuremath{\lsem #1 \rsem}}
 
-% Partial function
-\makeatletter
-\newcommand{\pto}{}% just for safety
-\DeclareRobustCommand{\pto}{\mathrel{\mathpalette\p@to@gets\to}}
-\newcommand{\p@to@gets}[2]{%
-  \ooalign{\hidewidth$\m@th#1\mapstochar\mkern5mu$\hidewidth\cr$\m@th#1\to$\cr}%
-}
-\makeatother
+% Undefined
+\newcommand{\undefined}{\mathbf{undef}}
 
 \title{Typing Property Graphs}
 \author{Nimo Beeren}
@@ -162,6 +165,9 @@ To enable more general cardinality constraints on edges, we revise the definitio
     \item $\beta : (N \cup E_d \cup E_u) \to \btypes$ is a total function mapping schema elements to element types;
     \item $\gamma : (N \times E) \pto (\N \times \N^\infty)$ is a partial function mapping some pairs of schema nodes and schema edges to cardinality constraints, where $\N$ is defined as $\{0, 1, 2, \ldots\}$ and $\N^\infty$ is defined as $\N \cup \{\infty\}$.
   \end{itemize}
+
+  % TODO: add some explanation on what a "cardinality constraint" is
+
   Given a node $n \in N$ and an edge $e \in E$, we assume that $\gamma(n, e)$ is defined if and only if there exists a node $n' \in N$ such that $\rho(e) \in \{(n, n'), (n', n), \{n, n'\}\}$. In other words, $n$ \emph{participates} in $e$.
 \end{definition}
 
@@ -192,7 +198,10 @@ To enable more general cardinality constraints on edges, we revise the definitio
   \end{enumerate}
 \end{definition}
 
-% TODO: optional properties
+\subsection{Optional properties}
+
+Given a property type $\ptype \in \ptypes$, we use $\ptype?$ to denote that a property is optional. That is, $\sem{\ptype?} = \sem{\ptype} \cup \{\undefined\}$.
+
 % TODO: "any" types, i.e. record with any property, allow edge to any node
 
 \end{document}
