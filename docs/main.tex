@@ -160,7 +160,7 @@ To enable more general cardinality constraints on edges, we revise the definitio
     \item $E_u$ is a finite set of undirected schema edges;
     \item $\rho : (E_d \cup E_u) \to (N \times N)$ is a total function mapping schema edges to pairs of schema nodes;
     \item $\beta : (N \cup E_d \cup E_u) \to \btypes$ is a total function mapping schema elements to element types;
-    \item $\gamma : (N \times E) \pto (\N \times \N^\infty)$ is a total function mapping some pairs of schema nodes and schema edges to cardinality constraints, where $\N$ is defined as $\{0, 1, 2, \ldots\}$ and $\N^\infty$ is defined as $\N \cup \{\infty\}$.
+    \item $\gamma : (N \times E) \pto (\N \times \N^\infty)$ is a partial function mapping some pairs of schema nodes and schema edges to cardinality constraints, where $\N$ is defined as $\{0, 1, 2, \ldots\}$ and $\N^\infty$ is defined as $\N \cup \{\infty\}$.
   \end{itemize}
   Given a node $n \in N$ and an edge $e \in E$, we assume that $\gamma(n, e)$ is defined if and only if there exists a node $n' \in N$ such that $\rho(e) \in \{(n, n'), (n', n), \{n, n'\}\}$. In other words, $n$ \emph{participates} in $e$.
 \end{definition}
