@@ -201,9 +201,30 @@ To enable more general cardinality constraints on edges, we revise the definitio
   \end{enumerate}
 \end{definition}
 
-% \subsection{Optional properties}
+\subsection{Optional properties}
 
-% Given a property type $\ptype \in \ptypes$, we use $\ptype?$ to denote that a property is optional. That is, $\sem{\ptype?} = \sem{\ptype} \cup \{\undefined\}$.
+We revise the definition of record by adding a special property value $\undefined$, which indicates that the value of a property is not defined.
+
+\begin{definition}[Record]
+  A \emph{record} is a total function $r : \mathcal{N} \to \mathcal{V} \cup \{\undefined\}$ that maps property names to property values or the special value $\undefined$. The set of all records is denoted as $\mathcal{R}$.
+\end{definition}
+
+For a record $r$ and a property name $k \in \mathcal{N}$ such that $r(k)$ was previously undefined, we now say $r(k) = \undefined$. This can be seen as the ``default'' value of a property.
+
+We adjust the definitions of property conformance, record type, and record conformance accordingly.
+
+\begin{definition}[Property conformance]
+  For each property type $\ptype \in \ptypes$ there is a set $\sem{\ptype} \subseteq \mathcal{V} \cup \{\undefined\}$ that contains all property values that \emph{conform} to the type $\ptype$. We say $\ptype$ is \emph{optional} iff $\undefined \in \sem{\ptype}$.
+\end{definition}
+
+\begin{definition}[Record type]
+  A \emph{record type} is a total function $\rtype : \mathcal{N} \to \ptypes$ that maps property names to a property type.
+  % We will denote such record types as $\langle a_1 : \rtype_1, \ldots, a_n : \rtype_n \rangle$.
+\end{definition}
+
+\begin{definition}[Record conformance]
+  We say that a record $r$ \emph{conforms} to a record type $\rtype$, denoted $r \in \sem{\rtype}$, if for each property name $k \in \mathcal{N}$ it holds that $r(k) \in \sem{\rtype(k)}$.
+\end{definition}
 
 % TODO: "any" types, i.e. record with any property, allow edge to any node
 
