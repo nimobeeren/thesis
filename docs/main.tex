@@ -68,7 +68,7 @@ We postulate the following countably infinite sets: the set of labels $\mathcal{
   \end{itemize}
 \end{definition}
 
-Given a node $n$, the set of \emph{outgoing} edges is given by $\{e \in E_d \mid \exists n' \in N : \rho(e) = (n, n')\}$, and the set of \emph{incoming} edges is given by $\{e \in E_d \mid \exists n' \in N : \rho(e) = (n', n)\}$. We use the umbrella term \emph{elements} to refer to nodes and edges.
+Given a node $n$, the set of (directed) \emph{outgoing} edges is given by $\{e \in E_d \mid \exists n' \in N : \rho(e) = (n, n')\}$, and the set of (directed) \emph{incoming} edges is given by $\{e \in E_d \mid \exists n' \in N : \rho(e) = (n', n)\}$. We use the umbrella term \emph{elements} to refer to nodes and edges.
 
 \section{Property Graph Schemas}
 
@@ -79,7 +79,8 @@ We postulate the set of property types $\mathcal{T}$.
 \end{definition}
 
 \begin{definition}[Record type]
-  A \emph{record type} is a finite partial function $\rtype : \mathcal{N} \pto \ptypes$ that maps some property names to a property type. We will denote such record types as $\langle a_1 : \rtype_1, \ldots, a_n : \rtype_n \rangle$.
+  A \emph{record type} is a finite partial function $\rtype : \mathcal{N} \pto \ptypes$ that maps some property names to a property type.
+  % We will denote such record types as $\langle a_1 : \rtype_1, \ldots, a_n : \rtype_n \rangle$.
 \end{definition}
 
 \begin{definition}[Record conformance]
@@ -89,11 +90,13 @@ We postulate the set of property types $\mathcal{T}$.
 Next, we introduce an \emph{element type}\footnote{We typically use the symbol \emph{b} to refer to elements, since \emph{e} is reserved for edges.}, which describes the labels and properties that can be associated with a node or edge.
 
 \begin{definition}[Element type]
-  A \emph{element type} is a pair $\btype = (L, \rtype)$ where $L \subseteq \mathcal{L}$ is a finite set of labels and and $\rtype$ a record type. We will denote such element types also simply as $L\rtype$ or $\{ l_1 \ldots l_k \} \langle a_1 : \rtype_1, \ldots, a_n : \rtype_n \rangle$. The set of all element types is denoted as $\btypes$.
+  A \emph{element type} is a pair $\btype = (L, \rtype)$ where $L \subseteq \mathcal{L}$ is a finite set of labels and and $\rtype$ a record type. 
+  % We will denote such element types also simply as $L\rtype$ or $\{ l_1 \ldots l_k \} \langle a_1 : \rtype_1, \ldots, a_n : \rtype_n \rangle$.
+  The set of all element types is denoted as $\btypes$.
 \end{definition}
 
 \begin{definition}[Element conformance]
-  Let $G = (N, E_d, E_u, \rho, \lambda, \pi)$ be a property graph and $\btype = L\rtype$ an element type. The set of elements that \emph{conform} to $\btype$ is defined as $\sem{\btype} = \{b \in N \cup E_d \cup E_u \mid \lambda(b) = L \wedge \pi(b) \in \sem{\rtype}\}$.
+  Let $G = (N, E_d, E_u, \rho, \lambda, \pi)$ be a property graph and $\btype = (L, \rtype)$ an element type. The set of elements that \emph{conform} to $\btype$ is defined as $\sem{\btype} = \{b \in N \cup E_d \cup E_u \mid \lambda(b) = L \wedge \pi(b) \in \sem{\rtype}\}$.
 \end{definition}
 
 \begin{definition}[Property graph type]
@@ -108,7 +111,7 @@ Next, we introduce an \emph{element type}\footnote{We typically use the symbol \
   \end{itemize}
 \end{definition}
 
-The similarity between property graph types and property graphs is intentional. This allows us to visualize them in a similar ways, and to use the same mental model to think about them. Indeed, a property graph type can be simulated by a property graph if we allow properties to take property types as values, i.e. $\ptypes \subseteq \mathcal{V}$. Then we let $\lambda$ and $\pi$ take the role of $\beta$, in the sense that $\lambda(b) = L$ and $\pi(b) = \rtype$ if $\beta(b) = L\rtype$ for all elements $b$ of the property graph.
+The similarity between property graph types and property graphs is intentional. This allows us to visualize them in a similar ways, and to use the same mental model to think about them. Indeed, a property graph type can be simulated by a property graph if we allow properties to take property types as values, i.e. $\ptypes \subseteq \mathcal{V}$. Then we let $\lambda$ and $\pi$ take the role of $\beta$, in the sense that $\lambda(b) = L$ and $\pi(b) = \rtype$ if $\beta(b) = (L, \rtype)$ for all elements $b$ of the property graph.
 
 \begin{definition}[Property graph conformance]
   We say that a property graph $G = (N, E_d, E_u, \rho, \lambda, \pi)$ \emph{conforms} to a property graph type $\gtype = (N', E_d', E_u', \rho', \beta)$ if and only if all of the following rules hold.
@@ -198,9 +201,9 @@ To enable more general cardinality constraints on edges, we revise the definitio
   \end{enumerate}
 \end{definition}
 
-\subsection{Optional properties}
+% \subsection{Optional properties}
 
-Given a property type $\ptype \in \ptypes$, we use $\ptype?$ to denote that a property is optional. That is, $\sem{\ptype?} = \sem{\ptype} \cup \{\undefined\}$.
+% Given a property type $\ptype \in \ptypes$, we use $\ptype?$ to denote that a property is optional. That is, $\sem{\ptype?} = \sem{\ptype} \cup \{\undefined\}$.
 
 % TODO: "any" types, i.e. record with any property, allow edge to any node
 
