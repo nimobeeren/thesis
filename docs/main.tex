@@ -223,9 +223,12 @@ We adjust the definitions of property conformance, record type, and record confo
 \end{definition}
 
 \begin{definition}[Record conformance]
-  We say that a record $r$ \emph{conforms} to a record type $\rtype$, denoted $r \in \sem{\rtype}$, if for each property name $k \in \mathcal{N}$ it holds that $r(k) \in \sem{\rtype(k)}$.
+  We say that a record $r$ \emph{conforms} to a record type $\rtype$, denoted $r \in \sem{\rtype}$, if and only if for each property name $k \in \mathcal{N}$ it holds that $r(k) \in \sem{\rtype(k)}$.
 \end{definition}
 
-% TODO: "any" types, i.e. record with any property, allow edge to any node
+% "Open" types
+
+% Record type with any property name and any value: possible by setting [[\rtype(k)]] = V U {undef} for all (unspecified) property names
+% Record type with any property name and specific value: set [[\rtype(k)]] = val U {undef} for all (unspecified) property names
 
 \end{document}
