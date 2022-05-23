@@ -117,26 +117,47 @@ The similarity between property graph types and property graphs is intentional. 
   We say that a property graph $G = (N, E_d, E_u, \rho, \lambda, \pi)$ \emph{conforms} to a property graph type $\gtype = (N', E_d', E_u', \rho', \beta)$ if and only if all of the following rules hold.
 
   \begin{enumerate}
-    \item The vocabulary for nodes:\\
-    $\forall n \in N \exists n' \in N' : n \in \sem{\beta(n')}$
+    \item The vocabulary for nodes:
+    \begin{align*}
+      &\forall n \in N \exists n' \in N'\\
+      &\quad n \in \sem{\beta(n')}
+    \end{align*}
     
-    \item The vocabulary for directed edges:\\
-    $\forall e \in E_d \exists e' \in E_d' : e \in \sem{\beta(e')}$
+    \item The vocabulary for directed edges:
+    \begin{align*}
+      &\forall e \in E_d \exists e' \in E_d'\\
+      &\quad e \in \sem{\beta(e')}
+    \end{align*}
 
-    \item The vocabulary for undirected edges:\\
-    $\forall e \in E_u \exists e' \in E_u' : e \in \sem{\beta(e')}$
+    \item The vocabulary for undirected edges:
+    \begin{align*}
+      &\forall e \in E_u \exists e' \in E_u'\\
+      &\quad e \in \sem{\beta(e')}
+    \end{align*}
     
-    \item Outgoing directed edges are mandatory:\\
-    $\forall e' \in E_d' \forall n'_1, n'_2 \in N' : \rho'(e') = (n'_1, n'_2) \implies
-    \\\forall n_1 \in N \cap \sem{\beta(n'_1)} \exists e \in E_d \cap \sem{\beta(e')} \exists n_2 \in N \cap \sem{\beta(n'_2)} : \rho(e) = (n_1, n_2)$
+    \item Outgoing directed edges are mandatory:
+    \begin{align*}
+      &\forall e' \in E_u' \forall n'_1, n'_2 \in N'\\
+      &\quad\rho'(e') = (n'_1, n'_2)\\
+      &\quad\quad\implies {} \forall n_1 \in N \cap \sem{\beta(n'_1)} \exists e \in E_u \cap \sem{\beta(e')} \exists n_2 \in N \cap \sem{\beta(n'_2)}\\
+      &\quad\quad\quad\quad\quad\quad\rho(e) = (n_1, n_2)
+    \end{align*}
 
-    \item Incoming directed edges are mandatory:\\
-    $\forall e' \in E_d' \forall n'_1, n'_2 \in N' : \rho'(e') = (n'_1, n'_2) \implies
-    \\\forall n_2 \in N \cap \sem{\beta(n'_2)} \exists e \in E_d \cap \sem{\beta(e')} \exists n_1 \in N \cap \sem{\beta(n'_1)} : \rho(e) = (n_1, n_2)$
+    \item Incoming directed edges are mandatory:
+    \begin{align*}
+      &\forall e' \in E_u' \forall n'_1, n'_2 \in N'\\
+      &\quad\rho'(e') = (n'_1, n'_2)\\
+      &\quad\quad\implies {} \forall n_2 \in N \cap \sem{\beta(n'_2)} \exists e \in E_u \cap \sem{\beta(e')} \exists n_1 \in N \cap \sem{\beta(n'_1)}\\
+      &\quad\quad\quad\quad\quad\quad\rho(e) = (n_1, n_2)
+    \end{align*}
     
-    \item Undirected edges are mandatory:\\
-    $\forall e' \in E_u' \forall n'_1, n'_2 \in N' : \rho'(e') = \{n'_1, n'_2\} \implies
-    \\\forall n_1 \in N \cap \sem{\beta(n'_1)} \exists e \in E_u \cap \sem{\beta(e')} \exists n_2 \in N \cap \sem{\beta(n'_2)} : \rho(e) = \{n_1, n_2\}$
+    \item Undirected edges are mandatory:
+    \begin{align*}
+      &\forall e' \in E_u' \forall n'_1, n'_2 \in N'\\
+      &\quad\rho'(e') = \{n'_1, n'_2\}\\
+      &\quad\quad\implies {} \forall n_1 \in N \cap \sem{\beta(n'_1)} \exists e \in E_u \cap \sem{\beta(e')} \exists n_2 \in N \cap \sem{\beta(n'_2)}\\
+      &\quad\quad\quad\quad\quad\quad\rho(e) = \{n_1, n_2\}
+    \end{align*}
   \end{enumerate}
 \end{definition}
 
@@ -178,26 +199,47 @@ To enable more general cardinality constraints on edges, we revise the definitio
   We say that a property graph $G = (N, E_d, E_u, \rho, \lambda, \pi)$ \emph{conforms} to a property graph type $\gtype = (N', E_d', E_u', \rho', \beta, \gamma)$ if and only if all of the following rules hold.
 
   \begin{enumerate}
-    \item The vocabulary for nodes:\\
-    $\forall n \in N \exists n' \in N' : n \in \sem{\beta(n')}$
+    \item The vocabulary for nodes:
+    \begin{align*}
+      &\forall n \in N \exists n' \in N'\\
+      &\quad n \in \sem{\beta(n')}
+    \end{align*}
     
-    \item The vocabulary for directed edges:\\
-    $\forall e \in E_d \exists e' \in E_d' : e \in \sem{\beta(e')}$
+    \item The vocabulary for directed edges:
+    \begin{align*}
+      &\forall e \in E_d \exists e' \in E_d'\\
+      &\quad e \in \sem{\beta(e')}
+    \end{align*}
 
-    \item The vocabulary for undirected edges:\\
-    $\forall e \in E_u \exists e' \in E_u' : e \in \sem{\beta(e')}$
+    \item The vocabulary for undirected edges:
+    \begin{align*}
+      &\forall e \in E_u \exists e' \in E_u'\\
+      &\quad e \in \sem{\beta(e')}
+    \end{align*}
     
-    \item Cardinality constraints on outgoing directed edges:\\
-    $\forall e' \in E_d' \forall n'_1, n'_2 \in N' : \rho'(e') = (n'_1, n'_2) \implies
-    \\\forall n_1 \in N \cap \sem{\beta(n'_1)} \exists^{\gamma(n'_1, e')} e \in E_d \cap \sem{\beta(e')} \exists n_2 \in N \cap \sem{\beta(n'_2)} : \rho(e) = (n_1, n_2)$
+    \item Cardinality constraints on outgoing directed edges:
+    \begin{align*}
+      &\forall e' \in E_u' \forall n'_1, n'_2 \in N'\\
+      &\quad\rho'(e') = (n'_1, n'_2)\\
+      &\quad\quad\implies {} \forall n_1 \in N \cap \sem{\beta(n'_1)} \exists^{\gamma(n'_1, e')} e \in E_u \cap \sem{\beta(e')} \exists n_2 \in N \cap \sem{\beta(n'_2)}\\
+      &\quad\quad\quad\quad\quad\quad\rho(e) = (n_1, n_2)
+    \end{align*}
 
-    \item Cardinality constraints on incoming directed edges:\\
-    $\forall e' \in E_d' \forall n'_1, n'_2 \in N' : \rho'(e') = (n'_1, n'_2) \implies
-    \\\forall n_2 \in N \cap \sem{\beta(n'_2)} \exists^{\gamma(n'_2, e')} e \in E_d \cap \sem{\beta(e')} \exists n_1 \in N \cap \sem{\beta(n'_1)} : \rho(e) = (n_1, n_2)$
+    \item Cardinality constraints on incoming directed edges:
+    \begin{align*}
+      &\forall e' \in E_u' \forall n'_1, n'_2 \in N'\\
+      &\quad\rho'(e') = (n'_1, n'_2)\\
+      &\quad\quad\implies {} \forall n_2 \in N \cap \sem{\beta(n'_2)} \exists^{\gamma(n'_2, e')} e \in E_u \cap \sem{\beta(e')} \exists n_1 \in N \cap \sem{\beta(n'_1)}\\
+      &\quad\quad\quad\quad\quad\quad\rho(e) = (n_1, n_2)
+    \end{align*}
     
-    \item Cardinality constraints on undirected edges:\\
-    $\forall e' \in E_u' \forall n'_1, n'_2 \in N' : \rho'(e') = \{n'_1, n'_2\} \implies
-    \\\forall n_1 \in N \cap \sem{\beta(n'_1)} \exists^{\gamma(n'_1, e')} e \in E_u \cap \sem{\beta(e')} \exists n_2 \in N \cap \sem{\beta(n'_2)} : \rho(e) = \{n_1, n_2\}$
+    \item Cardinality constraints on undirected edges:
+    \begin{align*}
+      &\forall e' \in E_u' \forall n'_1, n'_2 \in N'\\
+      &\quad\rho'(e') = \{n'_1, n'_2\}\\
+      &\quad\quad\implies {} \forall n_1 \in N \cap \sem{\beta(n'_1)} \exists^{\gamma(n'_1, e')} e \in E_u \cap \sem{\beta(e')} \exists n_2 \in N \cap \sem{\beta(n'_2)}\\
+      &\quad\quad\quad\quad\quad\quad\rho(e) = \{n_1, n_2\}
+    \end{align*}
   \end{enumerate}
 \end{definition}
 
