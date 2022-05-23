@@ -27,8 +27,8 @@
 \newcommand{\ptypes}{\mathcal{T}}
 \newcommand{\rtype}{\tau^r}
 \newcommand{\rtypes}{\mathcal{T}^r}
-\newcommand{\btype}{\tau^b}
-\newcommand{\btypes}{\mathcal{T}^b}
+\newcommand{\otype}{\tau^o}
+\newcommand{\otypes}{\mathcal{T}^o}
 \newcommand{\gtype}{\tau^g}
 \newcommand{\gtypes}{\mathcal{T}^g}
 
@@ -68,7 +68,7 @@ We postulate the following countably infinite sets: the set of labels $\mathcal{
   \end{itemize}
 \end{definition}
 
-Given a node $n$, the set of (directed) \emph{outgoing} edges is given by $\{e \in E_d \mid \exists n' \in N : \rho_d(e) = (n, n')\}$, and the set of (directed) \emph{incoming} edges is given by $\{e \in E_d \mid \exists n' \in N : \rho_d(e) = (n', n)\}$. We use the umbrella term \emph{elements} to refer to nodes and edges.
+Given a node $n$, the set of (directed) \emph{outgoing} edges is given by $\{e \in E_d \mid \exists n' \in N : \rho_d(e) = (n, n')\}$, and the set of (directed) \emph{incoming} edges is given by $\{e \in E_d \mid \exists n' \in N : \rho_d(e) = (n', n)\}$. We use the umbrella term \emph{objects} to refer to nodes and edges.
 
 \section{Property Graph Schemas}
 
@@ -87,60 +87,58 @@ We postulate the set of property types $\mathcal{T}$.
   We say that a record $r$ \emph{conforms} to a record type $\rtype$, denoted $r \in \sem{\rtype}$, if for each property name $k \in \mathcal{N}$ it holds that (1) $r(k)$ is defined iff $\rtype(k)$ is defined and (2) $r(k) \in \sem{\rtype(k)}$ if $r(k)$ and $\rtype(k)$ are defined.
 \end{definition}
 
-Next, we introduce an \emph{element type}\footnote{We typically use the symbol \emph{b} to refer to elements, since \emph{e} is reserved for edges.}, which describes the labels and properties that can be associated with a node or edge.
-
-\begin{definition}[Element type]
-  A \emph{element type} is a pair $\btype = (L, \rtype)$ where $L \subseteq \mathcal{L}$ is a finite set of labels and and $\rtype$ a record type. 
-  % We will denote such element types also simply as $L\rtype$ or $\{ l_1 \ldots l_k \} \langle a_1 : \rtype_1, \ldots, a_n : \rtype_n \rangle$.
-  The set of all element types is denoted as $\btypes$.
+\begin{definition}[Object type]
+  A \emph{object type} is a pair $\otype = (L, \rtype)$ where $L \subseteq \mathcal{L}$ is a finite set of labels and and $\rtype$ a record type. 
+  % We will denote such object types also simply as $L\rtype$ or $\{ l_1 \ldots l_k \} \langle a_1 : \rtype_1, \ldots, a_n : \rtype_n \rangle$.
+  The set of all object types is denoted as $\otypes$.
 \end{definition}
 
-\begin{definition}[Element conformance]
-  Let $G = (N, E_d, E_u, \rho_d, \rho_u, \lambda, \pi)$ be a property graph and $\btype = (L, \rtype)$ an element type. The set of elements that \emph{conform} to $\btype$ is defined as $\sem{\btype} = \{b \in N \cup E_d \cup E_u \mid \lambda(b) = L \wedge \pi(b) \in \sem{\rtype}\}$.
+\begin{definition}[Object conformance]
+  Let $G = (N, E_d, E_u, \rho_d, \rho_u, \lambda, \pi)$ be a property graph and $\otype = (L, \rtype)$ an object type. The set of objects that \emph{conform} to $\otype$ is defined as $\sem{\otype} = \{b \in N \cup E_d \cup E_u \mid \lambda(b) = L \wedge \pi(b) \in \sem{\rtype}\}$.
 \end{definition}
 
 \begin{definition}[Property graph type]
-  A \emph{property graph type} is given by a tuple $\gtype = (N, E_d, E_u, \rho_d, \rho_u, \beta)$ where 
+  A \emph{property graph type} is given by a tuple $\gtype = (N, E_d, E_u, \rho_d, \rho_u, \omega)$ where 
   \begin{itemize}
     \item $N$ is a finite set of schema nodes;
     \item $E_d$ is a finite set of directed schema edges;
     \item $E_u$ is a finite set of undirected schema edges;
     \item $\rho_d : E_d \to (N \times N)$ is a total function mapping directed schema edges to ordered pairs of schema nodes;
     \item $\rho_u : E_u \to \{\{u, v\} \mid u, v \in N\}$ is a total function mapping undirected schema edges to unordered pairs of schema nodes;
-    \item $\beta : (N \cup E_d \cup E_u) \to \btypes$ is a total function mapping schema elements to element types;
+    \item $\omega : (N \cup E_d \cup E_u) \to \otypes$ is a total function mapping schema objects to object types;
     \item the sets $N$, $E_d$ and $E_u$ are disjoint.
   \end{itemize}
 \end{definition}
 
-The similarity between property graph types and property graphs is intentional. This allows us to visualize them in a similar ways, and to use the same mental model to think about them. Indeed, a property graph type can be simulated by a property graph if we allow properties to take property types as values, i.e. $\ptypes \subseteq \mathcal{V}$. Then we let $\lambda$ and $\pi$ take the role of $\beta$, in the sense that $\lambda(b) = L$ and $\pi(b) = \rtype$ if $\beta(b) = (L, \rtype)$ for all elements $b$ of the property graph.
+The similarity between property graph types and property graphs is intentional. This allows us to visualize them in a similar ways, and to use the same mental model to think about them. Indeed, a property graph type can be simulated by a property graph if we allow properties to take property types as values, i.e. $\ptypes \subseteq \mathcal{V}$. Then we let $\lambda$ and $\pi$ take the role of $\omega$, in the sense that $\lambda(o) = L$ and $\pi(o) = \rtype$ if $\omega(o) = (L, \rtype)$ for all objects $o$ in the property graph.
 
 \begin{definition}[Property graph conformance]
-  We say that a property graph \[G = (N, E_d, E_u, \rho_d, \rho_u, \lambda, \pi)\] \emph{conforms} to a property graph type \[\gtype = (N', E_d', E_u', \rho_d', \rho_u', \beta)\] if and only if all of the following rules hold.
+  We say that a property graph \[G = (N, E_d, E_u, \rho_d, \rho_u, \lambda, \pi)\] \emph{conforms} to a property graph type \[\gtype = (N', E_d', E_u', \rho_d', \rho_u', \omega)\] if and only if all of the following rules hold.
 
   \begin{enumerate}
     \item The vocabulary for nodes:
     \begin{align*}
       &\forall n \in N \exists n' \in N'\\
-      &\quad n \in \sem{\beta(n')}
+      &\quad n \in \sem{\omega(n')}
     \end{align*}
     
     \item The vocabulary for directed edges:
     \begin{align*}
       &\forall e \in E_d \exists e' \in E_d'\\
-      &\quad e \in \sem{\beta(e')}
+      &\quad e \in \sem{\omega(e')}
     \end{align*}
 
     \item The vocabulary for undirected edges:
     \begin{align*}
       &\forall e \in E_u \exists e' \in E_u'\\
-      &\quad e \in \sem{\beta(e')}
+      &\quad e \in \sem{\omega(e')}
     \end{align*}
     
     \item Outgoing directed edges are mandatory:
     \begin{align*}
       &\forall e' \in E_d' \forall n'_1, n'_2 \in N'\\
       &\quad\rho_d'(e') = (n'_1, n'_2)\\
-      &\quad\quad\implies {} \forall n_1 \in N \cap \sem{\beta(n'_1)} \exists e \in E_u \cap \sem{\beta(e')} \exists n_2 \in N \cap \sem{\beta(n'_2)}\\
+      &\quad\quad\implies {} \forall n_1 \in N \cap \sem{\omega(n'_1)} \exists e \in E_u \cap \sem{\omega(e')} \exists n_2 \in N \cap \sem{\omega(n'_2)}\\
       &\quad\quad\quad\quad\quad\quad\rho_d(e) = (n_1, n_2)
     \end{align*}
 
@@ -148,7 +146,7 @@ The similarity between property graph types and property graphs is intentional. 
     \begin{align*}
       &\forall e' \in E_d' \forall n'_1, n'_2 \in N'\\
       &\quad\rho_d'(e') = (n'_1, n'_2)\\
-      &\quad\quad\implies {} \forall n_2 \in N \cap \sem{\beta(n'_2)} \exists e \in E_u \cap \sem{\beta(e')} \exists n_1 \in N \cap \sem{\beta(n'_1)}\\
+      &\quad\quad\implies {} \forall n_2 \in N \cap \sem{\omega(n'_2)} \exists e \in E_u \cap \sem{\omega(e')} \exists n_1 \in N \cap \sem{\omega(n'_1)}\\
       &\quad\quad\quad\quad\quad\quad\rho_d(e) = (n_1, n_2)
     \end{align*}
     
@@ -156,13 +154,13 @@ The similarity between property graph types and property graphs is intentional. 
     \begin{align*}
       &\forall e' \in E_u' \forall n'_1, n'_2 \in N'\\
       &\quad\rho_u'(e') = \{n'_1, n'_2\}\\
-      &\quad\quad\implies {} \forall n_1 \in N \cap \sem{\beta(n'_1)} \exists e \in E_u \cap \sem{\beta(e')} \exists n_2 \in N \cap \sem{\beta(n'_2)}\\
+      &\quad\quad\implies {} \forall n_1 \in N \cap \sem{\omega(n'_1)} \exists e \in E_u \cap \sem{\omega(e')} \exists n_2 \in N \cap \sem{\omega(n'_2)}\\
       &\quad\quad\quad\quad\quad\quad\rho_u(e) = \{n_1, n_2\}
     \end{align*}
   \end{enumerate}
 \end{definition}
 
-Under these definitions, all edges in the schema are mandatory. That is, if a schema node $n' \in N'$ has an incident edge $e'$ (i.e. an incoming, outgoing, or undirected edge that $n'$ participates in), then any node $n \in N$ that conforms to $\beta(n')$ must also have one or more incident edges $e$ (in the same direction) that conform to $\beta(e')$. Furthermore, the other endpoint of $e$ must conform to the element type associated with the other endpoint of the schema edge. In the following, we will relax this requirement and introduce more general constraints on cardinality.
+Under these definitions, all edges in the schema are mandatory. That is, if a schema node $n' \in N'$ has an incident edge $e'$ (i.e. an incoming, outgoing, or undirected edge that $n'$ participates in), then any node $n \in N$ that conforms to $\omega(n')$ must also have one or more incident edges $e$ (in the same direction) that conform to $\omega(e')$. Furthermore, the other endpoint of $e$ must conform to the object type associated with the other endpoint of the schema edge. In the following, we will relax this requirement and introduce more general constraints on cardinality.
 
 \subsection{Cardinality constraints}
 
@@ -181,14 +179,14 @@ We first introduce a generalization of the existential quantifier, which enables
 To enable more general cardinality constraints on edges, we revise the definitions of property graph type and property graph conformance.
 
 \begin{definition}[Property graph type]
-  A \emph{property graph type} is a tuple \[\gtype = (N, E_d, E_u, \rho_d, \rho_u, \beta, \gamma)\] where
+  A \emph{property graph type} is a tuple \[\gtype = (N, E_d, E_u, \rho_d, \rho_u, \omega, \gamma)\] where
   \begin{itemize}
     \item $N$ is a finite set of schema nodes;
     \item $E_d$ is a finite set of directed schema edges;
     \item $E_u$ is a finite set of undirected schema edges;
     \item $\rho_d : E_d \to (N \times N)$ is a total function mapping directed schema edges to ordered pairs of schema nodes;
     \item $\rho_u : E_u \to \{\{u, v\} \mid u, v \in N\}$ is a total function mapping undirected schema edges to unordered pairs of schema nodes;
-    \item $\beta : (N \cup E_d \cup E_u) \to \btypes$ is a total function mapping schema elements to element types;
+    \item $\omega : (N \cup E_d \cup E_u) \to \otypes$ is a total function mapping schema objects to object types;
     \item $\gamma : (N \times (E_d \cup E_u)) \pto (\N \times \N^\infty)$ is a partial function mapping some pairs of schema nodes and schema edges to cardinality constraints, where $\N$ is defined as $\{0, 1, 2, \ldots\}$ and $\N^\infty$ is defined as $\N \cup \{\infty\}$;
     \item the sets $N$, $E_d$, $E_u$ are disjoint.
   \end{itemize}
@@ -199,32 +197,32 @@ To enable more general cardinality constraints on edges, we revise the definitio
 \end{definition}
 
 \begin{definition}[Property graph conformance]
-  We say that a property graph \[G = (N, E_d, E_u, \rho_d, \rho_u, \lambda, \pi)\] \emph{conforms} to a property graph type \[\gtype = (N', E_d', E_u', \rho_d', \rho_u', \beta, \gamma)\] if and only if all of the following rules hold.
+  We say that a property graph \[G = (N, E_d, E_u, \rho_d, \rho_u, \lambda, \pi)\] \emph{conforms} to a property graph type \[\gtype = (N', E_d', E_u', \rho_d', \rho_u', \omega, \gamma)\] if and only if all of the following rules hold.
 
   \begin{enumerate}
     \item The vocabulary for nodes:
     \begin{align*}
       &\forall n \in N \exists n' \in N'\\
-      &\quad n \in \sem{\beta(n')}
+      &\quad n \in \sem{\omega(n')}
     \end{align*}
     
     \item The vocabulary for directed edges:
     \begin{align*}
       &\forall e \in E_d \exists e' \in E_d'\\
-      &\quad e \in \sem{\beta(e')}
+      &\quad e \in \sem{\omega(e')}
     \end{align*}
 
     \item The vocabulary for undirected edges:
     \begin{align*}
       &\forall e \in E_u \exists e' \in E_u'\\
-      &\quad e \in \sem{\beta(e')}
+      &\quad e \in \sem{\omega(e')}
     \end{align*}
     
     \item Cardinality constraints on outgoing directed edges:
     \begin{align*}
       &\forall e' \in E_d' \forall n'_1, n'_2 \in N'\\
       &\quad\rho_d'(e') = (n'_1, n'_2)\\
-      &\quad\quad\implies {} \forall n_1 \in N \cap \sem{\beta(n'_1)} \exists^{\gamma(n'_1, e')} e \in E_u \cap \sem{\beta(e')} \exists n_2 \in N \cap \sem{\beta(n'_2)}\\
+      &\quad\quad\implies {} \forall n_1 \in N \cap \sem{\omega(n'_1)} \exists^{\gamma(n'_1, e')} e \in E_u \cap \sem{\omega(e')} \exists n_2 \in N \cap \sem{\omega(n'_2)}\\
       &\quad\quad\quad\quad\quad\quad\rho_d(e) = (n_1, n_2)
     \end{align*}
 
@@ -232,7 +230,7 @@ To enable more general cardinality constraints on edges, we revise the definitio
     \begin{align*}
       &\forall e' \in E_d' \forall n'_1, n'_2 \in N'\\
       &\quad\rho_d'(e') = (n'_1, n'_2)\\
-      &\quad\quad\implies {} \forall n_2 \in N \cap \sem{\beta(n'_2)} \exists^{\gamma(n'_2, e')} e \in E_u \cap \sem{\beta(e')} \exists n_1 \in N \cap \sem{\beta(n'_1)}\\
+      &\quad\quad\implies {} \forall n_2 \in N \cap \sem{\omega(n'_2)} \exists^{\gamma(n'_2, e')} e \in E_u \cap \sem{\omega(e')} \exists n_1 \in N \cap \sem{\omega(n'_1)}\\
       &\quad\quad\quad\quad\quad\quad\rho_d(e) = (n_1, n_2)
     \end{align*}
     
@@ -240,7 +238,7 @@ To enable more general cardinality constraints on edges, we revise the definitio
     \begin{align*}
       &\forall e' \in E_u' \forall n'_1, n'_2 \in N'\\
       &\quad\rho_u'(e') = \{n'_1, n'_2\}\\
-      &\quad\quad\implies {} \forall n_1 \in N \cap \sem{\beta(n'_1)} \exists^{\gamma(n'_1, e')} e \in E_u \cap \sem{\beta(e')} \exists n_2 \in N \cap \sem{\beta(n'_2)}\\
+      &\quad\quad\implies {} \forall n_1 \in N \cap \sem{\omega(n'_1)} \exists^{\gamma(n'_1, e')} e \in E_u \cap \sem{\omega(e')} \exists n_2 \in N \cap \sem{\omega(n'_2)}\\
       &\quad\quad\quad\quad\quad\quad\rho_u(e) = \{n_1, n_2\}
     \end{align*}
   \end{enumerate}
