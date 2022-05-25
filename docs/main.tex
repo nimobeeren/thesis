@@ -80,7 +80,7 @@ We postulate the set of property types $\mathcal{T}$.
 
 \begin{definition}[Record type]
   A \emph{record type} is a finite partial function $\rtype : \mathcal{N} \pto \ptypes$ that maps some property names to a property type.
-  % We will denote such record types as $\langle a_1 : \rtype_1, \ldots, a_n : \rtype_n \rangle$.
+  We will denote such record types as $\langle a_1 : \ptype_1, \ldots, a_n : \ptype_n \rangle$.
 \end{definition}
 
 \begin{definition}[Record conformance]
@@ -257,7 +257,7 @@ For a record $r$ and a property name $k \in \mathcal{N}$ such that $r(k)$ was pr
 We adjust the definitions of property conformance, record type, and record conformance accordingly.
 
 \begin{definition}[Property conformance]
-  For each property type $\ptype \in \ptypes$ there is a set $\sem{\ptype} \subseteq \mathcal{V} \cup \{\undefined\}$ that contains all property values that \emph{conform} to the type $\ptype$. We say $\ptype$ is \emph{optional} iff $\undefined \in \sem{\ptype}$.
+  For each property type $\ptype \in \ptypes$ there is a set $\sem{\ptype} \subseteq \mathcal{V} \cup \{\undefined\}$ that contains all property values that \emph{conform} to the type $\ptype$. We say $\ptype$ is \emph{optional} iff $\undefined \in \sem{\ptype}$. We use the notation $\ptype?$ to make a property optional, i.e. $\sem{\ptype?} = \sem{\ptype} \cup \{ \undefined \}$.
 \end{definition}
 
 \begin{definition}[Record type]
@@ -269,9 +269,16 @@ We adjust the definitions of property conformance, record type, and record confo
   We say that a record $r$ \emph{conforms} to a record type $\rtype$, denoted $r \in \sem{\rtype}$, if and only if for each property name $k \in \mathcal{N}$ it holds that $r(k) \in \sem{\rtype(k)}$.
 \end{definition}
 
-% "Open" types
+\subsection{Open types}
 
-% Record type with any property name and any value: possible by setting [[\rtype(k)]] = V U {undef} for all (unspecified) property names
-% Record type with any property name and specific value: set [[\rtype(k)]] = val U {undef} for all (unspecified) property names
+It may be desirable to have a record type that allows any property, in addition to the explicitly mentioned properties. This can be achieved by setting $\rtype(k) = \ptype?$ for all unspecified property names $k \in \mathcal{N}$ (there may be infinitely many of them), where $\ptype$ is an arbitrary property type. If we want to allow any value, we can set $\sem{\ptype} = \mathcal{V}$.
+
+\section{Limitations}
+
+% Node with any label: create a node for every combination of labels (but then we can't express there should be an edge to "at least one" of them). Solution: union types? Look into type theory again
+
+Under these definitions, it is not possible to have a single object type that allows two different label sets. Hence, it is not possible to have optional labels, i.e. the object type $\otype = (\{\texttt{Vehicle}, \texttt{Car}\}, \langle \texttt{make} : \texttt{string} \rangle)$ requires that the labels \texttt{Vehicle} and \texttt{Car} are both present, just having \texttt{Car} is not enough. Of course, it is possible to have two schema objects like $\otype_1 = (\{\texttt{Car}\}, \langle \texttt{make} : \texttt{string} \rangle)$ and $\otype_2 = (\{\texttt{Vehicle}, \texttt{Car}\}, \langle \texttt{make} : \texttt{string} \rangle)$. However, then it is not possible to specify that every \texttt{Employee} must have exactly one outgoing \texttt{OWNS} edge to a node conforming to either $\otype_1$ or $\otype_2$.
+
+More generally, it is not possible to specify constraints over a graph pattern larger than two neighboring nodes and the edge between them.
 
 \end{document}
