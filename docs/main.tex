@@ -271,6 +271,8 @@ We adjust the definitions of property conformance, record type, and record confo
 
 \subsection{Open types}
 
+% TODO: improve
+
 It may be desirable to have a record type that allows any property, in addition to the explicitly mentioned properties. This can be achieved by setting $\rtype(k) = \ptype?$ for all unspecified property names $k \in \mathcal{N}$ (there may be infinitely many of them), where $\ptype$ is an arbitrary property type. If we want to allow any value, we can set $\sem{\ptype} = \mathcal{V}$.
 
 \section{Limitations}
@@ -278,6 +280,8 @@ It may be desirable to have a record type that allows any property, in addition 
 % Node with any label: create a node for every combination of labels (but then we can't express there should be an edge to "at least one" of them). Solution: union types? Look into type theory again
 
 Under these definitions, it is not possible to have a single object type that allows two different label sets. Hence, it is not possible to have optional labels, i.e. the object type $\otype = (\{\texttt{Vehicle}, \texttt{Car}\}, \langle \texttt{make} : \texttt{string} \rangle)$ requires that the labels \texttt{Vehicle} and \texttt{Car} are both present, just having \texttt{Car} is not enough. Of course, it is possible to have two schema objects like $\otype_1 = (\{\texttt{Car}\}, \langle \texttt{make} : \texttt{string} \rangle)$ and $\otype_2 = (\{\texttt{Vehicle}, \texttt{Car}\}, \langle \texttt{make} : \texttt{string} \rangle)$. However, then it is not possible to specify that every \texttt{Employee} must have exactly one outgoing \texttt{OWNS} edge to a node conforming to either $\otype_1$ or $\otype_2$.
+
+% TODO: In general, it's not possible to say that an object must conform to type 1 OR type 2 (union type). Problem with labels follows from that. But also union of two records is not possible.
 
 More generally, it is not possible to specify constraints over a graph pattern larger than two neighboring nodes and the edge between them.
 
