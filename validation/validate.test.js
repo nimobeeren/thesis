@@ -60,18 +60,18 @@ test("the empty graph conforms to the empty schema", async () => {
 test("graph conforms to schema", async () => {
   // Create the schema
   await session.run(`
-    CREATE (user:Schema:User { name: "String", age: "Integer" })-[:FOLLOWS { since: "Date" }]->(user),
-    (user)-[:LIKES]->(post:Schema:Post { content: "String", at: "Date" });
+    CREATE (user:Schema:User { name: "STRING", age: "INTEGER" })-[:FOLLOWS { since: "DATE" }]->(user),
+    (user)-[:LIKES]->(post:Schema:Post { content: "STRING", at: "DATE" })
   `);
 
   // Create the data
   await session.run(`
-    CREATE (user1:Data:User { name: "String", age: "Integer" }),
-    (user2:Data:User { name: "String", age: "Integer" }),
-    (user1)-[:FOLLOWS {since: "Date"}]->(user2),
-    (user2)-[:FOLLOWS {since: "Date"}]->(user1),
-    (user1)-[:LIKES]->(post1:Data:Post { content: "String", at: "Date" }),
-    (user2)-[:LIKES]->(post2:Data:Post { content: "String", at: "Date" });
+    CREATE (user1:Data:User { name: "STRING", age: "INTEGER" }),
+    (user2:Data:User { name: "STRING", age: "INTEGER" }),
+    (user1)-[:FOLLOWS {since: "DATE"}]->(user2),
+    (user2)-[:FOLLOWS {since: "DATE"}]->(user1),
+    (user1)-[:LIKES]->(post1:Data:Post { content: "STRING", at: "DATE" }),
+    (user2)-[:LIKES]->(post2:Data:Post { content: "STRING", at: "DATE" })
   `);
 
   const violatingNodes = await validateNodes(session);
@@ -90,12 +90,12 @@ test("graph conforms to schema", async () => {
 test("node is missing mandatory property", async () => {
   // Create the schema
   await session.run(`
-    CREATE (user:Schema:User { name: "String", age: "Integer" })
+    CREATE (user:Schema:User { name: "STRING", age: "INTEGER" })
   `);
 
   // Create the data
   const dataResult = await session.run(`
-    CREATE (user:Data:User { name: "String" }) RETURN user
+    CREATE (user:Data:User { name: "STRING" }) RETURN user
   `);
 
   const userNodeId = dataResult.records[0].get("user").identity;
@@ -117,14 +117,14 @@ test("node is missing mandatory property", async () => {
 test("edge is missing mandatory property", async () => {
   // Create the schema
   await session.run(`
-    CREATE (:Schema:User { name: "String", age: "Integer" })-[:CREATED { at: "Date" }]->
-    (:Schema:Post { content: "String" })
+    CREATE (:Schema:User { name: "STRING", age: "INTEGER" })-[:CREATED { at: "DATE" }]->
+    (:Schema:Post { content: "STRING" })
   `);
 
   // Create the data
   const dataResult = await session.run(`
-    CREATE (user:Data:User { name: "String", age: "Integer" })-[created:CREATED]->
-    (post:Data:Post { content: "String" })
+    CREATE (user:Data:User { name: "STRING", age: "INTEGER" })-[created:CREATED]->
+    (post:Data:Post { content: "STRING" })
     RETURN user, created, post
   `);
 
