@@ -24,9 +24,7 @@ const session = driver.session();
 
 // Make sure we're working with a clean DB from the start
 beforeAll(async () => {
-  const result = await session.writeTransaction((tx) =>
-    tx.run("MATCH (n) RETURN n")
-  );
+  const result = await session.run("MATCH (n) RETURN n");
 
   if (result.records.length > 0) {
     throw new Error("Database is not empty! Aborting to prevent data loss.");
@@ -36,9 +34,7 @@ beforeAll(async () => {
 // Clean up anything we created during a test
 afterEach(async () => {
   // Delete all nodes and edges in the database
-  return await session.writeTransaction((tx) =>
-    tx.run("MATCH (n) DETACH DELETE n")
-  );
+  return await session.run("MATCH (n) DETACH DELETE n");
 });
 
 // Close DB connection
@@ -63,24 +59,20 @@ test("the empty graph conforms to the empty schema", async () => {
 
 test("graph conforms to schema", async () => {
   // Create the schema
-  await session.writeTransaction((tx) =>
-    tx.run(`
-      CREATE (user:Schema:User { name: "String", age: "Integer" })-[:FOLLOWS { since: "Date" }]->(user),
-      (user)-[:LIKES]->(post:Schema:Post { content: "String", at: "Date" });
-    `)
-  );
+  await session.run(`
+    CREATE (user:Schema:User { name: "String", age: "Integer" })-[:FOLLOWS { since: "Date" }]->(user),
+    (user)-[:LIKES]->(post:Schema:Post { content: "String", at: "Date" });
+  `);
 
   // Create the data
-  await session.writeTransaction((tx) =>
-    tx.run(`
-      CREATE (user1:Data:User { name: "String", age: "Integer" }),
-      (user2:Data:User { name: "String", age: "Integer" }),
-      (user1)-[:FOLLOWS {since: "Date"}]->(user2),
-      (user2)-[:FOLLOWS {since: "Date"}]->(user1),
-      (user1)-[:LIKES]->(post1:Data:Post { content: "String", at: "Date" }),
-      (user2)-[:LIKES]->(post2:Data:Post { content: "String", at: "Date" });
-    `)
-  );
+  await session.run(`
+    CREATE (user1:Data:User { name: "String", age: "Integer" }),
+    (user2:Data:User { name: "String", age: "Integer" }),
+    (user1)-[:FOLLOWS {since: "Date"}]->(user2),
+    (user2)-[:FOLLOWS {since: "Date"}]->(user1),
+    (user1)-[:LIKES]->(post1:Data:Post { content: "String", at: "Date" }),
+    (user2)-[:LIKES]->(post2:Data:Post { content: "String", at: "Date" });
+  `);
 
   const violatingNodes = await validateNodes(session);
   expect(violatingNodes.records).toHaveLength(0);
@@ -97,18 +89,14 @@ test("graph conforms to schema", async () => {
 
 test("node is missing mandatory property", async () => {
   // Create the schema
-  await session.writeTransaction((tx) =>
-    tx.run(`
-      CREATE (user:Schema:User { name: "String", age: "Integer" })
-    `)
-  );
+  await session.run(`
+    CREATE (user:Schema:User { name: "String", age: "Integer" })
+  `);
 
   // Create the data
-  const dataResult = await session.writeTransaction((tx) =>
-    tx.run(`
-      CREATE (user:Data:User { name: "String" }) RETURN user
-    `)
-  );
+  const dataResult = await session.run(`
+    CREATE (user:Data:User { name: "String" }) RETURN user
+  `);
 
   const userNodeId = dataResult.records[0].get("user").identity;
 
@@ -128,21 +116,17 @@ test("node is missing mandatory property", async () => {
 
 test("edge is missing mandatory property", async () => {
   // Create the schema
-  await session.writeTransaction((tx) =>
-    tx.run(`
-      CREATE (:Schema:User { name: "String", age: "Integer" })-[:CREATED { at: "Date" }]->
-      (:Schema:Post { content: "String" })
-    `)
-  );
+  await session.run(`
+    CREATE (:Schema:User { name: "String", age: "Integer" })-[:CREATED { at: "Date" }]->
+    (:Schema:Post { content: "String" })
+  `);
 
   // Create the data
-  const dataResult = await session.writeTransaction((tx) =>
-    tx.run(`
-      CREATE (user:Data:User { name: "String", age: "Integer" })-[created:CREATED]->
-      (post:Data:Post { content: "String" })
-      RETURN user, created, post
-    `)
-  );
+  const dataResult = await session.run(`
+    CREATE (user:Data:User { name: "String", age: "Integer" })-[created:CREATED]->
+    (post:Data:Post { content: "String" })
+    RETURN user, created, post
+  `);
 
   const userNodeId = dataResult.records[0].get("user").identity;
   const createdEdgeId = dataResult.records[0].get("created").identity;
@@ -169,20 +153,16 @@ test("edge is missing mandatory property", async () => {
 
 test("node is missing incoming edge", async () => {
   // Create the schema
-  await session.writeTransaction((tx) =>
-    tx.run(`
-      CREATE (:Schema:User)-[:CREATED]->(:Schema:Post)
-    `)
-  );
+  await session.run(`
+    CREATE (:Schema:User)-[:CREATED]->(:Schema:Post)
+  `);
 
   // Create the data
-  const dataResult = await session.writeTransaction((tx) =>
-    tx.run(`
-      CREATE (:Data:User)-[:CREATED]->(:Data:Post),
-      (post:Data:Post)
-      RETURN post
-    `)
-  );
+  const dataResult = await session.run(`
+    CREATE (:Data:User)-[:CREATED]->(:Data:Post),
+    (post:Data:Post)
+    RETURN post
+  `);
 
   const postNodeId = dataResult.records[0].get("post").identity;
 
@@ -203,20 +183,16 @@ test("node is missing incoming edge", async () => {
 
 test("node is missing outgoing edge", async () => {
   // Create the schema
-  await session.writeTransaction((tx) =>
-    tx.run(`
-      CREATE (:Schema:User)-[:CREATED]->(:Schema:Post)
-    `)
-  );
+  await session.run(`
+    CREATE (:Schema:User)-[:CREATED]->(:Schema:Post)
+  `);
 
   // Create the data
-  const dataResult = await session.writeTransaction((tx) =>
-    tx.run(`
-      CREATE (:Data:User)-[:CREATED]->(:Data:Post),
-      (user:Data:User)
-      RETURN user
-    `)
-  );
+  const dataResult = await session.run(`
+    CREATE (:Data:User)-[:CREATED]->(:Data:Post),
+    (user:Data:User)
+    RETURN user
+  `);
 
   const userNodeId = dataResult.records[0].get("user").identity;
 
