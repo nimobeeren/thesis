@@ -8,9 +8,9 @@ async function validateNodes(session) {
     tx.run(`
       MATCH (dataNode:Data)
       WHERE NOT EXISTS {
-          MATCH (schemaNode:Schema)
-          WHERE properties(dataNode) = properties(schemaNode)
-          AND [label IN labels(dataNode) WHERE label <> "Data"] = [label IN labels(schemaNode) WHERE label <> "Schema"]
+        MATCH (schemaNode:Schema)
+        WHERE properties(dataNode) = properties(schemaNode)
+        AND [label IN labels(dataNode) WHERE label <> "Data"] = [label IN labels(schemaNode) WHERE label <> "Schema"]
       }
       RETURN dataNode
     `)
@@ -27,9 +27,9 @@ async function validateEdges(session) {
     tx.run(`
       MATCH (:Data)-[dataEdge]->(:Data)
       WHERE NOT EXISTS {
-          MATCH (:Schema)-[schemaEdge]->(:Schema)
-          WHERE properties(dataEdge) = properties(schemaEdge)
-          AND type(dataEdge) = type(schemaEdge)
+        MATCH (:Schema)-[schemaEdge]->(:Schema)
+        WHERE properties(dataEdge) = properties(schemaEdge)
+        AND type(dataEdge) = type(schemaEdge)
       }
       RETURN dataEdge
     `)
@@ -49,11 +49,11 @@ async function validateIncomingEdges(session) {
       WHERE properties(dn2) = properties(sn2)
       AND [label IN labels(dn2) WHERE label <> "Data"] = [label IN labels(sn2) WHERE label <> "Schema"]
       AND NOT EXISTS {
-          MATCH (dn1:Data)-[de]->(dn2)
-          WHERE properties(de) = properties(se)
-          AND type(de) = type(se)
-          AND properties(dn1) = properties(sn1)
-          AND [label IN labels(dn1) WHERE label <> "Data"] = [label IN labels(sn1) WHERE label <> "Schema"]
+        MATCH (dn1:Data)-[de]->(dn2)
+        WHERE properties(de) = properties(se)
+        AND type(de) = type(se)
+        AND properties(dn1) = properties(sn1)
+        AND [label IN labels(dn1) WHERE label <> "Data"] = [label IN labels(sn1) WHERE label <> "Schema"]
       }
       RETURN dn2
     `)
@@ -73,11 +73,11 @@ async function validateOutgoingEdges(session) {
       WHERE properties(dn1) = properties(sn1)
       AND [label IN labels(dn1) WHERE label <> "Data"] = [label IN labels(sn1) WHERE label <> "Schema"]
       AND NOT EXISTS {
-          MATCH (dn1)-[de]->(dn2:Data)
-          WHERE properties(de) = properties(se)
-          AND type(de) = type(se)
-          AND properties(dn2) = properties(sn2)
-          AND [label IN labels(dn2) WHERE label <> "Data"] = [label IN labels(sn2) WHERE label <> "Schema"]
+        MATCH (dn1)-[de]->(dn2:Data)
+        WHERE properties(de) = properties(se)
+        AND type(de) = type(se)
+        AND properties(dn2) = properties(sn2)
+        AND [label IN labels(dn2) WHERE label <> "Data"] = [label IN labels(sn2) WHERE label <> "Schema"]
       }
       RETURN dn1
     `)
