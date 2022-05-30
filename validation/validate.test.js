@@ -66,7 +66,7 @@ test("graph conforms to schema", async () => {
   await session.writeTransaction((tx) =>
     tx.run(`
       CREATE (user:Schema:User { name: "String", age: "Integer" })-[:FOLLOWS { since: "Date" }]->(user),
-      (user)-[:LIKES]->(post:Schema:Post { content: "String", createdAt: "Date" });
+      (user)-[:LIKES]->(post:Schema:Post { content: "String", at: "Date" });
     `)
   );
 
@@ -77,8 +77,8 @@ test("graph conforms to schema", async () => {
       (user2:Data:User { name: "String", age: "Integer" }),
       (user1)-[:FOLLOWS {since: "Date"}]->(user2),
       (user2)-[:FOLLOWS {since: "Date"}]->(user1),
-      (user1)-[:LIKES]->(post1:Data:Post { content: "String", createdAt: "Date" }),
-      (user2)-[:LIKES]->(post2:Data:Post { content: "String", createdAt: "Date" });
+      (user1)-[:LIKES]->(post1:Data:Post { content: "String", at: "Date" }),
+      (user2)-[:LIKES]->(post2:Data:Post { content: "String", at: "Date" });
     `)
   );
 
@@ -93,4 +93,144 @@ test("graph conforms to schema", async () => {
 
   const violatingOutgoingEdges = await validateOutgoingEdges(session);
   expect(violatingOutgoingEdges.records).toHaveLength(0);
+});
+
+test("node is missing mandatory property", async () => {
+  // Create the schema
+  await session.writeTransaction((tx) =>
+    tx.run(`
+      CREATE (user:Schema:User { name: "String", age: "Integer" })
+    `)
+  );
+
+  // Create the data
+  const dataResult = await session.writeTransaction((tx) =>
+    tx.run(`
+      CREATE (user:Data:User { name: "String" }) RETURN user
+    `)
+  );
+
+  const userNodeId = dataResult.records[0].get("user").identity;
+
+  const violatingNodes = await validateNodes(session);
+  expect(violatingNodes.records).toHaveLength(1);
+  expect(violatingNodes.records[0].get(0).identity).toEqual(userNodeId);
+
+  const violatingEdges = await validateEdges(session);
+  expect(violatingEdges.records).toHaveLength(0);
+
+  const violatingIncomingEdges = await validateIncomingEdges(session);
+  expect(violatingIncomingEdges.records).toHaveLength(0);
+
+  const violatingOutgoingEdges = await validateOutgoingEdges(session);
+  expect(violatingOutgoingEdges.records).toHaveLength(0);
+});
+
+test("edge is missing mandatory property", async () => {
+  // Create the schema
+  await session.writeTransaction((tx) =>
+    tx.run(`
+      CREATE (:Schema:User { name: "String", age: "Integer" })-[:CREATED { at: "Date" }]->
+      (:Schema:Post { content: "String" })
+    `)
+  );
+
+  // Create the data
+  const dataResult = await session.writeTransaction((tx) =>
+    tx.run(`
+      CREATE (user:Data:User { name: "String", age: "Integer" })-[created:CREATED]->
+      (post:Data:Post { content: "String" })
+      RETURN user, created, post
+    `)
+  );
+
+  const userNodeId = dataResult.records[0].get("user").identity;
+  const createdEdgeId = dataResult.records[0].get("created").identity;
+  const postNodeId = dataResult.records[0].get("post").identity;
+
+  const violatingNodes = await validateNodes(session);
+  expect(violatingNodes.records).toHaveLength(0);
+
+  // The CREATED edge is missing the at property
+  const violatingEdges = await validateEdges(session);
+  expect(violatingEdges.records).toHaveLength(1);
+  expect(violatingEdges.records[0].get(0).identity).toEqual(createdEdgeId);
+
+  // Since the CREATED edge does not conform, the Post node also doesn't
+  const violatingIncomingEdges = await validateIncomingEdges(session);
+  expect(violatingIncomingEdges.records).toHaveLength(1);
+  expect(violatingIncomingEdges.records[0].get(0).identity).toEqual(postNodeId);
+
+  // Since the CREATED edge does not conform, the User node also doesn't
+  const violatingOutgoingEdges = await validateOutgoingEdges(session);
+  expect(violatingOutgoingEdges.records).toHaveLength(1);
+  expect(violatingOutgoingEdges.records[0].get(0).identity).toEqual(userNodeId);
+});
+
+test("node is missing incoming edge", async () => {
+  // Create the schema
+  await session.writeTransaction((tx) =>
+    tx.run(`
+      CREATE (:Schema:User)-[:CREATED]->(:Schema:Post)
+    `)
+  );
+
+  // Create the data
+  const dataResult = await session.writeTransaction((tx) =>
+    tx.run(`
+      CREATE (:Data:User)-[:CREATED]->(:Data:Post),
+      (post:Data:Post)
+      RETURN post
+    `)
+  );
+
+  const postNodeId = dataResult.records[0].get("post").identity;
+
+  const violatingNodes = await validateNodes(session);
+  expect(violatingNodes.records).toHaveLength(0);
+
+  const violatingEdges = await validateEdges(session);
+  expect(violatingEdges.records).toHaveLength(0);
+
+  // The Post node does not have an incoming CREATED edge from a User
+  const violatingIncomingEdges = await validateIncomingEdges(session);
+  expect(violatingIncomingEdges.records).toHaveLength(1);
+  expect(violatingIncomingEdges.records[0].get(0).identity).toEqual(postNodeId);
+
+  const violatingOutgoingEdges = await validateOutgoingEdges(session);
+  expect(violatingOutgoingEdges.records).toHaveLength(0);
+});
+
+test("node is missing outgoing edge", async () => {
+  // Create the schema
+  await session.writeTransaction((tx) =>
+    tx.run(`
+      CREATE (:Schema:User)-[:CREATED]->(:Schema:Post)
+    `)
+  );
+
+  // Create the data
+  const dataResult = await session.writeTransaction((tx) =>
+    tx.run(`
+      CREATE (:Data:User)-[:CREATED]->(:Data:Post),
+      (user:Data:User)
+      RETURN user
+    `)
+  );
+
+  const userNodeId = dataResult.records[0].get("user").identity;
+
+  const violatingNodes = await validateNodes(session);
+  expect(violatingNodes.records).toHaveLength(0);
+
+  const violatingEdges = await validateEdges(session);
+  expect(violatingEdges.records).toHaveLength(0);
+
+  const violatingIncomingEdges = await validateIncomingEdges(session);
+  expect(violatingIncomingEdges.records).toHaveLength(0);
+
+  // The User node has no outgoing CREATED edge to a Post
+  const violatingOutgoingEdges = await validateOutgoingEdges(session);
+  expect(violatingOutgoingEdges.records).toHaveLength(1);
+  expect(violatingOutgoingEdges.records[0].get(0).identity).toEqual(userNodeId);
 });
