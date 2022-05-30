@@ -1,7 +1,7 @@
 /**
- * Checks the vocabulary for nodes.
+ * Finds the nodes that do not match the labels or properties of any node type in the schema.
  * @param {import('neo4j-driver').Session} session
- * @returns all data nodes that do not conform to any node type in the schema
+ * @returns all data nodes that do not conform to any node type
  */
 async function validateNodes(session) {
   return await session.writeTransaction((tx) =>
@@ -18,9 +18,9 @@ async function validateNodes(session) {
 }
 
 /**
- * Checks the vocabulary for edges.
+ * Finds the edges that do not match the label or properties of any edge type in the schema.
  * @param {import('neo4j-driver').Session} session
- * @returns all data edges that do not conform to any edge type in the schema
+ * @returns all data edges that do not conform to any edge type
  */
 async function validateEdges(session) {
   return await session.writeTransaction((tx) =>
