@@ -1,0 +1,16 @@
+{
+  "name": "validation",
+  "version": "0.1.0",
+  "author": "Nimo Beeren",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "test": "jest test.js"
+  },
+  "dependencies": {
+    "@types/jest": "^27.5.1",
+    "dotenv": "^16.0.1",
+    "jest": "^28.1.0",
+    "neo4j-driver": "^4.4.5"
+  }
+}
