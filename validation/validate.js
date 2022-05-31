@@ -8,7 +8,7 @@ async function validateNodes(session) {
     MATCH (dataNode:Data)
     WHERE NOT EXISTS {
       MATCH (schemaNode:Schema)
-      WHERE properties(dataNode) = properties(schemaNode)
+      WHERE apoc.meta.types(dataNode) = properties(schemaNode)
       AND [label IN labels(dataNode) WHERE label <> "Data"] = [label IN labels(schemaNode) WHERE label <> "Schema"]
     }
     RETURN dataNode
@@ -25,7 +25,7 @@ async function validateEdges(session) {
     MATCH (:Data)-[dataEdge]->(:Data)
     WHERE NOT EXISTS {
       MATCH (:Schema)-[schemaEdge]->(:Schema)
-      WHERE properties(dataEdge) = properties(schemaEdge)
+      WHERE apoc.meta.types(dataEdge) = properties(schemaEdge)
       AND type(dataEdge) = type(schemaEdge)
     }
     RETURN dataEdge
@@ -41,13 +41,13 @@ async function validateIncomingEdges(session) {
   return await session.run(`
     MATCH (sn1:Schema)-[se]->(sn2:Schema)
     MATCH (dn2:Data)
-    WHERE properties(dn2) = properties(sn2)
+    WHERE apoc.meta.types(dn2) = properties(sn2)
     AND [label IN labels(dn2) WHERE label <> "Data"] = [label IN labels(sn2) WHERE label <> "Schema"]
     AND NOT EXISTS {
       MATCH (dn1:Data)-[de]->(dn2)
-      WHERE properties(de) = properties(se)
+      WHERE apoc.meta.types(de) = properties(se)
       AND type(de) = type(se)
-      AND properties(dn1) = properties(sn1)
+      AND apoc.meta.types(dn1) = properties(sn1)
       AND [label IN labels(dn1) WHERE label <> "Data"] = [label IN labels(sn1) WHERE label <> "Schema"]
     }
     RETURN dn2
@@ -63,13 +63,13 @@ async function validateOutgoingEdges(session) {
   return await session.run(`
     MATCH (sn1:Schema)-[se]->(sn2:Schema)
     MATCH (dn1:Data)
-    WHERE properties(dn1) = properties(sn1)
+    WHERE apoc.meta.types(dn1) = properties(sn1)
     AND [label IN labels(dn1) WHERE label <> "Data"] = [label IN labels(sn1) WHERE label <> "Schema"]
     AND NOT EXISTS {
       MATCH (dn1)-[de]->(dn2:Data)
-      WHERE properties(de) = properties(se)
+      WHERE apoc.meta.types(de) = properties(se)
       AND type(de) = type(se)
-      AND properties(dn2) = properties(sn2)
+      AND apoc.meta.types(dn2) = properties(sn2)
       AND [label IN labels(dn2) WHERE label <> "Data"] = [label IN labels(sn2) WHERE label <> "Schema"]
     }
     RETURN dn1
