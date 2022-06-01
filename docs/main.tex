@@ -112,9 +112,11 @@ We postulate the set of property types $\mathcal{T}$.
 
 The similarity between property graph types and property graphs is intentional. This allows us to visualize them in a similar ways, and to use the same mental model to think about them. Indeed, a property graph type can be simulated by a property graph if we allow properties to take property types as values, i.e. $\ptypes \subseteq \mathcal{V}$. Then we let $\lambda$ and $\pi$ take the role of $\omega$, in the sense that $\lambda(o) = L$ and $\pi(o) = \rtype$ if $\omega(o) = (L, \rtype)$ for all objects $o$ in the property graph.
 
+% TODO: mirror the changes on later definition of PG conformance
 \begin{definition}[Property graph conformance]
   We say that a property graph \[G = (N, E_d, E_u, \rho_d, \rho_u, \lambda, \pi)\] \emph{conforms} to a property graph type \[\gtype = (N', E_d', E_u', \rho_d', \rho_u', \omega)\] if and only if all of the following rules hold.
 
+  % TODO: don't like this "vocabulary" word
   \begin{enumerate}
     \item The vocabulary for nodes:
     \begin{align*}
@@ -125,13 +127,18 @@ The similarity between property graph types and property graphs is intentional. 
     \item The vocabulary for directed edges:
     \begin{align*}
       &\forall e \in E_d \exists e' \in E_d'\\
-      &\quad e \in \sem{\omega(e')}
+      &\quad e \in \sem{\omega(e')}\\
+      &\quad\wedge \Pi_1(\rho_d(e)) \in \sem{\omega(\Pi_1(\rho_d'(e')))}\\
+      &\quad\wedge \Pi_2(\rho_d(e)) \in \sem{\omega(\Pi_2(\rho_d'(e')))}
     \end{align*}
 
+    % FIXME: \Pi on a set does not make sense
     \item The vocabulary for undirected edges:
     \begin{align*}
       &\forall e \in E_u \exists e' \in E_u'\\
-      &\quad e \in \sem{\omega(e')}
+      &\quad e \in \sem{\omega(e')}\\
+      &\quad\wedge \Pi_1(\rho_u(e)) \in \sem{\omega(\Pi_1(\rho_u'(e')))}\\
+      &\quad\wedge \Pi_2(\rho_u(e)) \in \sem{\omega(\Pi_2(\rho_u'(e')))}
     \end{align*}
     
     \item Outgoing directed edges are mandatory:
