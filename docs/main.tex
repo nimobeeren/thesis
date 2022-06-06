@@ -24,6 +24,8 @@
 
 % Projection operator
 \newcommand{\proj}{\mathrm{proj}}
+\newcommand{\src}{\mathtt{src}}
+\newcommand{\trg}{\mathtt{trg}}
 
 % Schema elements
 \newcommand{\ptype}{\tau}
@@ -73,6 +75,8 @@ Our notion of property graph is a directed \emph{multigraph}. That means there c
 Given a node $u$, the set of \emph{outgoing} edges is given by $\{e \in E \mid \exists v \in N : \rho(e) = (u, v)\}$, and the set of \emph{incoming} edges is given by $\{e \in E \mid \exists v \in N : \rho(e) = (v, u)\}$. We use the umbrella term \emph{objects} to refer to nodes and edges.
 
 The $j^\text{th}$ \emph{projection map}, written $\proj_j$, maps a tuple $\bar{x} = (x_1, \ldots, x_j, \ldots, x_k)$ to the value $\proj_j(\bar{x}) = x_j$.
+
+The functions $\src$ and $\trg$ map pairs to their first and second element, i.e. $\src((u, v)) = u$ and $\trg((u, v)) = v$. To refer to the source and target \emph{endpoints} of an edge $e$, we write $\src(\rho(e))$ and $\trg(\rho(e))$, respectively.
 
 \section{Property Graph Schemas}
 
@@ -129,22 +133,22 @@ The similarity between property graph types and property graphs is intentional. 
     \begin{align*}
       &\forall e \in E \exists e' \in E' :\\
       &\quad e \in \sem{\omega(e')}\\
-      &\quad\quad\wedge \proj_1(\rho(e)) \in \sem{\omega(\proj_1(\rho'(e')))}\\
-      &\quad\quad\wedge \proj_2(\rho(e)) \in \sem{\omega(\proj_2(\rho'(e')))}
+      &\quad\quad\wedge \src(\rho(e)) \in \sem{\omega(\src(\rho'(e')))}\\
+      &\quad\quad\wedge \trg(\rho(e)) \in \sem{\omega(\trg(\rho'(e')))}
     \end{align*}
     
     \item If a node conforms to a schema node, it must have all the outgoing edges of the right type:
     \begin{align*}
-      &\forall e' \in E' \forall n_1 \in N \cap \sem{\omega(\proj_1(\rho(e')))}\\
+      &\forall e' \in E' \forall n_1 \in N \cap \sem{\omega(\src(\rho(e')))}\\
       &\quad\exists e \in E \cap \sem{\omega(e')} :\\
-      &\quad\quad \proj_1(\rho(e)) = n_1 \wedge \proj_2(\rho(e)) \in \sem{\omega(\proj_2(\rho(e')))}
+      &\quad\quad \src(\rho(e)) = n_1 \wedge \trg(\rho(e)) \in \sem{\omega(\trg(\rho(e')))}
     \end{align*}
 
     \item If a node conforms to a schema node, it must have all the incoming edges of the right type:
     \begin{align*}
-      &\forall e' \in E' \forall n_2 \in N \cap \sem{\omega(\proj_2(\rho(e')))}\\
+      &\forall e' \in E' \forall n_2 \in N \cap \sem{\omega(\trg(\rho(e')))}\\
       &\quad\exists e \in E \cap \sem{\omega(e')} :\\
-      &\quad\quad \proj_1(\rho(e)) \in \sem{\omega(\proj_1(\rho(e')))} \wedge \proj_2(\rho(e)) = n_2
+      &\quad\quad \src(\rho(e)) \in \sem{\omega(\src(\rho(e')))} \wedge \trg(\rho(e)) = n_2
     \end{align*}
   \end{enumerate}
 \end{definition}
@@ -171,6 +175,8 @@ Next, we allow cardinality constraints on edges by revising the definitions of p
   A \emph{cardinality constraint} is an ordered pair of intervals $(n_1..m_1, \, n_2..m_2)$ where $n_1, n_2 \in \N$ and $m_1, m_2 \in \N^*$ with $\N = \{0, 1, 2, \ldots\}$ and $\N^* = \N \cup \{*\}$. The set of all cardinality constraints is denoted as $\mathcal{C}$.
 \end{definition}
 
+We also use the functions $\src$ and $\trg$ to refer to the first and second element of a cardinality constraint, i.e. $\src((n_1..m_1, \, n_2..m_2)) = n_1..m_1$ and $\trg((n_1..m_1, \, n_2..m_2)) = n_2..m_2$.
+
 \begin{definition}[Property graph type]
   A \emph{property graph type} is a tuple $$\gtype = (N, E, \rho, \omega, \gamma)$$ where
   \begin{itemize}
@@ -196,22 +202,22 @@ Next, we allow cardinality constraints on edges by revising the definitions of p
     \begin{align*}
       &\forall e \in E \exists e' \in E' :\\
       &\quad e \in \sem{\omega(e')}\\
-      &\quad\quad\wedge \proj_1(\rho(e)) \in \sem{\omega(\proj_1(\rho'(e')))}\\
-      &\quad\quad\wedge \proj_2(\rho(e)) \in \sem{\omega(\proj_2(\rho'(e')))}
+      &\quad\quad\wedge \src(\rho(e)) \in \sem{\omega(\src(\rho'(e')))}\\
+      &\quad\quad\wedge \trg(\rho(e)) \in \sem{\omega(\trg(\rho'(e')))}
     \end{align*}
     
     \item If a node conforms to a schema node, it must have the right number of outgoing edges of the right type:
     \begin{align*}
-      &\forall e' \in E' \forall n_1 \in N \cap \sem{\omega(\proj_1(\rho(e')))}\\
-      &\quad\exists^{\proj_1(\gamma(e'))} e \in E \cap \sem{\omega(e')} :\\
-      &\quad\quad \proj_1(\rho(e)) = n_1 \wedge \proj_2(\rho(e)) \in \sem{\omega(\proj_2(\rho(e')))}
+      &\forall e' \in E' \forall n_1 \in N \cap \sem{\omega(\src(\rho(e')))}\\
+      &\quad\exists^{\src(\gamma(e'))} e \in E \cap \sem{\omega(e')} :\\
+      &\quad\quad \src(\rho(e)) = n_1 \wedge \trg(\rho(e)) \in \sem{\omega(\trg(\rho(e')))}
     \end{align*}
 
     \item If a node conforms to a schema node, it must have the right number of incoming edges of the right type:
     \begin{align*}
-      &\forall e' \in E' \forall n_2 \in N \cap \sem{\omega(\proj_2(\rho(e')))}\\
-      &\quad\exists^{\proj_2(\gamma(e'))} e \in E \cap \sem{\omega(e')} :\\
-      &\quad\quad \proj_1(\rho(e)) \in \sem{\omega(\proj_1(\rho(e')))} \wedge \proj_2(\rho(e)) = n_2
+      &\forall e' \in E' \forall n_2 \in N \cap \sem{\omega(\trg(\rho(e')))}\\
+      &\quad\exists^{\trg(\gamma(e'))} e \in E \cap \sem{\omega(e')} :\\
+      &\quad\quad \src(\rho(e)) \in \sem{\omega(\src(\rho(e')))} \wedge \trg(\rho(e)) = n_2
     \end{align*}
   \end{enumerate}
 \end{definition}
