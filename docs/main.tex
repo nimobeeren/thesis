@@ -156,14 +156,13 @@ In the following, we will relax this requirement and introduce more general cons
 
 We first introduce a generalization of the existential quantifier, which enables counting the number of distinct variables that satisfy a predicate.
 
-% TODO: use dots to denote ranges and * instead of \infty
 \begin{definition}[Counting quantifier]
   The \emph{counting quantifier} is defined as follows. Given two numbers $n, m \in \N$, a predicate $P$, and a set $X$, define
   \begin{itemize}
     \item $\exists^{\geq n} x \in X : P(x) \equiv \exists x_1, x_2, \ldots, x_n \in X : P(x_1) \wedge \ldots \wedge P(x_n) \wedge \forall 1 \leq i < j \leq n : x_i \neq x_j$;
     \item $\exists^{\leq n} x \in X : P(x) \equiv \exists x_1, \ldots, x_n, x_{n+1}, \ldots, x_k \in X : P(x) \implies \forall n < i < j \leq k : x_i = x_j$;
-    \item $\exists^{(n, m)} x \in X : P(x) \equiv \exists^{\geq n} x \in X : P(x) \wedge \exists^{\leq m} x' \in X : P(x')$; and
-    \item $\exists^{(n, \infty)} x \in X : P(x) \equiv \exists^{\geq n} x \in X : P(x)$.
+    \item $\exists^{n..m} x \in X : P(x) \equiv \exists^{\geq n} x \in X : P(x) \wedge \exists^{\leq m} x' \in X : P(x')$; and
+    \item $\exists^{n..*} x \in X : P(x) \equiv \exists^{\geq n} x \in X : P(x)$.
   \end{itemize}
 \end{definition}
 
@@ -177,7 +176,7 @@ To enable more general cardinality constraints on edges, we revise the definitio
     \item $\rho : E \to (N \times N)$ is a total function mapping schema edges to ordered pairs of schema nodes;
     \item $\omega : (N \cup E) \to \otypes$ is a total function mapping schema objects to object types;
     % TODO: let gamma map edges to an ordered pair of cardinality constraints
-    \item $\gamma : (N \times E) \pto (\N \times \N^\infty)$ is a partial function mapping some pairs of schema nodes and schema edges to cardinality constraints, where $\N$ is defined as $\{0, 1, 2, \ldots\}$ and $\N^\infty$ is defined as $\N \cup \{\infty\}$;
+    \item $\gamma : (N \times E) \pto \{n..m \mid n \in \N, m \in \N^*\}$ is a partial function mapping some pairs of schema nodes and schema edges to cardinality constraints, where $\N$ is defined as $\{0, 1, 2, \ldots\}$ and $\N^*$ is defined as $\N \cup \{*\}$;
   \end{itemize}
 
   % TODO: add some explanation on what a "cardinality constraint" is
