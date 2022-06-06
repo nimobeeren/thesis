@@ -22,15 +22,18 @@
 }
 \makeatother
 
+% Projection operator
+\newcommand{\proj}{\mathrm{proj}}
+
 % Schema elements
 \newcommand{\ptype}{\tau}
 \newcommand{\ptypes}{\mathcal{T}}
-\newcommand{\rtype}{\tau^r}
-\newcommand{\rtypes}{\mathcal{T}^r}
-\newcommand{\otype}{\tau^o}
-\newcommand{\otypes}{\mathcal{T}^o}
-\newcommand{\gtype}{\tau^g}
-\newcommand{\gtypes}{\mathcal{T}^g}
+\newcommand{\rtype}{\tau^\mathsf{r}}
+\newcommand{\rtypes}{\mathcal{T}^\mathsf{r}}
+\newcommand{\otype}{\tau^\mathsf{o}}
+\newcommand{\otypes}{\mathcal{T}^\mathsf{o}}
+\newcommand{\gtype}{\tau^\mathsf{g}}
+\newcommand{\gtypes}{\mathcal{T}^\mathsf{g}}
 
 % Semantics (double brackets)
 \newcommand{\lsem}{\ensuremath{[\![}}
@@ -69,6 +72,8 @@ We postulate the following countably infinite sets: the set of labels $\mathcal{
 \end{definition}
 
 Given a node $n$, the set of (directed) \emph{outgoing} edges is given by $\{e \in E_d \mid \exists n' \in N : \rho_d(e) = (n, n')\}$, and the set of (directed) \emph{incoming} edges is given by $\{e \in E_d \mid \exists n' \in N : \rho_d(e) = (n', n)\}$. We use the umbrella term \emph{objects} to refer to nodes and edges.
+
+The $j^\text{th}$ \emph{projection map}, written $\proj_j$, maps a tuple $\bar{x} = (x_1, \ldots, x_j, \ldots, x_k)$ to the value $\proj_j(\bar{x}) = x_j$.
 
 \section{Property Graph Schemas}
 
@@ -112,7 +117,6 @@ We postulate the set of property types $\mathcal{T}$.
 
 The similarity between property graph types and property graphs is intentional. This allows us to visualize them in a similar ways, and to use the same mental model to think about them. Indeed, a property graph type can be simulated by a property graph if we allow properties to take property types as values, i.e. $\ptypes \subseteq \mathcal{V}$. Then we let $\lambda$ and $\pi$ take the role of $\omega$, in the sense that $\lambda(o) = L$ and $\pi(o) = \rtype$ if $\omega(o) = (L, \rtype)$ for all objects $o$ in the property graph.
 
-% TODO: mirror the changes on later definition of PG conformance
 \begin{definition}[Property graph conformance]
   We say that a property graph \[G = (N, E_d, E_u, \rho_d, \rho_u, \lambda, \pi)\] \emph{conforms} to a property graph type \[\gtype = (N', E_d', E_u', \rho_d', \rho_u', \omega)\] if and only if all of the following rules hold.
 
@@ -128,35 +132,35 @@ The similarity between property graph types and property graphs is intentional. 
     \begin{align*}
       &\forall e \in E_d \exists e' \in E_d'\\
       &\quad e \in \sem{\omega(e')}\\
-      &\quad\wedge \Pi_1(\rho_d(e)) \in \sem{\omega(\Pi_1(\rho_d'(e')))}\\
-      &\quad\wedge \Pi_2(\rho_d(e)) \in \sem{\omega(\Pi_2(\rho_d'(e')))}
+      &\quad\quad\wedge \proj_1(\rho_d(e)) \in \sem{\omega(\proj_1(\rho_d'(e')))}\\
+      &\quad\quad\wedge \proj_2(\rho_d(e)) \in \sem{\omega(\proj_2(\rho_d'(e')))}
     \end{align*}
 
-    % FIXME: \Pi on a set does not make sense
+    % TODO: get rid of undirected edges
+    % FIXME: \proj on a set does not make sense
     \item The vocabulary for undirected edges:
     \begin{align*}
       &\forall e \in E_u \exists e' \in E_u'\\
       &\quad e \in \sem{\omega(e')}\\
-      &\quad\wedge \Pi_1(\rho_u(e)) \in \sem{\omega(\Pi_1(\rho_u'(e')))}\\
-      &\quad\wedge \Pi_2(\rho_u(e)) \in \sem{\omega(\Pi_2(\rho_u'(e')))}
+      &\quad\quad\wedge \proj_1(\rho_u(e)) \in \sem{\omega(\proj_1(\rho_u'(e')))}\\
+      &\quad\quad\wedge \proj_2(\rho_u(e)) \in \sem{\omega(\proj_2(\rho_u'(e')))}
     \end{align*}
     
     \item Outgoing directed edges are mandatory:
     \begin{align*}
-      &\forall e' \in E_d' \forall n'_1, n'_2 \in N'\\
-      &\quad\rho_d'(e') = (n'_1, n'_2)\\
-      &\quad\quad\implies {} \forall n_1 \in N \cap \sem{\omega(n'_1)} \exists e \in E_u \cap \sem{\omega(e')} \exists n_2 \in N \cap \sem{\omega(n'_2)}\\
-      &\quad\quad\quad\quad\quad\quad\rho_d(e) = (n_1, n_2)
+      &\forall e' \in E_d' \forall n_1 \in N \cap \sem{\omega(\proj_1(\rho_d(e')))}\\
+      &\quad\exists e \in E_u \cap \sem{\omega(e')}\\
+      &\quad\quad \proj_1(\rho_d(e)) = n_1 \wedge \proj_2(\rho_d(e)) \in \sem{\omega(\proj_2(\rho_d(e')))}
     \end{align*}
 
     \item Incoming directed edges are mandatory:
     \begin{align*}
-      &\forall e' \in E_d' \forall n'_1, n'_2 \in N'\\
-      &\quad\rho_d'(e') = (n'_1, n'_2)\\
-      &\quad\quad\implies {} \forall n_2 \in N \cap \sem{\omega(n'_2)} \exists e \in E_u \cap \sem{\omega(e')} \exists n_1 \in N \cap \sem{\omega(n'_1)}\\
-      &\quad\quad\quad\quad\quad\quad\rho_d(e) = (n_1, n_2)
+      &\forall e' \in E_d' \forall n_2 \in N \cap \sem{\omega(\proj_2(\rho_d(e')))}\\
+      &\quad\exists e \in E_u \cap \sem{\omega(e')}\\
+      &\quad\quad \proj_1(\rho_d(e)) \in \sem{\omega(\proj_1(\rho_d(e')))} \wedge \proj_2(\rho_d(e)) = n_2
     \end{align*}
     
+    % TODO: get rid of undirected edges
     \item Undirected edges are mandatory:
     \begin{align*}
       &\forall e' \in E_u' \forall n'_1, n'_2 \in N'\\
@@ -216,9 +220,12 @@ To enable more general cardinality constraints on edges, we revise the definitio
     \item The vocabulary for directed edges:
     \begin{align*}
       &\forall e \in E_d \exists e' \in E_d'\\
-      &\quad e \in \sem{\omega(e')}
+      &\quad e \in \sem{\omega(e')}\\
+      &\quad\quad\wedge \proj_1(\rho_d(e)) \in \sem{\omega(\proj_1(\rho_d'(e')))}\\
+      &\quad\quad\wedge \proj_2(\rho_d(e)) \in \sem{\omega(\proj_2(\rho_d'(e')))}
     \end{align*}
 
+    % TODO: get rid of undirected edges
     \item The vocabulary for undirected edges:
     \begin{align*}
       &\forall e \in E_u \exists e' \in E_u'\\
@@ -227,20 +234,19 @@ To enable more general cardinality constraints on edges, we revise the definitio
     
     \item Cardinality constraints on outgoing directed edges:
     \begin{align*}
-      &\forall e' \in E_d' \forall n'_1, n'_2 \in N'\\
-      &\quad\rho_d'(e') = (n'_1, n'_2)\\
-      &\quad\quad\implies {} \forall n_1 \in N \cap \sem{\omega(n'_1)} \exists^{\gamma(n'_1, e')} e \in E_u \cap \sem{\omega(e')} \exists n_2 \in N \cap \sem{\omega(n'_2)}\\
-      &\quad\quad\quad\quad\quad\quad\rho_d(e) = (n_1, n_2)
+      &\forall e' \in E_d' \forall n_1 \in N \cap \sem{\omega(\proj_1(\rho_d(e')))}\\
+      &\quad\exists^{\gamma(n'_1, e')} e \in E_u \cap \sem{\omega(e')}\\
+      &\quad\quad \proj_1(\rho_d(e)) = n_1 \wedge \proj_2(\rho_d(e)) \in \sem{\omega(\proj_2(\rho_d(e')))}
     \end{align*}
 
     \item Cardinality constraints on incoming directed edges:
     \begin{align*}
-      &\forall e' \in E_d' \forall n'_1, n'_2 \in N'\\
-      &\quad\rho_d'(e') = (n'_1, n'_2)\\
-      &\quad\quad\implies {} \forall n_2 \in N \cap \sem{\omega(n'_2)} \exists^{\gamma(n'_2, e')} e \in E_u \cap \sem{\omega(e')} \exists n_1 \in N \cap \sem{\omega(n'_1)}\\
-      &\quad\quad\quad\quad\quad\quad\rho_d(e) = (n_1, n_2)
+      &\forall e' \in E_d' \forall n_2 \in N \cap \sem{\omega(\proj_2(\rho_d(e')))}\\
+      &\quad\exists^{\gamma(n'_2, e')} e \in E_u \cap \sem{\omega(e')}\\
+      &\quad\quad \proj_1(\rho_d(e)) \in \sem{\omega(\proj_1(\rho_d(e')))} \wedge \proj_2(\rho_d(e)) = n_2
     \end{align*}
     
+    % TODO: get rid of undirected edges
     \item Cardinality constraints on undirected edges:
     \begin{align*}
       &\forall e' \in E_u' \forall n'_1, n'_2 \in N'\\
@@ -284,14 +290,14 @@ It may be desirable to allow a record to have properties with any name or any va
 
 Under these definitions, it is not possible to specify constraints over a graph pattern larger than two neighboring nodes and the edge between them. For example, we cannot express that if a \texttt{Person} node has an outgoing edge \texttt{OWNS} to a \texttt{Car} node, then that \texttt{Person} node must have an outgoing edge \texttt{HAS} to a \texttt{DriversLicense} node. Such a pattern consists of three nodes (\texttt{Person}, \texttt{Car}, \texttt{DriversLicense}) and two edges (\texttt{OWNS}, \texttt{HAS}).
 
-Alternatively, we can have two \texttt{Person} nodes, where one requires having a \texttt{DriversLicense} and allows owning 0 or more \texttt{Car}s, and the other does not allow owning a \texttt{Car}. This would indeed prevent a situation where a \texttt{Person} owns a \texttt{Car}, but does not have a \texttt{DriversLicense}.
+Alternatively, we can have two \texttt{Person} nodes, where one requires having a \texttt{DriversLicense} and allows owning 0 or more \texttt{Car}s, and the other does not allow owning a \texttt{Car}. This would indeed prevent a situation where a \texttt{Person} owns a \texttt{Car}, but does not have a \texttt{DriversLicense}. However, ...
 
 % However, this breaks down when we add constraints that depend on the uniqueness of a \texttt{Person}. For example, say we want to model that a Person has exactly one Passport, and every Passport is associated with exactly one Person.
 % FIXME: actually, this seems possible, as long as everything is the same for both Person nodes
 
 % Node with any label: create a node for every combination of labels (but then we can't express there should be an edge to "at least one" of them). Solution: union types? Look into type theory again
 
-Under these definitions, it is not possible to have a single object type that allows two different label sets. Hence, it is not possible to have optional labels, i.e. the object type $\otype = (\{\texttt{Vehicle}, \texttt{Car}\}, \langle \texttt{make} : \texttt{string} \rangle)$ requires that the labels \texttt{Vehicle} and \texttt{Car} are both present, just having \texttt{Car} is not enough. Of course, it is possible to have two schema objects like $\otype_1 = (\{\texttt{Car}\}, \langle \texttt{make} : \texttt{string} \rangle)$ and $\otype_2 = (\{\texttt{Vehicle}, \texttt{Car}\}, \langle \texttt{make} : \texttt{string} \rangle)$. However, then it is not possible to specify that every \texttt{Employee} must have exactly one outgoing \texttt{OWNS} edge to a node conforming to either $\otype_1$ or $\otype_2$.
+Furthermore, it is not possible to have a single object type that allows two different label sets. Hence, it is not possible to have optional labels, i.e. the object type $\otype = (\{\texttt{Vehicle}, \texttt{Car}\}, \langle \texttt{make} : \texttt{string} \rangle)$ requires that the labels \texttt{Vehicle} and \texttt{Car} are both present, just having \texttt{Car} is not enough. Of course, it is possible to have two schema objects like $\otype_1 = (\{\texttt{Car}\}, \langle \texttt{make} : \texttt{string} \rangle)$ and $\otype_2 = (\{\texttt{Vehicle}, \texttt{Car}\}, \langle \texttt{make} : \texttt{string} \rangle)$. However, then it is not possible to specify that every \texttt{Employee} must have exactly one outgoing \texttt{OWNS} edge to a node conforming to either $\otype_1$ or $\otype_2$.
 
 % TODO: In general, it's not possible to say that an object must conform to type 1 OR type 2 (union type). Problem with labels follows from that. But also union of two records is not possible.
 
