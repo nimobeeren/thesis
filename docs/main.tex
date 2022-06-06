@@ -111,46 +111,45 @@ We postulate the set of property types $\mathcal{T}$.
   \end{itemize}
 \end{definition}
 
-The similarity between property graph types and property graphs is intentional. This allows us to visualize them in a similar ways, and to use the same mental model to think about them. Indeed, a property graph type can be simulated by a property graph if we allow properties to take property types as values, i.e. $\ptypes \subseteq \mathcal{V}$. Then we let $\lambda$ and $\pi$ take the role of $\omega$, in the sense that $\lambda(o) = L$ and $\pi(o) = \rtype$ if $\omega(o) = (L, \rtype)$ for all objects $o$ in the property graph.
+We may informally say that an object $o$ conforms to a schema object $o'$, by which we mean that $o \in \sem{\omega(o')}$.
+
+The similarity between property graph types and property graphs is intentional. This allows us to visualize them in a similar ways, and to use the same mental model to think about them. In fact, a property graph type can be simulated by a property graph if we allow properties to take property types as values, i.e. $\ptypes \subseteq \mathcal{V}$. Then we let $\lambda$ and $\pi$ take the role of $\omega$, in the sense that $\lambda(o) = L$ and $\pi(o) = \rtype$ if $\omega(o) = (L, \rtype)$ for all objects $o$ in the property graph.
 
 \begin{definition}[Property graph conformance]
   Given a property graph $$G = (N, E, \rho, \lambda, \pi)$$ and a property graph type $$\gtype = (N', E', \rho', \omega)$$ we say that $G$ \emph{conforms} to $\gtype$ if and only if all of the following rules hold.
 
-  % TODO: don't like this "vocabulary" word
   \begin{enumerate}
-    \item The vocabulary for nodes:
+    \item Every node conforms to a schema node:
     \begin{align*}
-      &\forall n \in N \exists n' \in N'\\
+      &\forall n \in N \exists n' \in N' :\\
       &\quad n \in \sem{\omega(n')}
     \end{align*}
     
-    \item The vocabulary for edges:
+    \item Every edge conforms to a schema edge, and the endpoints conform respectively:
     \begin{align*}
-      &\forall e \in E \exists e' \in E'\\
+      &\forall e \in E \exists e' \in E' :\\
       &\quad e \in \sem{\omega(e')}\\
       &\quad\quad\wedge \proj_1(\rho(e)) \in \sem{\omega(\proj_1(\rho'(e')))}\\
       &\quad\quad\wedge \proj_2(\rho(e)) \in \sem{\omega(\proj_2(\rho'(e')))}
     \end{align*}
     
-    \item Outgoing edges are mandatory:
+    \item If a node conforms to a schema node, it must have all the outgoing edges of the right type:
     \begin{align*}
       &\forall e' \in E' \forall n_1 \in N \cap \sem{\omega(\proj_1(\rho(e')))}\\
-      &\quad\exists e \in E \cap \sem{\omega(e')}\\
+      &\quad\exists e \in E \cap \sem{\omega(e')} :\\
       &\quad\quad \proj_1(\rho(e)) = n_1 \wedge \proj_2(\rho(e)) \in \sem{\omega(\proj_2(\rho(e')))}
     \end{align*}
 
-    \item Incoming edges are mandatory:
+    \item If a node conforms to a schema node, it must have all the incoming edges of the right type:
     \begin{align*}
       &\forall e' \in E' \forall n_2 \in N \cap \sem{\omega(\proj_2(\rho(e')))}\\
-      &\quad\exists e \in E \cap \sem{\omega(e')}\\
+      &\quad\exists e \in E \cap \sem{\omega(e')} :\\
       &\quad\quad \proj_1(\rho(e)) \in \sem{\omega(\proj_1(\rho(e')))} \wedge \proj_2(\rho(e)) = n_2
     \end{align*}
   \end{enumerate}
 \end{definition}
 
-Under these definitions, a schema edge requires that at least one conforming edge exists in the data graph. That is, if a schema node $n' \in N'$ has an incident edge $e'$ (i.e. an incoming or outgoing edge that $n'$ participates in), then any node $n \in N$ that conforms to $\omega(n')$ must also have at least one incident edge $e$ (in the same direction) that conforms to $\omega(e')$. Furthermore, the other endpoint of $e$ must conform to the object type associated with the other endpoint of the schema edge.
-
-In the following, we will relax this requirement and introduce a more general notion of cardinality constraints.
+Under these definitions, a schema edge requires that \emph{at least one} conforming edge exists in the property graph. That is, if a schema node has an incident edge (i.e. an incoming or outgoing edge that the schema node participates in), then any node that conforms to the schema node must also have at least one incident edge (in the same direction) that conforms to the schema edge. In the following, we will relax this requirement and introduce a more general notion of cardinality constraints.
 
 \subsection{Cardinality constraints}
 
@@ -187,31 +186,31 @@ Next, we allow cardinality constraints on edges by revising the definitions of p
   Given a property graph $$G = (N, E, \rho, \lambda, \pi)$$ and a property graph type $$\gtype = (N', E', \rho', \omega, \gamma)$$ we say that $G$ \emph{conforms} to $\gtype$ if and only if all of the following rules hold.
 
   \begin{enumerate}
-    \item The vocabulary for nodes:
+    \item Every node conforms to a schema node:
     \begin{align*}
-      &\forall n \in N \exists n' \in N'\\
+      &\forall n \in N \exists n' \in N' :\\
       &\quad n \in \sem{\omega(n')}
     \end{align*}
     
-    \item The vocabulary for edges:
+    \item Every edge conforms to a schema edge, and the endpoints conform respectively:
     \begin{align*}
-      &\forall e \in E \exists e' \in E'\\
+      &\forall e \in E \exists e' \in E' :\\
       &\quad e \in \sem{\omega(e')}\\
       &\quad\quad\wedge \proj_1(\rho(e)) \in \sem{\omega(\proj_1(\rho'(e')))}\\
       &\quad\quad\wedge \proj_2(\rho(e)) \in \sem{\omega(\proj_2(\rho'(e')))}
     \end{align*}
     
-    \item Cardinality constraints on outgoing edges:
+    \item If a node conforms to a schema node, it must have the right number of outgoing edges of the right type:
     \begin{align*}
       &\forall e' \in E' \forall n_1 \in N \cap \sem{\omega(\proj_1(\rho(e')))}\\
-      &\quad\exists^{\proj_1(\gamma(e'))} e \in E \cap \sem{\omega(e')}\\
+      &\quad\exists^{\proj_1(\gamma(e'))} e \in E \cap \sem{\omega(e')} :\\
       &\quad\quad \proj_1(\rho(e)) = n_1 \wedge \proj_2(\rho(e)) \in \sem{\omega(\proj_2(\rho(e')))}
     \end{align*}
 
-    \item Cardinality constraints on incoming edges:
+    \item If a node conforms to a schema node, it must have the right number of incoming edges of the right type:
     \begin{align*}
       &\forall e' \in E' \forall n_2 \in N \cap \sem{\omega(\proj_2(\rho(e')))}\\
-      &\quad\exists^{\proj_2(\gamma(e'))} e \in E \cap \sem{\omega(e')}\\
+      &\quad\exists^{\proj_2(\gamma(e'))} e \in E \cap \sem{\omega(e')} :\\
       &\quad\quad \proj_1(\rho(e)) \in \sem{\omega(\proj_1(\rho(e')))} \wedge \proj_2(\rho(e)) = n_2
     \end{align*}
   \end{enumerate}
