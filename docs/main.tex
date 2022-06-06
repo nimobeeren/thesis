@@ -58,20 +58,19 @@ We postulate the following countably infinite sets: the set of labels $\mathcal{
 \end{definition}
 
 \begin{definition}[Property graph]
-  A \emph{property graph} is a tuple \[G = (N, E_d, E_u, \rho_d, \rho_u, \lambda, \pi)\] where
+  A \emph{property graph} is a tuple $$G = (N, E, \rho, \lambda, \pi)$$ where
   \begin{itemize}
     \item $N$ is a finite set of nodes;
-    \item $E_d$ is a finite set of directed edges;
-    \item $E_u$ is a finite set of undirected edges;
-    \item $\rho_d : E_d \to (N \times N)$ is a total function mapping directed edges to ordered pairs of nodes;
-    \item $\rho_u : E_u \to \{\{u, v\} \mid u, v \in N\}$ is a total function mapping undirected edges to unordered pairs of nodes;
-    \item $\lambda : (N \cup E_d \cup E_u) \to 2^{\mathcal{L}}$ is a total function mapping nodes and edges to a (possibly empty) set of labels;
-    \item $\pi : (N \cup E_d \cup E_u) \to \mathcal{R}$ is a total function mapping nodes and edges to a record;
-    \item the sets $N$, $E_d$, $E_u$ are disjoint.
+    \item $E$ is a finite set of edges such that $N \cap E = \emptyset$;
+    \item $\rho : E \to (N \times N)$ is a total function mapping edges to ordered pairs of nodes;
+    \item $\lambda : (N \cup E) \to 2^{\mathcal{L}}$ is a total function mapping nodes and edges to a (possibly empty) set of labels;
+    \item $\pi : (N \cup E) \to \mathcal{R}$ is a total function mapping nodes and edges to a record.
   \end{itemize}
 \end{definition}
 
-Given a node $n$, the set of (directed) \emph{outgoing} edges is given by $\{e \in E_d \mid \exists n' \in N : \rho_d(e) = (n, n')\}$, and the set of (directed) \emph{incoming} edges is given by $\{e \in E_d \mid \exists n' \in N : \rho_d(e) = (n', n)\}$. We use the umbrella term \emph{objects} to refer to nodes and edges.
+Our notion of property graph is a directed \emph{multigraph}. That means there can be multiple edges between two nodes $u$ and $v$. Furthermore, we allow $u = v$, in which case the edge is called a \emph{self-loop}. Undirected edges are not allowed, but they could be simulated by attaching a special label or property to an edge.
+
+Given a node $u$, the set of \emph{outgoing} edges is given by $\{e \in E \mid \exists v \in N : \rho(e) = (u, v)\}$, and the set of \emph{incoming} edges is given by $\{e \in E \mid \exists v \in N : \rho(e) = (v, u)\}$. We use the umbrella term \emph{objects} to refer to nodes and edges.
 
 The $j^\text{th}$ \emph{projection map}, written $\proj_j$, maps a tuple $\bar{x} = (x_1, \ldots, x_j, \ldots, x_k)$ to the value $\proj_j(\bar{x}) = x_j$.
 
@@ -99,26 +98,23 @@ We postulate the set of property types $\mathcal{T}$.
 \end{definition}
 
 \begin{definition}[Object conformance]
-  Let $G = (N, E_d, E_u, \rho_d, \rho_u, \lambda, \pi)$ be a property graph and $\otype = (L, \rtype)$ an object type. The set of objects that \emph{conform} to $\otype$ is defined as $\sem{\otype} = \{o \in N \cup E_d \cup E_u \mid \lambda(o) = L \wedge \pi(o) \in \sem{\rtype}\}$.
+  Let $G = (N, E, \rho, \lambda, \pi)$ be a property graph and $\otype = (L, \rtype)$ an object type. The set of objects that \emph{conform} to $\otype$ is defined as $\sem{\otype} = \{o \in N \cup E \mid \lambda(o) = L \wedge \pi(o) \in \sem{\rtype}\}$.
 \end{definition}
 
 \begin{definition}[Property graph type]
-  A \emph{property graph type} is given by a tuple $\gtype = (N, E_d, E_u, \rho_d, \rho_u, \omega)$ where 
+  A \emph{property graph type} is given by a tuple $\gtype = (N, E, \rho, \omega)$ where 
   \begin{itemize}
     \item $N$ is a finite set of schema nodes;
-    \item $E_d$ is a finite set of directed schema edges;
-    \item $E_u$ is a finite set of undirected schema edges;
-    \item $\rho_d : E_d \to (N \times N)$ is a total function mapping directed schema edges to ordered pairs of schema nodes;
-    \item $\rho_u : E_u \to \{\{u, v\} \mid u, v \in N\}$ is a total function mapping undirected schema edges to unordered pairs of schema nodes;
-    \item $\omega : (N \cup E_d \cup E_u) \to \otypes$ is a total function mapping schema objects to object types;
-    \item the sets $N$, $E_d$ and $E_u$ are disjoint.
+    \item $E$ is a finite set of schema edges such that $N \cap E = \emptyset$;
+    \item $\rho : E \to (N \times N)$ is a total function mapping schema edges to ordered pairs of schema nodes;
+    \item $\omega : (N \cup E) \to \otypes$ is a total function mapping schema objects to object types;
   \end{itemize}
 \end{definition}
 
 The similarity between property graph types and property graphs is intentional. This allows us to visualize them in a similar ways, and to use the same mental model to think about them. Indeed, a property graph type can be simulated by a property graph if we allow properties to take property types as values, i.e. $\ptypes \subseteq \mathcal{V}$. Then we let $\lambda$ and $\pi$ take the role of $\omega$, in the sense that $\lambda(o) = L$ and $\pi(o) = \rtype$ if $\omega(o) = (L, \rtype)$ for all objects $o$ in the property graph.
 
 \begin{definition}[Property graph conformance]
-  We say that a property graph \[G = (N, E_d, E_u, \rho_d, \rho_u, \lambda, \pi)\] \emph{conforms} to a property graph type \[\gtype = (N', E_d', E_u', \rho_d', \rho_u', \omega)\] if and only if all of the following rules hold.
+  Given a property graph $$G = (N, E, \rho, \lambda, \pi)$$ and a property graph type $$\gtype = (N', E', \rho', \omega)$$ we say that $G$ \emph{conforms} to $\gtype$ if and only if all of the following rules hold.
 
   % TODO: don't like this "vocabulary" word
   \begin{enumerate}
@@ -128,55 +124,39 @@ The similarity between property graph types and property graphs is intentional. 
       &\quad n \in \sem{\omega(n')}
     \end{align*}
     
-    \item The vocabulary for directed edges:
+    \item The vocabulary for edges:
     \begin{align*}
-      &\forall e \in E_d \exists e' \in E_d'\\
+      &\forall e \in E \exists e' \in E'\\
       &\quad e \in \sem{\omega(e')}\\
-      &\quad\quad\wedge \proj_1(\rho_d(e)) \in \sem{\omega(\proj_1(\rho_d'(e')))}\\
-      &\quad\quad\wedge \proj_2(\rho_d(e)) \in \sem{\omega(\proj_2(\rho_d'(e')))}
-    \end{align*}
-
-    % TODO: get rid of undirected edges
-    % FIXME: \proj on a set does not make sense
-    \item The vocabulary for undirected edges:
-    \begin{align*}
-      &\forall e \in E_u \exists e' \in E_u'\\
-      &\quad e \in \sem{\omega(e')}\\
-      &\quad\quad\wedge \proj_1(\rho_u(e)) \in \sem{\omega(\proj_1(\rho_u'(e')))}\\
-      &\quad\quad\wedge \proj_2(\rho_u(e)) \in \sem{\omega(\proj_2(\rho_u'(e')))}
+      &\quad\quad\wedge \proj_1(\rho(e)) \in \sem{\omega(\proj_1(\rho'(e')))}\\
+      &\quad\quad\wedge \proj_2(\rho(e)) \in \sem{\omega(\proj_2(\rho'(e')))}
     \end{align*}
     
-    \item Outgoing directed edges are mandatory:
+    \item Outgoing edges are mandatory:
     \begin{align*}
-      &\forall e' \in E_d' \forall n_1 \in N \cap \sem{\omega(\proj_1(\rho_d(e')))}\\
-      &\quad\exists e \in E_u \cap \sem{\omega(e')}\\
-      &\quad\quad \proj_1(\rho_d(e)) = n_1 \wedge \proj_2(\rho_d(e)) \in \sem{\omega(\proj_2(\rho_d(e')))}
+      &\forall e' \in E' \forall n_1 \in N \cap \sem{\omega(\proj_1(\rho(e')))}\\
+      &\quad\exists e \in E \cap \sem{\omega(e')}\\
+      &\quad\quad \proj_1(\rho(e)) = n_1 \wedge \proj_2(\rho(e)) \in \sem{\omega(\proj_2(\rho(e')))}
     \end{align*}
 
-    \item Incoming directed edges are mandatory:
+    \item Incoming edges are mandatory:
     \begin{align*}
-      &\forall e' \in E_d' \forall n_2 \in N \cap \sem{\omega(\proj_2(\rho_d(e')))}\\
-      &\quad\exists e \in E_u \cap \sem{\omega(e')}\\
-      &\quad\quad \proj_1(\rho_d(e)) \in \sem{\omega(\proj_1(\rho_d(e')))} \wedge \proj_2(\rho_d(e)) = n_2
-    \end{align*}
-    
-    % TODO: get rid of undirected edges
-    \item Undirected edges are mandatory:
-    \begin{align*}
-      &\forall e' \in E_u' \forall n'_1, n'_2 \in N'\\
-      &\quad\rho_u'(e') = \{n'_1, n'_2\}\\
-      &\quad\quad\implies {} \forall n_1 \in N \cap \sem{\omega(n'_1)} \exists e \in E_u \cap \sem{\omega(e')} \exists n_2 \in N \cap \sem{\omega(n'_2)}\\
-      &\quad\quad\quad\quad\quad\quad\rho_u(e) = \{n_1, n_2\}
+      &\forall e' \in E' \forall n_2 \in N \cap \sem{\omega(\proj_2(\rho(e')))}\\
+      &\quad\exists e \in E \cap \sem{\omega(e')}\\
+      &\quad\quad \proj_1(\rho(e)) \in \sem{\omega(\proj_1(\rho(e')))} \wedge \proj_2(\rho(e)) = n_2
     \end{align*}
   \end{enumerate}
 \end{definition}
 
-Under these definitions, all edges in the schema are mandatory. That is, if a schema node $n' \in N'$ has an incident edge $e'$ (i.e. an incoming, outgoing, or undirected edge that $n'$ participates in), then any node $n \in N$ that conforms to $\omega(n')$ must also have one or more incident edges $e$ (in the same direction) that conform to $\omega(e')$. Furthermore, the other endpoint of $e$ must conform to the object type associated with the other endpoint of the schema edge. In the following, we will relax this requirement and introduce more general constraints on cardinality.
+Under these definitions, a schema edge requires that at least one conforming edge exists in the data graph. That is, if a schema node $n' \in N'$ has an incident edge $e'$ (i.e. an incoming or outgoing edge that $n'$ participates in), then any node $n \in N$ that conforms to $\omega(n')$ must also have at least one incident edge $e$ (in the same direction) that conforms to $\omega(e')$. Furthermore, the other endpoint of $e$ must conform to the object type associated with the other endpoint of the schema edge.
+
+In the following, we will relax this requirement and introduce more general constraints on cardinality.
 
 \subsection{Cardinality constraints}
 
 We first introduce a generalization of the existential quantifier, which enables counting the number of distinct variables that satisfy a predicate.
 
+% TODO: use dots to denote ranges and * instead of \infty
 \begin{definition}[Counting quantifier]
   The \emph{counting quantifier} is defined as follows. Given two numbers $n, m \in \N$, a predicate $P$, and a set $X$, define
   \begin{itemize}
@@ -190,25 +170,23 @@ We first introduce a generalization of the existential quantifier, which enables
 To enable more general cardinality constraints on edges, we revise the definitions of property graph type and property graph conformance.
 
 \begin{definition}[Property graph type]
-  A \emph{property graph type} is a tuple \[\gtype = (N, E_d, E_u, \rho_d, \rho_u, \omega, \gamma)\] where
+  A \emph{property graph type} is a tuple $$\gtype = (N, E, \rho, \omega, \gamma)$$ where
   \begin{itemize}
     \item $N$ is a finite set of schema nodes;
-    \item $E_d$ is a finite set of directed schema edges;
-    \item $E_u$ is a finite set of undirected schema edges;
-    \item $\rho_d : E_d \to (N \times N)$ is a total function mapping directed schema edges to ordered pairs of schema nodes;
-    \item $\rho_u : E_u \to \{\{u, v\} \mid u, v \in N\}$ is a total function mapping undirected schema edges to unordered pairs of schema nodes;
-    \item $\omega : (N \cup E_d \cup E_u) \to \otypes$ is a total function mapping schema objects to object types;
-    \item $\gamma : (N \times (E_d \cup E_u)) \pto (\N \times \N^\infty)$ is a partial function mapping some pairs of schema nodes and schema edges to cardinality constraints, where $\N$ is defined as $\{0, 1, 2, \ldots\}$ and $\N^\infty$ is defined as $\N \cup \{\infty\}$;
-    \item the sets $N$, $E_d$, $E_u$ are disjoint.
+    \item $E$ is a finite set of schema edges such that $N \cap E = \emptyset$;
+    \item $\rho : E \to (N \times N)$ is a total function mapping schema edges to ordered pairs of schema nodes;
+    \item $\omega : (N \cup E) \to \otypes$ is a total function mapping schema objects to object types;
+    % TODO: let gamma map edges to an ordered pair of cardinality constraints
+    \item $\gamma : (N \times E) \pto (\N \times \N^\infty)$ is a partial function mapping some pairs of schema nodes and schema edges to cardinality constraints, where $\N$ is defined as $\{0, 1, 2, \ldots\}$ and $\N^\infty$ is defined as $\N \cup \{\infty\}$;
   \end{itemize}
 
   % TODO: add some explanation on what a "cardinality constraint" is
 
-  Given a node $n \in N$ and an edge $e \in E_d \cup E_u$, we assume that $\gamma(n, e)$ is defined if and only if $n$ \emph{participates} in $e$. That is to say that there exists a node $n' \in N$ such that $\rho_d(e) = (n, n')$ or $\rho_d(e) = (n', n)$ or $\rho_u(e) = \{n, n'\}$.
+  Given a node $n \in N$ and an edge $e \in E$, we assume that $\gamma(n, e)$ is defined if and only if $n$ \emph{participates} in $e$. That is to say that there exists a node $n' \in N$ such that $\rho(e) = (n, n')$ or $\rho(e) = (n', n)$.
 \end{definition}
 
 \begin{definition}[Property graph conformance]
-  We say that a property graph \[G = (N, E_d, E_u, \rho_d, \rho_u, \lambda, \pi)\] \emph{conforms} to a property graph type \[\gtype = (N', E_d', E_u', \rho_d', \rho_u', \omega, \gamma)\] if and only if all of the following rules hold.
+  Given a property graph $$G = (N, E, \rho, \lambda, \pi)$$ and a property graph type $$\gtype = (N', E', \rho', \omega, \gamma)$$ we say that $G$ \emph{conforms} to $\gtype$ if and only if all of the following rules hold.
 
   \begin{enumerate}
     \item The vocabulary for nodes:
@@ -217,42 +195,26 @@ To enable more general cardinality constraints on edges, we revise the definitio
       &\quad n \in \sem{\omega(n')}
     \end{align*}
     
-    \item The vocabulary for directed edges:
+    \item The vocabulary for edges:
     \begin{align*}
-      &\forall e \in E_d \exists e' \in E_d'\\
+      &\forall e \in E \exists e' \in E'\\
       &\quad e \in \sem{\omega(e')}\\
-      &\quad\quad\wedge \proj_1(\rho_d(e)) \in \sem{\omega(\proj_1(\rho_d'(e')))}\\
-      &\quad\quad\wedge \proj_2(\rho_d(e)) \in \sem{\omega(\proj_2(\rho_d'(e')))}
-    \end{align*}
-
-    % TODO: get rid of undirected edges
-    \item The vocabulary for undirected edges:
-    \begin{align*}
-      &\forall e \in E_u \exists e' \in E_u'\\
-      &\quad e \in \sem{\omega(e')}
+      &\quad\quad\wedge \proj_1(\rho(e)) \in \sem{\omega(\proj_1(\rho'(e')))}\\
+      &\quad\quad\wedge \proj_2(\rho(e)) \in \sem{\omega(\proj_2(\rho'(e')))}
     \end{align*}
     
-    \item Cardinality constraints on outgoing directed edges:
+    \item Cardinality constraints on outgoing edges:
     \begin{align*}
-      &\forall e' \in E_d' \forall n_1 \in N \cap \sem{\omega(\proj_1(\rho_d(e')))}\\
-      &\quad\exists^{\gamma(n'_1, e')} e \in E_u \cap \sem{\omega(e')}\\
-      &\quad\quad \proj_1(\rho_d(e)) = n_1 \wedge \proj_2(\rho_d(e)) \in \sem{\omega(\proj_2(\rho_d(e')))}
+      &\forall e' \in E' \forall n_1 \in N \cap \sem{\omega(\proj_1(\rho(e')))}\\
+      &\quad\exists^{\gamma(n'_1, e')} e \in E \cap \sem{\omega(e')}\\
+      &\quad\quad \proj_1(\rho(e)) = n_1 \wedge \proj_2(\rho(e)) \in \sem{\omega(\proj_2(\rho(e')))}
     \end{align*}
 
-    \item Cardinality constraints on incoming directed edges:
+    \item Cardinality constraints on incoming edges:
     \begin{align*}
-      &\forall e' \in E_d' \forall n_2 \in N \cap \sem{\omega(\proj_2(\rho_d(e')))}\\
-      &\quad\exists^{\gamma(n'_2, e')} e \in E_u \cap \sem{\omega(e')}\\
-      &\quad\quad \proj_1(\rho_d(e)) \in \sem{\omega(\proj_1(\rho_d(e')))} \wedge \proj_2(\rho_d(e)) = n_2
-    \end{align*}
-    
-    % TODO: get rid of undirected edges
-    \item Cardinality constraints on undirected edges:
-    \begin{align*}
-      &\forall e' \in E_u' \forall n'_1, n'_2 \in N'\\
-      &\quad\rho_u'(e') = \{n'_1, n'_2\}\\
-      &\quad\quad\implies {} \forall n_1 \in N \cap \sem{\omega(n'_1)} \exists^{\gamma(n'_1, e')} e \in E_u \cap \sem{\omega(e')} \exists n_2 \in N \cap \sem{\omega(n'_2)}\\
-      &\quad\quad\quad\quad\quad\quad\rho_u(e) = \{n_1, n_2\}
+      &\forall e' \in E' \forall n_2 \in N \cap \sem{\omega(\proj_2(\rho(e')))}\\
+      &\quad\exists^{\gamma(n'_2, e')} e \in E \cap \sem{\omega(e')}\\
+      &\quad\quad \proj_1(\rho(e)) \in \sem{\omega(\proj_1(\rho(e')))} \wedge \proj_2(\rho(e)) = n_2
     \end{align*}
   \end{enumerate}
 \end{definition}
