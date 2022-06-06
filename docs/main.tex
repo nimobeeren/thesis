@@ -107,7 +107,7 @@ We postulate the set of property types $\mathcal{T}$.
     \item $N$ is a finite set of schema nodes;
     \item $E$ is a finite set of schema edges such that $N \cap E = \emptyset$;
     \item $\rho : E \to (N \times N)$ is a total function mapping schema edges to ordered pairs of schema nodes;
-    \item $\omega : (N \cup E) \to \otypes$ is a total function mapping schema objects to object types;
+    \item $\omega : (N \cup E) \to \otypes$ is a total function mapping schema objects to object types.
   \end{itemize}
 \end{definition}
 
@@ -150,11 +150,11 @@ The similarity between property graph types and property graphs is intentional. 
 
 Under these definitions, a schema edge requires that at least one conforming edge exists in the data graph. That is, if a schema node $n' \in N'$ has an incident edge $e'$ (i.e. an incoming or outgoing edge that $n'$ participates in), then any node $n \in N$ that conforms to $\omega(n')$ must also have at least one incident edge $e$ (in the same direction) that conforms to $\omega(e')$. Furthermore, the other endpoint of $e$ must conform to the object type associated with the other endpoint of the schema edge.
 
-In the following, we will relax this requirement and introduce more general constraints on cardinality.
+In the following, we will relax this requirement and introduce a more general notion of cardinality constraints.
 
 \subsection{Cardinality constraints}
 
-We first introduce a generalization of the existential quantifier, which enables counting the number of distinct variables that satisfy a predicate.
+We first introduce a generalization of the existential quantifier which enables counting the number of distinct variables that satisfy a predicate.
 
 \begin{definition}[Counting quantifier]
   The \emph{counting quantifier} is defined as follows. Given two numbers $n, m \in \N$, a predicate $P$, and a set $X$, define
@@ -166,7 +166,11 @@ We first introduce a generalization of the existential quantifier, which enables
   \end{itemize}
 \end{definition}
 
-To enable more general cardinality constraints on edges, we revise the definitions of property graph type and property graph conformance.
+Next, we allow cardinality constraints on edges by revising the definitions of property graph type and property graph conformance.
+
+\begin{definition}[Cardinality constraint]
+  A \emph{cardinality constraint} is an ordered pair of intervals $(n_1..m_1, \, n_2..m_2)$ where $n_1, n_2 \in \N$ and $m_1, m_2 \in \N^*$ with $\N = \{0, 1, 2, \ldots\}$ and $\N^* = \N \cup \{*\}$. The set of all cardinality constraints is denoted as $\mathcal{C}$.
+\end{definition}
 
 \begin{definition}[Property graph type]
   A \emph{property graph type} is a tuple $$\gtype = (N, E, \rho, \omega, \gamma)$$ where
@@ -175,13 +179,8 @@ To enable more general cardinality constraints on edges, we revise the definitio
     \item $E$ is a finite set of schema edges such that $N \cap E = \emptyset$;
     \item $\rho : E \to (N \times N)$ is a total function mapping schema edges to ordered pairs of schema nodes;
     \item $\omega : (N \cup E) \to \otypes$ is a total function mapping schema objects to object types;
-    % TODO: let gamma map edges to an ordered pair of cardinality constraints
-    \item $\gamma : (N \times E) \pto \{n..m \mid n \in \N, m \in \N^*\}$ is a partial function mapping some pairs of schema nodes and schema edges to cardinality constraints, where $\N$ is defined as $\{0, 1, 2, \ldots\}$ and $\N^*$ is defined as $\N \cup \{*\}$;
+    \item $\gamma : E \to \mathcal{C}$ is a total function mapping schema edges to cardinality constraints.
   \end{itemize}
-
-  % TODO: add some explanation on what a "cardinality constraint" is
-
-  Given a node $n \in N$ and an edge $e \in E$, we assume that $\gamma(n, e)$ is defined if and only if $n$ \emph{participates} in $e$. That is to say that there exists a node $n' \in N$ such that $\rho(e) = (n, n')$ or $\rho(e) = (n', n)$.
 \end{definition}
 
 \begin{definition}[Property graph conformance]
@@ -205,14 +204,14 @@ To enable more general cardinality constraints on edges, we revise the definitio
     \item Cardinality constraints on outgoing edges:
     \begin{align*}
       &\forall e' \in E' \forall n_1 \in N \cap \sem{\omega(\proj_1(\rho(e')))}\\
-      &\quad\exists^{\gamma(n'_1, e')} e \in E \cap \sem{\omega(e')}\\
+      &\quad\exists^{\proj_1(\gamma(e'))} e \in E \cap \sem{\omega(e')}\\
       &\quad\quad \proj_1(\rho(e)) = n_1 \wedge \proj_2(\rho(e)) \in \sem{\omega(\proj_2(\rho(e')))}
     \end{align*}
 
     \item Cardinality constraints on incoming edges:
     \begin{align*}
       &\forall e' \in E' \forall n_2 \in N \cap \sem{\omega(\proj_2(\rho(e')))}\\
-      &\quad\exists^{\gamma(n'_2, e')} e \in E \cap \sem{\omega(e')}\\
+      &\quad\exists^{\proj_2(\gamma(e'))} e \in E \cap \sem{\omega(e')}\\
       &\quad\quad \proj_1(\rho(e)) \in \sem{\omega(\proj_1(\rho(e')))} \wedge \proj_2(\rho(e)) = n_2
     \end{align*}
   \end{enumerate}
