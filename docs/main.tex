@@ -178,18 +178,18 @@ Next, we allow cardinality constraints on edges by revising the definitions of p
 We also use the functions $\src$ and $\trg$ to refer to the first and second element of a cardinality constraint, i.e. $\src((n_1..m_1, \, n_2..m_2)) = n_1..m_1$ and $\trg((n_1..m_1, \, n_2..m_2)) = n_2..m_2$.
 
 \begin{definition}[Property graph type]
-  A \emph{property graph type} is a tuple $$\gtype = (N, E, \rho, \omega, \gamma)$$ where
+  A \emph{property graph type} is a tuple $$\gtype = (N, E, \rho, \omega, \eta)$$ where
   \begin{itemize}
     \item $N$ is a finite set of schema nodes;
     \item $E$ is a finite set of schema edges such that $N \cap E = \emptyset$;
     \item $\rho : E \to (N \times N)$ is a total function mapping schema edges to ordered pairs of schema nodes;
     \item $\omega : (N \cup E) \to \otypes$ is a total function mapping schema objects to object types;
-    \item $\gamma : E \to \mathcal{C}$ is a total function mapping schema edges to cardinality constraints.
+    \item $\eta : E \to \mathcal{C}$ is a total function mapping schema edges to cardinality constraints.
   \end{itemize}
 \end{definition}
 
 \begin{definition}[Property graph conformance]
-  Given a property graph $$G = (N, E, \rho, \lambda, \pi)$$ and a property graph type $$\gtype = (N', E', \rho', \omega, \gamma)$$ we say that $G$ \emph{conforms} to $\gtype$ if and only if all of the following rules hold.
+  Given a property graph $$G = (N, E, \rho, \lambda, \pi)$$ and a property graph type $$\gtype = (N', E', \rho', \omega, \eta)$$ we say that $G$ \emph{conforms} to $\gtype$ if and only if all of the following rules hold.
 
   \begin{enumerate}
     \item Every node conforms to a schema node:
@@ -209,14 +209,14 @@ We also use the functions $\src$ and $\trg$ to refer to the first and second ele
     \item If a node conforms to a schema node, it must have the right number of outgoing edges of the right type:
     \begin{align*}
       &\forall e' \in E' \forall n_1 \in N \cap \sem{\omega(\src(\rho(e')))}\\
-      &\quad\exists^{\src(\gamma(e'))} e \in E \cap \sem{\omega(e')} :\\
+      &\quad\exists^{\src(\eta(e'))} e \in E \cap \sem{\omega(e')} :\\
       &\quad\quad \src(\rho(e)) = n_1 \wedge \trg(\rho(e)) \in \sem{\omega(\trg(\rho(e')))}
     \end{align*}
 
     \item If a node conforms to a schema node, it must have the right number of incoming edges of the right type:
     \begin{align*}
       &\forall e' \in E' \forall n_2 \in N \cap \sem{\omega(\trg(\rho(e')))}\\
-      &\quad\exists^{\trg(\gamma(e'))} e \in E \cap \sem{\omega(e')} :\\
+      &\quad\exists^{\trg(\eta(e'))} e \in E \cap \sem{\omega(e')} :\\
       &\quad\quad \src(\rho(e)) \in \sem{\omega(\src(\rho(e')))} \wedge \trg(\rho(e)) = n_2
     \end{align*}
   \end{enumerate}
