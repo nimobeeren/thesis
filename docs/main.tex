@@ -122,29 +122,26 @@ The similarity between property graph types and property graphs is intentional. 
   \begin{enumerate}
     \item Every node conforms to a schema node:
     \begin{align*}
-      &\forall n \in N \exists n' \in N' :\\
+      &\forall n \in N \; \exists n' \in N' :\\
       &\quad n \in \sem{\omega(n')}
     \end{align*}
     
     \item Every edge conforms to a schema edge, and the endpoints conform respectively:
     \begin{align*}
-      &\forall e \in E \exists e' \in E' :\\
-      &\quad e \in \sem{\omega(e')}\\
-      &\quad\quad\wedge \src(\rho(e)) \in \sem{\omega(\src(\rho'(e')))}\\
+      &\forall e \in E \; \exists e' \in E' :\\
+      &\quad e \in \sem{\omega(e')} \wedge \src(\rho(e)) \in \sem{\omega(\src(\rho'(e')))}\\
       &\quad\quad\wedge \trg(\rho(e)) \in \sem{\omega(\trg(\rho'(e')))}
     \end{align*}
     
     \item If a node conforms to a schema node, it must have all the outgoing edges of the right type:
     \begin{align*}
-      &\forall e' \in E' \forall n_1 \in N \cap \sem{\omega(\src(\rho(e')))}\\
-      &\quad\exists e \in E \cap \sem{\omega(e')} :\\
+      &\forall e' \in E' \; \forall n_1 \in N \cap \sem{\omega(\src(\rho(e')))} \; \exists e \in E \cap \sem{\omega(e')} :\\
       &\quad\quad \src(\rho(e)) = n_1 \wedge \trg(\rho(e)) \in \sem{\omega(\trg(\rho(e')))}
     \end{align*}
 
     \item If a node conforms to a schema node, it must have all the incoming edges of the right type:
     \begin{align*}
-      &\forall e' \in E' \forall n_2 \in N \cap \sem{\omega(\trg(\rho(e')))}\\
-      &\quad\exists e \in E \cap \sem{\omega(e')} :\\
+      &\forall e' \in E' \; \forall n_2 \in N \cap \sem{\omega(\trg(\rho(e')))} \; \exists e \in E \cap \sem{\omega(e')} :\\
       &\quad\quad \src(\rho(e)) \in \sem{\omega(\src(\rho(e')))} \wedge \trg(\rho(e)) = n_2
     \end{align*}
   \end{enumerate}
@@ -191,29 +188,26 @@ We also use the functions $\src$ and $\trg$ to refer to the first and second int
   \begin{enumerate}
     \item Every node conforms to a schema node:
     \begin{align*}
-      &\forall n \in N \exists n' \in N' :\\
+      &\forall n \in N \; \exists n' \in N' :\\
       &\quad n \in \sem{\omega(n')}
     \end{align*}
     
     \item Every edge conforms to a schema edge, and the endpoints conform respectively:
     \begin{align*}
-      &\forall e \in E \exists e' \in E' :\\
-      &\quad e \in \sem{\omega(e')}\\
-      &\quad\quad\wedge \src(\rho(e)) \in \sem{\omega(\src(\rho'(e')))}\\
+      &\forall e \in E \; \exists e' \in E' :\\
+      &\quad e \in \sem{\omega(e')} \wedge \src(\rho(e)) \in \sem{\omega(\src(\rho'(e')))}\\
       &\quad\quad\wedge \trg(\rho(e)) \in \sem{\omega(\trg(\rho'(e')))}
     \end{align*}
     
     \item If a node conforms to a schema node, it must have the right number of outgoing edges of the right type:
     \begin{align*}
-      &\forall e' \in E' \forall n_1 \in N \cap \sem{\omega(\src(\rho(e')))}\\
-      &\quad\exists^{\src(\eta(e'))} e \in E \cap \sem{\omega(e')} :\\
+      &\forall e' \in E' \; \forall n_1 \in N \cap \sem{\omega(\src(\rho(e')))} \; \exists^{\src(\eta(e'))} e \in E \cap \sem{\omega(e')} :\\
       &\quad\quad \src(\rho(e)) = n_1 \wedge \trg(\rho(e)) \in \sem{\omega(\trg(\rho(e')))}
     \end{align*}
 
     \item If a node conforms to a schema node, it must have the right number of incoming edges of the right type:
     \begin{align*}
-      &\forall e' \in E' \forall n_2 \in N \cap \sem{\omega(\trg(\rho(e')))}\\
-      &\quad\exists^{\trg(\eta(e'))} e \in E \cap \sem{\omega(e')} :\\
+      &\forall e' \in E' \; \forall n_2 \in N \cap \sem{\omega(\trg(\rho(e')))} \; \exists^{\trg(\eta(e'))} e \in E \cap \sem{\omega(e')} :\\
       &\quad\quad \src(\rho(e)) \in \sem{\omega(\src(\rho(e')))} \wedge \trg(\rho(e)) = n_2
     \end{align*}
   \end{enumerate}
