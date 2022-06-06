@@ -22,11 +22,15 @@ async function validateNodes(session) {
  */
 async function validateEdges(session) {
   return await session.run(`
-    MATCH (:Data)-[dataEdge]->(:Data)
+    MATCH (dataSrcNode:Data)-[dataEdge]->(dataTrgNode:Data)
     WHERE NOT EXISTS {
-      MATCH (:Schema)-[schemaEdge]->(:Schema)
+      MATCH (schemaSrcNode:Schema)-[schemaEdge]->(schemaTrgNode:Schema)
       WHERE apoc.meta.types(dataEdge) = properties(schemaEdge)
       AND type(dataEdge) = type(schemaEdge)
+      AND apoc.meta.types(dataSrcNode) = properties(schemaSrcNode)
+      AND [label IN labels(dataSrcNode) WHERE label <> "Data"] = [label IN labels(schemaSrcNode) WHERE label <> "Schema"]
+      AND apoc.meta.types(dataTrgNode) = properties(schemaTrgNode)
+      AND [label IN labels(dataTrgNode) WHERE label <> "Data"] = [label IN labels(schemaTrgNode) WHERE label <> "Schema"]
     }
     RETURN dataEdge
   `);

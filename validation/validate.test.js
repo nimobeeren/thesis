@@ -89,10 +89,14 @@ test("graph conforms to schema", async () => {
 
 test("node is missing mandatory property", async () => {
   // Create the schema
-  await session.run(`CREATE (user:Schema:User { name: "STRING", age: "INTEGER" })`);
+  await session.run(
+    `CREATE (user:Schema:User { name: "STRING", age: "INTEGER" })`
+  );
 
   // Create the data
-  const dataResult = await session.run(`CREATE (user:Data:User { name: "Rose" }) RETURN user`);
+  const dataResult = await session.run(
+    `CREATE (user:Data:User { name: "Rose" }) RETURN user`
+  );
 
   const userNodeId = dataResult.records[0].get("user").identity;
 
@@ -207,4 +211,64 @@ test("node is missing outgoing edge", async () => {
   const violatingOutgoingEdges = await validateOutgoingEdges(session);
   expect(violatingOutgoingEdges.records).toHaveLength(1);
   expect(violatingOutgoingEdges.records[0].get(0).identity).toEqual(userNodeId);
+});
+
+test("edge has wrong target node", async () => {
+  // Create the schema
+  await session.run(`
+    CREATE (:Schema:User)-[:CREATED]->
+    (:Schema:Post)
+  `);
+
+  // Create the data
+  const dataResult = await session.run(`
+    CREATE (user:Data:User)-[:CREATED]->(:Data:Post),
+    (user)-[selfloop:CREATED]->(user)
+    RETURN selfloop
+  `);
+
+  const userNodeId = dataResult.records[0].get(0).identity;
+
+  const violatingNodes = await validateNodes(session);
+  expect(violatingNodes.records).toHaveLength(0);
+
+  const violatingEdges = await validateEdges(session);
+  expect(violatingEdges.records).toHaveLength(1);
+  expect(violatingEdges.records[0].get(0).identity).toEqual(userNodeId);
+
+  const violatingIncomingEdges = await validateIncomingEdges(session);
+  expect(violatingIncomingEdges.records).toHaveLength(0);
+
+  const violatingOutgoingEdges = await validateOutgoingEdges(session);
+  expect(violatingOutgoingEdges.records).toHaveLength(0);
+});
+
+test("edge has wrong source node", async () => {
+  // Create the schema
+  await session.run(`
+    CREATE (:Schema:User)-[:CREATED]->
+    (:Schema:Post)
+  `);
+
+  // Create the data
+  const dataResult = await session.run(`
+    CREATE (:Data:User)-[:CREATED]->(post:Data:Post),
+    (post)-[selfloop:CREATED]->(post)
+    RETURN selfloop
+  `);
+
+  const userNodeId = dataResult.records[0].get(0).identity;
+
+  const violatingNodes = await validateNodes(session);
+  expect(violatingNodes.records).toHaveLength(0);
+
+  const violatingEdges = await validateEdges(session);
+  expect(violatingEdges.records).toHaveLength(1);
+  expect(violatingEdges.records[0].get(0).identity).toEqual(userNodeId);
+
+  const violatingIncomingEdges = await validateIncomingEdges(session);
+  expect(violatingIncomingEdges.records).toHaveLength(0);
+
+  const violatingOutgoingEdges = await validateOutgoingEdges(session);
+  expect(violatingOutgoingEdges.records).toHaveLength(0);
 });
