@@ -22,8 +22,7 @@
 }
 \makeatother
 
-% Projection operator
-\newcommand{\proj}{\mathrm{proj}}
+% Source and target operators
 \newcommand{\src}{\mathtt{src}}
 \newcommand{\trg}{\mathtt{trg}}
 
@@ -73,8 +72,6 @@ We postulate the following countably infinite sets: the set of labels $\mathcal{
 Our notion of property graph is a directed \emph{multigraph}. That means there can be multiple edges between two nodes $u$ and $v$. Furthermore, we allow $u = v$, in which case the edge is called a \emph{self-loop}. Undirected edges are not allowed, but they could be simulated by attaching a special label or property to an edge.
 
 Given a node $u$, the set of \emph{outgoing} edges is given by $\{e \in E \mid \exists v \in N : \rho(e) = (u, v)\}$, and the set of \emph{incoming} edges is given by $\{e \in E \mid \exists v \in N : \rho(e) = (v, u)\}$. We use the umbrella term \emph{objects} to refer to nodes and edges.
-
-The $j^\text{th}$ \emph{projection map}, written $\proj_j$, maps a tuple $\bar{x} = (x_1, \ldots, x_j, \ldots, x_k)$ to the value $\proj_j(\bar{x}) = x_j$.
 
 The functions $\src$ and $\trg$ map pairs to their first and second element, i.e. $\src((u, v)) = u$ and $\trg((u, v)) = v$. To refer to the source and target \emph{endpoints} of an edge $e$, we write $\src(\rho(e))$ and $\trg(\rho(e))$, respectively.
 
@@ -175,7 +172,7 @@ Next, we allow cardinality constraints on edges by revising the definitions of p
   A \emph{cardinality constraint} is an ordered pair of intervals $(n_1..m_1, \, n_2..m_2)$ where $n_1, n_2 \in \N$ and $m_1, m_2 \in \N^*$ with $\N = \{0, 1, 2, \ldots\}$ and $\N^* = \N \cup \{*\}$. The set of all cardinality constraints is denoted as $\mathcal{C}$.
 \end{definition}
 
-We also use the functions $\src$ and $\trg$ to refer to the first and second element of a cardinality constraint, i.e. $\src((n_1..m_1, \, n_2..m_2)) = n_1..m_1$ and $\trg((n_1..m_1, \, n_2..m_2)) = n_2..m_2$.
+We also use the functions $\src$ and $\trg$ to refer to the first and second interval of a cardinality constraint, i.e. $\src((n_1..m_1, \, n_2..m_2)) = n_1..m_1$ and $\trg((n_1..m_1, \, n_2..m_2)) = n_2..m_2$.
 
 \begin{definition}[Property graph type]
   A \emph{property graph type} is a tuple $$\gtype = (N, E, \rho, \omega, \eta)$$ where
