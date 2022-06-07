@@ -216,8 +216,7 @@ test("node is missing outgoing edge", async () => {
 test("edge has wrong target node", async () => {
   // Create the schema
   await session.run(`
-    CREATE (:Schema:User)-[:CREATED]->
-    (:Schema:Post)
+    CREATE (:Schema:User)-[:CREATED]->(:Schema:Post)
   `);
 
   // Create the data
@@ -246,8 +245,7 @@ test("edge has wrong target node", async () => {
 test("edge has wrong source node", async () => {
   // Create the schema
   await session.run(`
-    CREATE (:Schema:User)-[:CREATED]->
-    (:Schema:Post)
+    CREATE (:Schema:User)-[:CREATED]->(:Schema:Post)
   `);
 
   // Create the data
@@ -265,6 +263,32 @@ test("edge has wrong source node", async () => {
   const violatingEdges = await validateEdges(session);
   expect(violatingEdges.records).toHaveLength(1);
   expect(violatingEdges.records[0].get(0).identity).toEqual(userNodeId);
+
+  const violatingIncomingEdges = await validateIncomingEdges(session);
+  expect(violatingIncomingEdges.records).toHaveLength(0);
+
+  const violatingOutgoingEdges = await validateOutgoingEdges(session);
+  expect(violatingOutgoingEdges.records).toHaveLength(0);
+});
+
+test("self-loops allow any edge between nodes of that type", async () => {
+  // Create the schema
+  await session.run(`
+    CREATE (user:Schema:User)-[:KNOWS]->(user)
+  `);
+
+  // Create the data
+  await session.run(`
+    CREATE (user1:Data:User)-[:KNOWS]->(user2:Data:User),
+    (user2)-[:KNOWS]->(user1),
+    (user2)-[:KNOWS]->(user2)
+  `);
+
+  const violatingNodes = await validateNodes(session);
+  expect(violatingNodes.records).toHaveLength(0);
+
+  const violatingEdges = await validateEdges(session);
+  expect(violatingEdges.records).toHaveLength(0);
 
   const violatingIncomingEdges = await validateIncomingEdges(session);
   expect(violatingIncomingEdges.records).toHaveLength(0);
