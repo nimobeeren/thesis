@@ -156,7 +156,7 @@ We first introduce a generalization of the existential quantifier which enables 
 \begin{definition}[Counting quantifier]
   The \emph{counting quantifier} is defined as follows. Given two numbers $n, m \in \N$, a predicate $P$, and a set $X$, define
   \begin{itemize}
-    \item $\exists^{\geq n} x \in X : P(x) \equiv \exists x_1, x_2, \ldots, x_n \in X : P(x_1) \wedge \ldots \wedge P(x_n) \wedge \forall 1 \leq i < j \leq n : x_i \neq x_j$;
+    \item $\exists^{\geq n} x \in X : P(x) \equiv \exists x_1, \ldots, x_n \in X : P(x_1) \wedge \ldots \wedge P(x_n) \wedge \forall 1 \leq i < j \leq n : x_i \neq x_j$;
     \item $\exists^{\leq n} x \in X : P(x) \equiv \exists x_1, \ldots, x_n, x_{n+1}, \ldots, x_k \in X : P(x_1) \wedge \ldots \wedge P(x_k) \implies \forall n < i < j \leq k : x_i = x_j$;
     \item $\exists^{n..m} x \in X : P(x) \equiv \exists^{\geq n} x \in X : P(x) \wedge \exists^{\leq m} x' \in X : P(x')$; and
     \item $\exists^{n..*} x \in X : P(x) \equiv \exists^{\geq n} x \in X : P(x)$.
