@@ -297,7 +297,7 @@ test("self-loops allow any edge between nodes of that type", async () => {
   expect(violatingOutgoingEdges.records).toHaveLength(0);
 });
 
-test("cardinality constraint is violated", async () => {
+test("cardinality constraints are violated", async () => {
   // Create the schema
   // Users can create 0 or 1 Posts, and every Post is created by exactly 1 User
   await session.run(`
@@ -309,12 +309,14 @@ test("cardinality constraint is violated", async () => {
     CREATE (:Data:User),
     (:Data:User)-[:CREATED]->(:Data:Post),
     (:Data:Post)<-[:CREATED]-(tooManyPostsUser:Data:User)-[:CREATED]->(:Data:Post),
-    (noCreatorPost:Data:Post)
-    RETURN tooManyPostsUser, noCreatorPost
+    (noCreatorPost:Data:Post),
+    (:Data:User)-[:CREATED]->(tooManyCreatorsPost:Data:Post)<-[:CREATED]-(:Data:User)
+    RETURN tooManyPostsUser, noCreatorPost, tooManyCreatorsPost
   `);
 
   const tooManyPostsUserId = dataResult.records[0].get(0).identity;
   const noCreatorPostId = dataResult.records[0].get(1).identity;
+  const tooManyCreatorsPostId = dataResult.records[0].get(2).identity;
 
   const violatingNodes = await validateNodes(session);
   expect(violatingNodes.records).toHaveLength(0);
@@ -323,8 +325,12 @@ test("cardinality constraint is violated", async () => {
   expect(violatingEdges.records).toHaveLength(0);
 
   const violatingIncomingEdges = await validateIncomingEdges(session);
-  expect(violatingIncomingEdges.records).toHaveLength(1);
+  expect(violatingIncomingEdges.records).toHaveLength(2);
+  // TODO: the indices of records may need to be swapped
   expect(violatingEdges.records[0].get(0).identity).toEqual(noCreatorPostId);
+  expect(violatingEdges.records[1].get(0).identity).toEqual(
+    tooManyCreatorsPostId
+  );
 
   const violatingOutgoingEdges = await validateOutgoingEdges(session);
   expect(violatingOutgoingEdges.records).toHaveLength(1);
