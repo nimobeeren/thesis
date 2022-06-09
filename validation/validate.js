@@ -3,8 +3,8 @@
  * @param {import('neo4j-driver').Session} session
  * @returns all data nodes that do not conform to any node type.
  */
-async function validateNodes(session) {
-  return await session.run(`
+function validateNodes(session) {
+  return session.run(`
     MATCH (dn:Data)
     WHERE NOT EXISTS {
       MATCH (sn:Schema)
@@ -26,8 +26,8 @@ async function validateNodes(session) {
  * @param {import('neo4j-driver').Session} session
  * @returns all data edges that do not conform to any edge type.
  */
-async function validateEdges(session) {
-  return await session.run(`
+function validateEdges(session) {
+  return session.run(`
     MATCH (dn1:Data)-[de]->(dn2:Data)
     WHERE NOT EXISTS {
       MATCH (sn1:Schema)-[se]->(sn2:Schema)
@@ -66,8 +66,8 @@ async function validateEdges(session) {
  * @returns all data nodes that don't have the right number of incoming edges of
  * a particular type.
  */
-async function validateIncomingEdges(session) {
-  return await session.run(`
+function validateIncomingEdges(session) {
+  return session.run(`
     MATCH (sn1:Schema)-[se]->(sn2:Schema)
     MATCH (dn2:Data)
     
@@ -118,8 +118,8 @@ async function validateIncomingEdges(session) {
  * @returns all data nodes that don't have the right number of outgoing edges of
  * a particular type.
  */
-async function validateOutgoingEdges(session) {
-  return await session.run(`
+function validateOutgoingEdges(session) {
+  return session.run(`
     MATCH (sn1:Schema)-[se]->(sn2:Schema)
     MATCH (dn1:Data)
     
