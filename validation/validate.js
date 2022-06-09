@@ -33,8 +33,12 @@ async function validateEdges(session) {
       MATCH (sn1:Schema)-[se]->(sn2:Schema)
   
       // de conforms to se
-      WHERE apoc.meta.types(de) = apoc.map.clean(properties(se), ["__inMin", "__inMax", "__outMin", "__outMax"], [])
-      AND type(de) = type(se)
+      // label matches
+      WHERE type(de) = type(se)
+      // all properties of de are specified in se and the right type
+      AND all(k IN keys(de) WHERE se[k] IS NOT NULL AND apoc.meta.type(de[k]) = replace(se[k], "?", ""))
+      // all mandatory properties of se are present in de
+      AND all(k IN keys(se) WHERE k IN ["__inMin", "__inMax", "__outMin", "__outMax"] OR se[k] ENDS WITH "?" OR de[k] IS NOT NULL)
   
       // dn1 conforms to sn1
       // all labels match, except Data and Schema labels
@@ -88,8 +92,12 @@ async function validateIncomingEdges(session) {
       (dn1:Data)-[de]->(dn2)
   
       // de conforms to se
-      WHERE apoc.meta.types(de) = apoc.map.clean(properties(se), ["__inMin", "__inMax", "__outMin", "__outMax"], [])
-      AND type(de) = type(se)
+      // label matches
+      WHERE type(de) = type(se)
+      // all properties of de are specified in se and the right type
+      AND all(k IN keys(de) WHERE se[k] IS NOT NULL AND apoc.meta.type(de[k]) = replace(se[k], "?", ""))
+      // all mandatory properties of se are present in de
+      AND all(k IN keys(se) WHERE k IN ["__inMin", "__inMax", "__outMin", "__outMax"] OR se[k] ENDS WITH "?" OR de[k] IS NOT NULL)
   
       // dn1 conforms to sn1
       // all labels match, except Data and Schema labels
@@ -136,8 +144,12 @@ async function validateOutgoingEdges(session) {
       (dn1)-[de]->(dn2:Data)
   
       // de conforms to se
-      WHERE apoc.meta.types(de) = apoc.map.clean(properties(se), ["__inMin", "__inMax", "__outMin", "__outMax"], [])
-      AND type(de) = type(se)
+      // label matches
+      WHERE type(de) = type(se)
+      // all properties of de are specified in se and the right type
+      AND all(k IN keys(de) WHERE se[k] IS NOT NULL AND apoc.meta.type(de[k]) = replace(se[k], "?", ""))
+      // all mandatory properties of se are present in de
+      AND all(k IN keys(se) WHERE k IN ["__inMin", "__inMax", "__outMin", "__outMax"] OR se[k] ENDS WITH "?" OR de[k] IS NOT NULL)
   
       // dn2 conforms to sn2
       // all labels match, except Data and Schema labels

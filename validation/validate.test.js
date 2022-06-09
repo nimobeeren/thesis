@@ -340,7 +340,7 @@ test("multiple cardinality constraints are violated", async () => {
   );
 });
 
-test("optional properties", async () => {
+test("nodes can have optional properties", async () => {
   // Create the schema
   // gender property is optional
   await session.run(`
@@ -375,6 +375,49 @@ test("optional properties", async () => {
 
   const violatingEdges = await validateEdges(session);
   expect(violatingEdges.records).toHaveLength(0);
+
+  const violatingIncomingEdges = await validateIncomingEdges(session);
+  expect(violatingIncomingEdges.records).toHaveLength(0);
+
+  const violatingOutgoingEdges = await validateOutgoingEdges(session);
+  expect(violatingOutgoingEdges.records).toHaveLength(0);
+});
+
+test("edges can have optional properties", async () => {
+  // Create the schema
+  // reason property is optional
+  await session.run(`
+    CREATE (:Schema:User)-[:CREATED {at: "STRING", reason: "STRING?"}]->(:Schema:Post)
+  `);
+
+  // Create the data
+  const dataResult = await session.run(`
+    CREATE (:Data:User)-[:CREATED {at: "2022", reason: "bored"}]->(:Data:Post),
+    (:Data:User)-[:CREATED {at: "2021"}]->(:Data:Post),
+    (:Data:User)-[notAllowed:CREATED {at: "2020", junk: true}]->(:Data:Post),
+    (:Data:User)-[wrongType:CREATED {at: "2019", reason: 1}]->(:Data:Post),
+    (:Data:User)-[missingMandatory:CREATED]->(:Data:Post)
+    RETURN notAllowed, wrongType, missingMandatory
+  `);
+
+  const notAllowedUserId = dataResult.records[0].get("notAllowed").identity;
+  const wrongTypeUserId = dataResult.records[0].get("wrongType").identity;
+  const missingMandatoryUserId =
+    dataResult.records[0].get("missingMandatory").identity;
+
+  const violatingNodes = await validateNodes(session);
+  expect(violatingNodes.records).toHaveLength(0);
+
+  const violatingEdges = await validateEdges(session);
+  expect(violatingEdges.records).toHaveLength(3);
+  // CREATED edge has a property not specified in the schema
+  expect(violatingEdges.records[0].get(0).identity).toEqual(notAllowedUserId);
+  // CREATED edge has an optional property, but the wrong type
+  expect(violatingEdges.records[1].get(0).identity).toEqual(wrongTypeUserId);
+  // CREATED edge is missing a mandatory property
+  expect(violatingEdges.records[2].get(0).identity).toEqual(
+    missingMandatoryUserId
+  );
 
   const violatingIncomingEdges = await validateIncomingEdges(session);
   expect(violatingIncomingEdges.records).toHaveLength(0);
