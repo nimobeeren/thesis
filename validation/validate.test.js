@@ -125,12 +125,10 @@ test("edge is missing mandatory property", async () => {
   const dataResult = await session.run(`
     CREATE (user:Data:User { name: "Nick", age: 38 })-[created:CREATED]->
     (post:Data:Post { content: "Diggity" })
-    RETURN user, created, post
+    RETURN created
   `);
 
-  const userNodeId = dataResult.records[0].get("user").identity;
   const createdEdgeId = dataResult.records[0].get("created").identity;
-  const postNodeId = dataResult.records[0].get("post").identity;
 
   const violatingNodes = await validateNodes(session);
   expect(violatingNodes.records).toHaveLength(0);
@@ -140,21 +138,19 @@ test("edge is missing mandatory property", async () => {
   expect(violatingEdges.records).toHaveLength(1);
   expect(violatingEdges.records[0].get(0).identity).toEqual(createdEdgeId);
 
-  // Since the CREATED edge does not conform, the Post node also doesn't
   const violatingIncomingEdges = await validateIncomingEdges(session);
-  expect(violatingIncomingEdges.records).toHaveLength(1);
-  expect(violatingIncomingEdges.records[0].get(0).identity).toEqual(postNodeId);
+  expect(violatingIncomingEdges.records).toHaveLength(0);
 
-  // Since the CREATED edge does not conform, the User node also doesn't
   const violatingOutgoingEdges = await validateOutgoingEdges(session);
-  expect(violatingOutgoingEdges.records).toHaveLength(1);
-  expect(violatingOutgoingEdges.records[0].get(0).identity).toEqual(userNodeId);
+  expect(violatingOutgoingEdges.records).toHaveLength(0);
 });
 
 test("node is missing incoming edge", async () => {
   // Create the schema
+  // Every Post must be created by at least one User
   await session.run(`
-    CREATE (:Schema:User { name: "STRING", age: "INTEGER" })-[:CREATED]->
+    CREATE (:Schema:User { name: "STRING", age: "INTEGER" })
+    -[:CREATED {__inMin: 1}]->
     (:Schema:Post { content: "STRING" })
   `);
 
@@ -184,8 +180,10 @@ test("node is missing incoming edge", async () => {
 
 test("node is missing outgoing edge", async () => {
   // Create the schema
+  // Every User must create at least one Post
   await session.run(`
-    CREATE (:Schema:User { name: "STRING", age: "INTEGER" })-[:CREATED]->
+    CREATE (:Schema:User { name: "STRING", age: "INTEGER" })
+    -[:CREATED {__outMin: 1}]->
     (:Schema:Post { content: "STRING" })
   `);
 
@@ -255,7 +253,7 @@ test("edge has wrong source node", async () => {
     RETURN selfloop
   `);
 
-  const userNodeId = dataResult.records[0].get(0).identity;
+  const userNodeId = dataResult.records[0].get("selfloop").identity;
 
   const violatingNodes = await validateNodes(session);
   expect(violatingNodes.records).toHaveLength(0);
@@ -297,11 +295,13 @@ test("self-loops allow any edge between nodes of that type", async () => {
   expect(violatingOutgoingEdges.records).toHaveLength(0);
 });
 
-test("cardinality constraints are violated", async () => {
+test("multiple cardinality constraints are violated", async () => {
   // Create the schema
   // Users can create 0 or 1 Posts, and every Post is created by exactly 1 User
   await session.run(`
-    CREATE (:Schema:User)-[:CREATED {srcMin: 1, srcMax: 1, trgMin: 0, trgMax: 1}]->(:Schema:Post)
+    CREATE (:Schema:User)
+    -[:CREATED {__inMin: 1, __inMax: 1, __outMin: 0, __outMax: 1}]->
+    (:Schema:Post)
   `);
 
   // Create the data
@@ -326,13 +326,16 @@ test("cardinality constraints are violated", async () => {
 
   const violatingIncomingEdges = await validateIncomingEdges(session);
   expect(violatingIncomingEdges.records).toHaveLength(2);
-  // TODO: the indices of records may need to be swapped
-  expect(violatingEdges.records[0].get(0).identity).toEqual(noCreatorPostId);
-  expect(violatingEdges.records[1].get(0).identity).toEqual(
+  expect(violatingIncomingEdges.records[0].get(0).identity).toEqual(
+    noCreatorPostId
+  );
+  expect(violatingIncomingEdges.records[1].get(0).identity).toEqual(
     tooManyCreatorsPostId
   );
 
   const violatingOutgoingEdges = await validateOutgoingEdges(session);
   expect(violatingOutgoingEdges.records).toHaveLength(1);
-  expect(violatingEdges.records[0].get(0).identity).toEqual(tooManyPostsUserId);
+  expect(violatingOutgoingEdges.records[0].get(0).identity).toEqual(
+    tooManyPostsUserId
+  );
 });
