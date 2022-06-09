@@ -339,3 +339,46 @@ test("multiple cardinality constraints are violated", async () => {
     tooManyPostsUserId
   );
 });
+
+test("optional properties", async () => {
+  // Create the schema
+  // gender property is optional
+  await session.run(`
+    CREATE (:Schema:User {name: "STRING", age: "INTEGER", gender: "STRING?"})
+  `);
+
+  // Create the data
+  const dataResult = await session.run(`
+    CREATE (:Data:User {name: "Rose", age: 24, gender: "F"}),
+    (:Data:User {name: "Ymke", age: 22}),
+    (notAllowed:Data:User {name: "Francesca", age: 42, goth: true}),
+    (wrongType:Data:User {name: "Hank", age: 11, gender: 2}),
+    (missingMandatory:Data:User {name: "Nick"})
+    RETURN notAllowed, wrongType, missingMandatory
+  `);
+
+  const notAllowedUserId = dataResult.records[0].get("notAllowed").identity;
+  const wrongTypeUserId = dataResult.records[0].get("wrongType").identity;
+  const missingMandatoryUserId =
+    dataResult.records[0].get("missingMandatory").identity;
+
+  const violatingNodes = await validateNodes(session);
+  expect(violatingNodes.records).toHaveLength(3);
+  // User has a property not specified in the schema
+  expect(violatingNodes.records[0].get(0).identity).toEqual(notAllowedUserId);
+  // User has an optional property, but the wrong type
+  expect(violatingNodes.records[1].get(0).identity).toEqual(wrongTypeUserId);
+  // User is missing a mandatory property
+  expect(violatingNodes.records[2].get(0).identity).toEqual(
+    missingMandatoryUserId
+  );
+
+  const violatingEdges = await validateEdges(session);
+  expect(violatingEdges.records).toHaveLength(0);
+
+  const violatingIncomingEdges = await validateIncomingEdges(session);
+  expect(violatingIncomingEdges.records).toHaveLength(0);
+
+  const violatingOutgoingEdges = await validateOutgoingEdges(session);
+  expect(violatingOutgoingEdges.records).toHaveLength(0);
+});

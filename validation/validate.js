@@ -10,8 +10,12 @@ async function validateNodes(session) {
       MATCH (sn:Schema)
 
       // dn conforms to sn
-      WHERE apoc.meta.types(dn) = properties(sn)
-      AND [label IN labels(dn) WHERE label <> "Data"] = [label IN labels(sn) WHERE label <> "Schema"]
+      // all labels match, except Data and Schema labels
+      WHERE [label IN labels(dn) WHERE label <> "Data"] = [label IN labels(sn) WHERE label <> "Schema"]
+      // all properties of dn are in specified in sn and the right type
+      AND all(k IN keys(dn) WHERE sn[k] IS NOT NULL AND apoc.meta.type(dn[k]) = replace(sn[k], "?", ""))
+      // all mandatory properties of sn are present in dn
+      AND all(k in keys(sn) WHERE k ENDS WITH "?" OR dn[k] IS NOT NULL)
     }
     RETURN dn
   `);
@@ -26,19 +30,27 @@ async function validateEdges(session) {
   return await session.run(`
     MATCH (dn1:Data)-[de]->(dn2:Data)
     WHERE NOT EXISTS {
-        MATCH (sn1:Schema)-[se]->(sn2:Schema)
-
-        // de conforms to se
-        WHERE apoc.meta.types(de) = apoc.map.clean(properties(se), ["__inMin", "__inMax", "__outMin", "__outMax"], [])
-        AND type(de) = type(se)
-    
-        // dn1 conforms to sn1
-        AND apoc.meta.types(dn1) = properties(sn1)
-        AND [label IN labels(dn1) WHERE label <> "Data"] = [label IN labels(sn1) WHERE label <> "Schema"]
-    
-        // dn2 conforms to sn2
-        AND apoc.meta.types(dn2) = properties(sn2)
-        AND [label IN labels(dn2) WHERE label <> "Data"] = [label IN labels(sn2) WHERE label <> "Schema"]
+      MATCH (sn1:Schema)-[se]->(sn2:Schema)
+  
+      // de conforms to se
+      WHERE apoc.meta.types(de) = apoc.map.clean(properties(se), ["__inMin", "__inMax", "__outMin", "__outMax"], [])
+      AND type(de) = type(se)
+  
+      // dn1 conforms to sn1
+      // all labels match, except Data and Schema labels
+      AND [label IN labels(dn1) WHERE label <> "Data"] = [label IN labels(sn1) WHERE label <> "Schema"]
+      // all properties of dn1 are in specified in sn1 and the right type
+      AND all(k IN keys(dn1) WHERE sn1[k] IS NOT NULL AND apoc.meta.type(dn1[k]) = replace(sn1[k], "?", ""))
+      // all mandatory properties of sn1 are present in dn1
+      AND all(k in keys(sn1) WHERE k ENDS WITH "?" OR dn1[k] IS NOT NULL)
+  
+      // dn2 conforms to sn2
+      // all labels match, except Data and Schema labels
+      AND [label IN labels(dn2) WHERE label <> "Data"] = [label IN labels(sn2) WHERE label <> "Schema"]
+      // all properties of dn2 are in specified in sn2 and the right type
+      AND all(k IN keys(dn2) WHERE sn2[k] IS NOT NULL AND apoc.meta.type(dn2[k]) = replace(sn2[k], "?", ""))
+      // all mandatory properties of sn2 are present in dn2
+      AND all(k in keys(sn2) WHERE k ENDS WITH "?" OR dn2[k] IS NOT NULL)
     }
     RETURN de
   `);
@@ -61,8 +73,12 @@ async function validateIncomingEdges(session) {
     coalesce(se.__inMax, apoc.math.maxLong()) AS inMax
     
     // dn2 conforms to sn2
-    WHERE apoc.meta.types(dn2) = properties(sn2)
-    AND [label IN labels(dn2) WHERE label <> "Data"] = [label IN labels(sn2) WHERE label <> "Schema"]
+    // all labels match, except Data and Schema labels
+    WHERE [label IN labels(dn2) WHERE label <> "Data"] = [label IN labels(sn2) WHERE label <> "Schema"]
+    // all properties of dn2 are in specified in sn2 and the right type
+    AND all(k IN keys(dn2) WHERE sn2[k] IS NOT NULL AND apoc.meta.type(dn2[k]) = replace(sn2[k], "?", ""))
+    // all mandatory properties of sn2 are present in dn2
+    AND all(k in keys(sn2) WHERE k ENDS WITH "?" OR dn2[k] IS NOT NULL)
     
     // se has a cardinality constraint on incoming edges
     AND (inMin > 0 OR inMax < apoc.math.maxLong())
@@ -76,8 +92,12 @@ async function validateIncomingEdges(session) {
       AND type(de) = type(se)
   
       // dn1 conforms to sn1
-      AND apoc.meta.types(dn1) = properties(sn1)
+      // all labels match, except Data and Schema labels
       AND [label IN labels(dn1) WHERE label <> "Data"] = [label IN labels(sn1) WHERE label <> "Schema"]
+      // all properties of dn1 are in specified in sn1 and the right type
+      AND all(k IN keys(dn1) WHERE sn1[k] IS NOT NULL AND apoc.meta.type(dn1[k]) = replace(sn1[k], "?", ""))
+      // all mandatory properties of sn1 are present in dn1
+      AND all(k in keys(sn1) WHERE k ENDS WITH "?" OR dn1[k] IS NOT NULL)
     | dn1]) <= inMax
     
     RETURN dn2
@@ -91,7 +111,6 @@ async function validateIncomingEdges(session) {
  * a particular type.
  */
 async function validateOutgoingEdges(session) {
-  // FIXME: always returns empty when outMin or outMax is null
   return await session.run(`
     MATCH (sn1:Schema)-[se]->(sn2:Schema)
     MATCH (dn1:Data)
@@ -102,8 +121,12 @@ async function validateOutgoingEdges(session) {
     coalesce(se.__outMax, apoc.math.maxLong()) AS outMax
     
     // dn1 conforms to sn1
-    WHERE apoc.meta.types(dn1) = properties(sn1)
-    AND [label IN labels(dn1) WHERE label <> "Data"] = [label IN labels(sn1) WHERE label <> "Schema"]
+    // all labels match, except Data and Schema labels
+    WHERE [label IN labels(dn1) WHERE label <> "Data"] = [label IN labels(sn1) WHERE label <> "Schema"]
+    // all properties of dn1 are in specified in sn1 and the right type
+    AND all(k IN keys(dn1) WHERE sn1[k] IS NOT NULL AND apoc.meta.type(dn1[k]) = replace(sn1[k], "?", ""))
+    // all mandatory properties of sn1 are present in dn1
+    AND all(k in keys(sn1) WHERE k ENDS WITH "?" OR dn1[k] IS NOT NULL)
     
     // se has a cardinality constraint on outgoing edges
     AND (outMin > 0 OR outMax < apoc.math.maxLong())
@@ -117,8 +140,12 @@ async function validateOutgoingEdges(session) {
       AND type(de) = type(se)
   
       // dn2 conforms to sn2
-      AND apoc.meta.types(dn2) = properties(sn2)
+      // all labels match, except Data and Schema labels
       AND [label IN labels(dn2) WHERE label <> "Data"] = [label IN labels(sn2) WHERE label <> "Schema"]
+      // all properties of dn2 are in specified in sn2 and the right type
+      AND all(k IN keys(dn2) WHERE sn2[k] IS NOT NULL AND apoc.meta.type(dn2[k]) = replace(sn2[k], "?", ""))
+      // all mandatory properties of sn2 are present in dn2
+      AND all(k in keys(sn2) WHERE k ENDS WITH "?" OR dn2[k] IS NOT NULL)
     | dn2]) <= outMax
     
     RETURN dn1
