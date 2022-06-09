@@ -15,7 +15,7 @@ async function validateNodes(session) {
       // all properties of dn are in specified in sn and the right type
       AND all(k IN keys(dn) WHERE sn[k] IS NOT NULL AND apoc.meta.type(dn[k]) = replace(sn[k], "?", ""))
       // all mandatory properties of sn are present in dn
-      AND all(k in keys(sn) WHERE k ENDS WITH "?" OR dn[k] IS NOT NULL)
+      AND all(k in keys(sn) WHERE sn[k] ENDS WITH "?" OR dn[k] IS NOT NULL)
     }
     RETURN dn
   `);
@@ -42,7 +42,7 @@ async function validateEdges(session) {
       // all properties of dn1 are in specified in sn1 and the right type
       AND all(k IN keys(dn1) WHERE sn1[k] IS NOT NULL AND apoc.meta.type(dn1[k]) = replace(sn1[k], "?", ""))
       // all mandatory properties of sn1 are present in dn1
-      AND all(k in keys(sn1) WHERE k ENDS WITH "?" OR dn1[k] IS NOT NULL)
+      AND all(k in keys(sn1) WHERE sn1[k] ENDS WITH "?" OR dn1[k] IS NOT NULL)
   
       // dn2 conforms to sn2
       // all labels match, except Data and Schema labels
@@ -50,7 +50,7 @@ async function validateEdges(session) {
       // all properties of dn2 are in specified in sn2 and the right type
       AND all(k IN keys(dn2) WHERE sn2[k] IS NOT NULL AND apoc.meta.type(dn2[k]) = replace(sn2[k], "?", ""))
       // all mandatory properties of sn2 are present in dn2
-      AND all(k in keys(sn2) WHERE k ENDS WITH "?" OR dn2[k] IS NOT NULL)
+      AND all(k in keys(sn2) WHERE sn2[k] ENDS WITH "?" OR dn2[k] IS NOT NULL)
     }
     RETURN de
   `);
@@ -78,7 +78,7 @@ async function validateIncomingEdges(session) {
     // all properties of dn2 are in specified in sn2 and the right type
     AND all(k IN keys(dn2) WHERE sn2[k] IS NOT NULL AND apoc.meta.type(dn2[k]) = replace(sn2[k], "?", ""))
     // all mandatory properties of sn2 are present in dn2
-    AND all(k in keys(sn2) WHERE k ENDS WITH "?" OR dn2[k] IS NOT NULL)
+    AND all(k in keys(sn2) WHERE sn2[k] ENDS WITH "?" OR dn2[k] IS NOT NULL)
     
     // se has a cardinality constraint on incoming edges
     AND (inMin > 0 OR inMax < apoc.math.maxLong())
@@ -97,7 +97,7 @@ async function validateIncomingEdges(session) {
       // all properties of dn1 are in specified in sn1 and the right type
       AND all(k IN keys(dn1) WHERE sn1[k] IS NOT NULL AND apoc.meta.type(dn1[k]) = replace(sn1[k], "?", ""))
       // all mandatory properties of sn1 are present in dn1
-      AND all(k in keys(sn1) WHERE k ENDS WITH "?" OR dn1[k] IS NOT NULL)
+      AND all(k in keys(sn1) WHERE sn1[k] ENDS WITH "?" OR dn1[k] IS NOT NULL)
     | dn1]) <= inMax
     
     RETURN dn2
@@ -126,7 +126,7 @@ async function validateOutgoingEdges(session) {
     // all properties of dn1 are in specified in sn1 and the right type
     AND all(k IN keys(dn1) WHERE sn1[k] IS NOT NULL AND apoc.meta.type(dn1[k]) = replace(sn1[k], "?", ""))
     // all mandatory properties of sn1 are present in dn1
-    AND all(k in keys(sn1) WHERE k ENDS WITH "?" OR dn1[k] IS NOT NULL)
+    AND all(k in keys(sn1) WHERE sn1[k] ENDS WITH "?" OR dn1[k] IS NOT NULL)
     
     // se has a cardinality constraint on outgoing edges
     AND (outMin > 0 OR outMax < apoc.math.maxLong())
@@ -145,7 +145,7 @@ async function validateOutgoingEdges(session) {
       // all properties of dn2 are in specified in sn2 and the right type
       AND all(k IN keys(dn2) WHERE sn2[k] IS NOT NULL AND apoc.meta.type(dn2[k]) = replace(sn2[k], "?", ""))
       // all mandatory properties of sn2 are present in dn2
-      AND all(k in keys(sn2) WHERE k ENDS WITH "?" OR dn2[k] IS NOT NULL)
+      AND all(k in keys(sn2) WHERE sn2[k] ENDS WITH "?" OR dn2[k] IS NOT NULL)
     | dn2]) <= outMax
     
     RETURN dn1
