@@ -136,13 +136,13 @@ The similarity between property graph types and property graphs is intentional. 
     \item If a node conforms to a schema node, it must have all the outgoing edges of the right type:
     \begin{align*}
       &\forall e' \in E' \; \forall n_1 \in N \cap \sem{\omega(\src(\rho(e')))} \; \exists e \in E \cap \sem{\omega(e')} :\\
-      &\quad\quad \src(\rho(e)) = n_1 \wedge \trg(\rho(e)) \in \sem{\omega(\trg(\rho(e')))}
+      &\quad \src(\rho(e)) = n_1 \wedge \trg(\rho(e)) \in \sem{\omega(\trg(\rho(e')))}
     \end{align*}
 
     \item If a node conforms to a schema node, it must have all the incoming edges of the right type:
     \begin{align*}
       &\forall e' \in E' \; \forall n_2 \in N \cap \sem{\omega(\trg(\rho(e')))} \; \exists e \in E \cap \sem{\omega(e')} :\\
-      &\quad\quad \src(\rho(e)) \in \sem{\omega(\src(\rho(e')))} \wedge \trg(\rho(e)) = n_2
+      &\quad \src(\rho(e)) \in \sem{\omega(\src(\rho(e')))} \wedge \trg(\rho(e)) = n_2
     \end{align*}
   \end{enumerate}
 \end{definition}
@@ -202,13 +202,13 @@ We also use the functions $\src$ and $\trg$ to refer to the first and second int
     \item If a node conforms to a schema node, it must have the right number of outgoing edges of the right type:
     \begin{align*}
       &\forall e' \in E' \; \forall n_1 \in N \cap \sem{\omega(\src(\rho(e')))} \; \exists^{\src(\eta(e'))} e \in E \cap \sem{\omega(e')} :\\
-      &\quad\quad \src(\rho(e)) = n_1 \wedge \trg(\rho(e)) \in \sem{\omega(\trg(\rho(e')))}
+      &\quad \src(\rho(e)) = n_1 \wedge \trg(\rho(e)) \in \sem{\omega(\trg(\rho(e')))}
     \end{align*}
 
     \item If a node conforms to a schema node, it must have the right number of incoming edges of the right type:
     \begin{align*}
       &\forall e' \in E' \; \forall n_2 \in N \cap \sem{\omega(\trg(\rho(e')))} \; \exists^{\trg(\eta(e'))} e \in E \cap \sem{\omega(e')} :\\
-      &\quad\quad \src(\rho(e)) \in \sem{\omega(\src(\rho(e')))} \wedge \trg(\rho(e)) = n_2
+      &\quad \src(\rho(e)) \in \sem{\omega(\src(\rho(e')))} \wedge \trg(\rho(e)) = n_2
     \end{align*}
   \end{enumerate}
 \end{definition}
@@ -238,23 +238,25 @@ We adjust the definitions of property conformance, record type, and record confo
   We say that a record $r$ \emph{conforms} to a record type $\rtype$, denoted $r \in \sem{\rtype}$, if and only if for each property name $k \in \mathcal{N}$ it holds that $r(k) \in \sem{\rtype(k)}$.
 \end{definition}
 
-\subsection{Open Records}
+\subsection{Open records}
 
-It may be desirable to allow a record to have properties with any name or any value. Such \emph{open records} can already be expressed under the current definitions. For a record type $\rtype$, we can allow properties with any name by setting $\rtype(k) = \ptype?$ for all (previously unspecified) property names $k \in \mathcal{N}$, where $\ptype$ is an arbitrary property type. Note that there may be infinitely many such $k$, so in practice we may want to have a special syntax to express this. We can allow these properties to have any value by setting $\sem{\ptype} = \mathcal{V}$, or we can restrict them to a subset of $\mathcal{V}$.
+It may be desirable to allow a record to have properties with any name or any value. Such \emph{open records} can already be expressed under the current definitions. For a record type $\rtype$, we can allow properties with any name by setting $\rtype(k) = \ptype?$ for all (previously unspecified) property names $k \in \mathcal{N}$, where $\ptype$ is an arbitrary property type. Note that there may be infinitely many such $k$, so in practice we may want to have a special syntax to express this. We can allow these properties to have any value by choosing a $\ptype$ such that $\sem{\ptype} = \mathcal{V}$, or we can restrict them to a subset of $\mathcal{V}$.
 
 \section{Limitations}
 
-Under these definitions, it is not possible to specify constraints over a graph pattern larger than two neighboring nodes and the edge between them. For example, we cannot express that if a \texttt{Person} node has an outgoing edge \texttt{OWNS} to a \texttt{Car} node, then that \texttt{Person} node must have an outgoing edge \texttt{HAS} to a \texttt{DriversLicense} node. Such a pattern consists of three nodes (\texttt{Person}, \texttt{Car}, \texttt{DriversLicense}) and two edges (\texttt{OWNS}, \texttt{HAS}).
+These definitions come with a number of limitations. In general, it is not possible to specify constraints over a graph pattern larger than two neighboring nodes and the edge between them. For example, we cannot express that if a \texttt{Person} node has an outgoing edge \texttt{OWNS} to a \texttt{Car} node, then that \texttt{Person} node must have an outgoing edge \texttt{HAS} to a \texttt{DriversLicense} node. Such a pattern consists of three nodes (\texttt{Person}, \texttt{Car}, \texttt{DriversLicense}) and two edges (\texttt{OWNS}, \texttt{HAS}).
 
-Alternatively, we can have two \texttt{Person} nodes, where one requires having a \texttt{DriversLicense} and allows owning 0 or more \texttt{Car}s, and the other does not allow owning a \texttt{Car}. This would indeed prevent a situation where a \texttt{Person} owns a \texttt{Car}, but does not have a \texttt{DriversLicense}. However, ...
+% Alternatively, we can have two \texttt{Person} nodes, where one requires having a \texttt{DriversLicense} and allows owning 0 or more \texttt{Car}s, and the other does not allow owning a \texttt{Car}. This would indeed prevent a situation where a \texttt{Person} owns a \texttt{Car}, but does not have a \texttt{DriversLicense}. However, ...
 
 % However, this breaks down when we add constraints that depend on the uniqueness of a \texttt{Person}. For example, say we want to model that a Person has exactly one Passport, and every Passport is associated with exactly one Person.
 % FIXME: actually, this seems possible, as long as everything is the same for both Person nodes
 
 % Node with any label: create a node for every combination of labels (but then we can't express there should be an edge to "at least one" of them). Solution: union types? Look into type theory again
 
-Furthermore, it is not possible to have a single object type that allows two different label sets. Hence, it is not possible to have optional labels, i.e. the object type $\otype = (\{\texttt{Vehicle}, \texttt{Car}\}, \langle \texttt{make} : \texttt{string} \rangle)$ requires that the labels \texttt{Vehicle} and \texttt{Car} are both present, just having \texttt{Car} is not enough. Of course, it is possible to have two schema objects like $\otype_1 = (\{\texttt{Car}\}, \langle \texttt{make} : \texttt{string} \rangle)$ and $\otype_2 = (\{\texttt{Vehicle}, \texttt{Car}\}, \langle \texttt{make} : \texttt{string} \rangle)$. However, then it is not possible to specify that every \texttt{Employee} must have exactly one outgoing \texttt{OWNS} edge to a node conforming to either $\otype_1$ or $\otype_2$.
+% Furthermore, it is not possible to have a single object type that allows two different label sets. Hence, it is not possible to have optional labels, i.e. the object type $\otype = (\{\texttt{Vehicle}, \texttt{Car}\}, \langle \texttt{make} : \texttt{string} \rangle)$ requires that the labels \texttt{Vehicle} and \texttt{Car} are both present, just having \texttt{Car} is not enough. Of course, it is possible to have two schema objects like $\otype_1 = (\{\texttt{Car}\}, \langle \texttt{make} : \texttt{string} \rangle)$ and $\otype_2 = (\{\texttt{Vehicle}, \texttt{Car}\}, \langle \texttt{make} : \texttt{string} \rangle)$. However, then it is not possible to specify that every \texttt{Employee} must have exactly one outgoing \texttt{OWNS} edge to a node conforming to either $\otype_1$ or $\otype_2$.
 
 % TODO: In general, it's not possible to say that an object must conform to type 1 OR type 2 (union type). Problem with labels follows from that. But also union of two records is not possible.
+
+Furthermore, subtype relations cannot be expressed. To see the problem, consider the ER-diagram of TODO. How would we express this using our schema formalisms?
 
 \end{document}
