@@ -4,6 +4,9 @@
 \usepackage{parskip}
 \usepackage{amsmath}
 \usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{caption}
+\usepackage{subcaption}
 
 \newtheorem{theorem}{Theorem}
 \newtheorem{definition}[theorem]{Definition}
@@ -257,6 +260,23 @@ These definitions come with a number of limitations. In general, it is not possi
 
 % TODO: In general, it's not possible to say that an object must conform to type 1 OR type 2 (union type). Problem with labels follows from that. But also union of two records is not possible.
 
-Furthermore, subtype relations cannot be expressed. To see the problem, consider the ER-diagram of TODO. How would we express this using our schema formalisms?
+Furthermore, subtype relations cannot be expressed. To see the problem, consider the schema depicted in \autoref{fig:subtyping} which uses an arrow with a solid white head to indicate a ``subtype of'' relation. How could we express this using our schema formalisms? TODO
+
+\begin{figure}[t]
+  \centering
+  \begin{subfigure}[t]{0.45\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{figures/subtyping}
+    \caption{A schema describing a supertype \texttt{Message} and its two subtypes \texttt{Post} and \texttt{Comment}.}
+    \label{fig:subtyping}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}[t]{0.45\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{figures/subtyping-ours}
+    \caption{An attempt to express the same schema, but without subtype relations. Note that the cardinality constraints are more permissive than in \autoref{fig:subtyping}.}
+    \label{fig:subtyping-ours}
+  \end{subfigure}
+\end{figure}
 
 \end{document}
