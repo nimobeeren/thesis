@@ -72,11 +72,13 @@ We postulate the following countably infinite sets: the set of labels $\mathcal{
   \end{itemize}
 \end{definition}
 
-Our notion of property graph is a directed \emph{multigraph}. That means there can be multiple edges between two nodes $u$ and $v$. Furthermore, we allow $u = v$, in which case the edge is called a \emph{self-loop}. Undirected edges are not allowed, but they could be simulated by attaching a special label or property to an edge.
+Our notion of property graph is a directed \emph{multigraph}. That means there can be multiple edges between two nodes $u$ and $v$. Furthermore, we allow $u = v$, in which case the edge is called a \emph{self-loop}. Undirected edges are not allowed, but they could be simulated by attaching a special label or property to an edge. We use the umbrella term \emph{objects} to refer to nodes and edges.
 
-Given a node $u$, the set of \emph{outgoing} edges is given by $\{e \in E \mid \exists v \in N : \rho(e) = (u, v)\}$, and the set of \emph{incoming} edges is given by $\{e \in E \mid \exists v \in N : \rho(e) = (v, u)\}$. We use the umbrella term \emph{objects} to refer to nodes and edges.
+Given a node $u$, the set of \emph{outgoing} edges is given by $\{e \in E \mid \exists v \in N : \rho(e) = (u, v)\}$, and the set of \emph{incoming} edges is given by $\{e \in E \mid \exists v \in N : \rho(e) = (v, u)\}$.
 
 The functions $\src$ and $\trg$ map pairs to their first and second element, i.e. $\src((u, v)) = u$ and $\trg((u, v)) = v$. To refer to the source and target \emph{endpoints} of an edge $e$, we write $\src(\rho(e))$ and $\trg(\rho(e))$, respectively.
+
+TODO: property graph example
 
 \section{Property Graph Schemas}
 
@@ -119,6 +121,8 @@ We may informally say that an object $o$ conforms to a schema object $o'$, by wh
 
 The similarity between property graph types and property graphs is intentional. This allows us to visualize them in a similar ways, and to use the same mental model to think about them. In fact, a property graph type can be simulated by a property graph if we allow properties to take property types as values, i.e. $\ptypes \subseteq \mathcal{V}$. Then we let $\lambda$ and $\pi$ take the role of $\omega$, in the sense that $\lambda(o) = L$ and $\pi(o) = \rtype$ if $\omega(o) = (L, \rtype)$ for all objects $o$ in the property graph.
 
+TODO: property graph type example
+
 \begin{definition}[Property graph conformance]
   Given a property graph $$G = (N, E, \rho, \lambda, \pi)$$ and a property graph type $$\gtype = (N', E', \rho', \omega)$$ we say that $G$ \emph{conforms} to $\gtype$ if and only if all of the following rules hold.
 
@@ -151,6 +155,8 @@ The similarity between property graph types and property graphs is intentional. 
 \end{definition}
 
 Under these definitions, a schema edge requires that \emph{at least one} conforming edge exists in the property graph. That is, if a schema node has an incident edge (i.e. an incoming or outgoing edge that the schema node participates in), then any node that conforms to the schema node must also have at least one incident edge (in the same direction) that conforms to the schema edge. In the following, we will relax this requirement and introduce a more general notion of cardinality constraints.
+
+TODO: examples
 
 \subsection{Cardinality constraints}
 
@@ -185,6 +191,8 @@ We also use the functions $\src$ and $\trg$ to refer to the first and second int
   \end{itemize}
 \end{definition}
 
+TODO: property graph type with cardinality constraints
+
 \begin{definition}[Property graph conformance]
   Given a property graph $$G = (N, E, \rho, \lambda, \pi)$$ and a property graph type $$\gtype = (N', E', \rho', \omega, \eta)$$ we say that $G$ \emph{conforms} to $\gtype$ if and only if all of the following rules hold.
 
@@ -215,6 +223,8 @@ We also use the functions $\src$ and $\trg$ to refer to the first and second int
     \end{align*}
   \end{enumerate}
 \end{definition}
+
+TODO: examples
 
 \subsection{Optional properties}
 
@@ -247,7 +257,14 @@ It may be desirable to allow a record to have properties with any name or any va
 
 \section{Limitations}
 
-Our schema formalisms come with a number of limitations. First, it is not possible to specify constraints over a graph pattern larger than two neighboring nodes and the edge between them. For example, say we want to allow a person to own a car, but only when they have a driver's license. Such a pattern would consists of three nodes (\texttt{Person}, \texttt{Car}, \texttt{DriversLicense}) and two edges (\texttt{owns}, \texttt{has}), which cannot be expressed.
+Our schema formalisms come with a number of limitations. First, it is not possible to specify constraints over a graph pattern larger than two neighboring nodes and the edge between them. For example, say we want to allow a person to drive a car, but only when they have a driver's license. \autoref{fig:drivers-license} depicts a schema that models this using three nodes and two edges. Unfortunately, it is not possible to prevent a person from driving a car without having a driver's license. This illustrates the limited scope of the constraints that we can specify.
+
+\begin{figure}[t]
+  \centering
+  \includegraphics{figures/drivers-license.pdf}
+  \caption{A schema consisting of three nodes and two edges. While we can enforce constraints on edge cardinalities, we cannot specify that a person may only drive a car if they have a driver's license.}
+  \label{fig:drivers-license}
+\end{figure}
 
 % Alternatively, we can have two \texttt{Person} nodes, where one requires having a \texttt{DriversLicense} and allows owning 0 or more \texttt{Car}s, and the other does not allow owning a \texttt{Car}. This would indeed prevent a situation where a \texttt{Person} owns a \texttt{Car}, but does not have a \texttt{DriversLicense}. However, ...
 
@@ -262,27 +279,27 @@ Our schema formalisms come with a number of limitations. First, it is not possib
 
 Furthermore, subtype relations cannot be expressed in general. To see the problem, consider the schema depicted in \autoref{fig:subtyping}. How could we express this using our schema formalism? An attempt is given in \autoref{fig:subtyping-ours}, where properties of the supertype \texttt{Message} are copied and distributed over all its subtypes, and the edge from \texttt{Comment} to \texttt{Message} is accompanied by an edge from \texttt{Comment} to Post and from \texttt{Comment} to itself. While the properties are modelled correctly in this case, it breaks down when we look at the cardinalities.
 
-\autoref{fig:subtyping} expresses the constraint of ``every \texttt{Comment} is a reply of exactly one \texttt{Message} (or a subtype of \texttt{Message})''. However, \autoref{fig:subtyping-ours} allows \texttt{Comment}s which are not a reply to anything, or which are a reply to more than one thing. This example shows that our schema formalism cannot be used to model all subtype relations.
+In \autoref{fig:subtyping}, a constraint is specified which we can express in words as ``every \texttt{Comment} is a reply of exactly one \texttt{Message} (or a subtype of \texttt{Message})''. However, it is not possible to specifiy such a constraint without using subtype relations, as in \autoref{fig:subtyping-ours}. This solution allows \texttt{Comment}s which are not a reply to anything, or which are a reply to more than one thing. Then again, if we disregard the cardinality constraints, the two schemas are equivalent. This example shows that our schema formalism can be used to model some but not all subtype relations.
 
 \begin{figure}[t]
   \centering
   \begin{subfigure}[t]{0.45\textwidth}
     \centering
-    \includegraphics[width=\textwidth]{figures/subtyping}
-    \caption{A schema describing a supertype \texttt{Message} and its two subtypes \texttt{Post} and \texttt{Comment}. The arrow with solid white head indicates a ``subtype of'' relation. This is a fragment of the LDBC SNB schema \cite{angles2020snb}.}
+    \includegraphics[width=\textwidth]{figures/subtyping.pdf}
+    \caption{A schema with a subtype relation. The arrow with solid white head indicates a ``subtype of'' relation.}
     \label{fig:subtyping}
   \end{subfigure}
   \hfill
   \begin{subfigure}[t]{0.45\textwidth}
     \centering
-    \includegraphics[width=\textwidth]{figures/subtyping-ours}
-    \caption{An attempt to express the same schema without using subtype relations. Note that the cardinality constraints are more permissive than in \autoref{fig:subtyping}.}
+    \includegraphics[width=\textwidth]{figures/subtyping-ours.pdf}
+    \caption{An attempt to express the same schema without using subtype relations. Note that the this schema is strictly more permissive than~(a).}
     \label{fig:subtyping-ours}
   \end{subfigure}
-  \caption{An example of a subtype relation that cannot be modeled using our schema formalism.}
+  \caption{A schema consisting of a supertype with two subtypes which cannot be modeled using our schema formalism. Any property graph that conforms to~(a) also conforms to~(b), but not the other way around.}
 \end{figure}
 
-\bibliographystyle{apalike}
-\bibliography{main}
+% \bibliographystyle{apalike}
+% \bibliography{main}
 
 \end{document}
