@@ -121,7 +121,14 @@ We may informally say that an object $o$ conforms to a schema object $o'$, by wh
 
 The similarity between property graph types and property graphs is intentional. This allows us to visualize them in a similar ways, and to use the same mental model to think about them. In fact, a property graph type can be simulated by a property graph if we allow properties to take property types as values, i.e. $\ptypes \subseteq \mathcal{V}$. Then we let $\lambda$ and $\pi$ take the role of $\omega$, in the sense that $\lambda(o) = L$ and $\pi(o) = \rtype$ if $\omega(o) = (L, \rtype)$ for all objects $o$ in the property graph.
 
-TODO: property graph type example
+An example of a property graph type is given in \autoref{fig:pg-type-example}.
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\textwidth]{figures/pg-type-example.pdf}
+  \caption{A property graph type, visualized as a property graph. This is a fragment of the LDBC SNB schema \cite{angles2020snb}.}
+  \label{fig:pg-type-example}
+\end{figure}
 
 \begin{definition}[Property graph conformance]
   Given a property graph $$G = (N, E, \rho, \lambda, \pi)$$ and a property graph type $$\gtype = (N', E', \rho', \omega)$$ we say that $G$ \emph{conforms} to $\gtype$ if and only if all of the following rules hold.
@@ -299,7 +306,7 @@ In \autoref{fig:subtyping}, a constraint is specified which we can express in wo
   \caption{A schema consisting of a supertype with two subtypes which cannot be modeled using our schema formalism. Any property graph that conforms to~(a) also conforms to~(b), but not the other way around.}
 \end{figure}
 
-% \bibliographystyle{apalike}
-% \bibliography{main}
+\bibliographystyle{apalike}
+\bibliography{main}
 
 \end{document}
