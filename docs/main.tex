@@ -1,5 +1,6 @@
-\documentclass[a4paper]{article}
+\documentclass{article}
 
+\usepackage[a4paper, margin=1.5in]{geometry}
 \usepackage[hidelinks]{hyperref}
 \usepackage{parskip}
 \usepackage{amsmath}
@@ -78,7 +79,14 @@ Given a node $u$, the set of \emph{outgoing} edges is given by $\{e \in E \mid \
 
 The functions $\src$ and $\trg$ map pairs to their first and second element, i.e. $\src((u, v)) = u$ and $\trg((u, v)) = v$. To refer to the source and target \emph{endpoints} of an edge $e$, we write $\src(\rho(e))$ and $\trg(\rho(e))$, respectively.
 
-TODO: property graph example
+An example of a property graph is given in \autoref{fig:pg}. Nodes and edges are drawn as rectangles and arrows, respectively. Each object is associated with a set of labels and properties. Edge properties are surrounded by `\{' and `\}', which are omitted when an edge has no properties.
+
+\begin{figure}[t]
+  \centering
+  \includegraphics{figures/pg.pdf}
+  \caption{A property graph representing a small social network.}
+  \label{fig:pg}
+\end{figure}
 
 \section{Property Graph Schemas}
 
@@ -107,7 +115,10 @@ We postulate the set of property types $\mathcal{T}$.
   Let $G = (N, E, \rho, \lambda, \pi)$ be a property graph and $\otype = (L, \rtype)$ an object type. The set of objects that \emph{conform} to $\otype$ is defined as $\sem{\otype} = \{o \in N \cup E \mid \lambda(o) = L \wedge \pi(o) \in \sem{\rtype}\}$.
 \end{definition}
 
+% TODO: rename property graph type to schema?
+% TODO: fix autoref to definitions
 \begin{definition}[Property graph type]
+  \label{def:pg-type}
   A \emph{property graph type} is given by a tuple $\gtype = (N, E, \rho, \omega)$ where 
   \begin{itemize}
     \item $N$ is a finite set of schema nodes;
@@ -121,39 +132,43 @@ We may informally say that an object $o$ conforms to a schema object $o'$, by wh
 
 The similarity between property graph types and property graphs is intentional. This allows us to visualize them in a similar ways, and to use the same mental model to think about them. In fact, a property graph type can be simulated by a property graph if we allow properties to take property types as values, i.e. $\ptypes \subseteq \mathcal{V}$. Then we let $\lambda$ and $\pi$ take the role of $\omega$, in the sense that $\lambda(o) = L$ and $\pi(o) = \rtype$ if $\omega(o) = (L, \rtype)$ for all objects $o$ in the property graph.
 
-An example of a property graph type is given in \autoref{fig:pg-type-example}.
+An example of a property graph type is given in \autoref{fig:pg-type}.
 
 \begin{figure}[t]
   \centering
-  \includegraphics[width=\textwidth]{figures/pg-type-example.pdf}
-  \caption{A property graph type, visualized as a property graph. This is a fragment of the LDBC SNB schema \cite{angles2020snb}.}
-  \label{fig:pg-type-example}
+  \includegraphics{figures/pg-type.pdf}
+  \caption{A property graph type.}
+  \label{fig:pg-type}
 \end{figure}
 
 \begin{definition}[Property graph conformance]
   Given a property graph $$G = (N, E, \rho, \lambda, \pi)$$ and a property graph type $$\gtype = (N', E', \rho', \omega)$$ we say that $G$ \emph{conforms} to $\gtype$ if and only if all of the following rules hold.
 
   \begin{enumerate}
-    \item Every node conforms to a schema node:
+    \item\label{rule:conformance-node}
+    Every node conforms to a schema node:
     \begin{align*}
       &\forall n \in N \; \exists n' \in N' :\\
       &\quad n \in \sem{\omega(n')}
     \end{align*}
     
-    \item Every edge conforms to a schema edge, and the endpoints conform respectively:
+    \item\label{rule:conformance-edge}
+    Every edge conforms to a schema edge, and the endpoints conform respectively:
     \begin{align*}
       &\forall e \in E \; \exists e' \in E' :\\
       &\quad e \in \sem{\omega(e')} \wedge \src(\rho(e)) \in \sem{\omega(\src(\rho'(e')))}\\
       &\quad\quad\wedge \trg(\rho(e)) \in \sem{\omega(\trg(\rho'(e')))}
     \end{align*}
     
-    \item If a node conforms to a schema node, it must have all the outgoing edges of the right type:
+    \item\label{rule:conformance-out}
+    If a node conforms to a schema node, it must have all the outgoing edges of the right type:
     \begin{align*}
       &\forall e' \in E' \; \forall n_1 \in N \cap \sem{\omega(\src(\rho(e')))} \; \exists e \in E \cap \sem{\omega(e')} :\\
       &\quad \src(\rho(e)) = n_1 \wedge \trg(\rho(e)) \in \sem{\omega(\trg(\rho(e')))}
     \end{align*}
 
-    \item If a node conforms to a schema node, it must have all the incoming edges of the right type:
+    \item\label{rule:conformance-in}
+    If a node conforms to a schema node, it must have all the incoming edges of the right type:
     \begin{align*}
       &\forall e' \in E' \; \forall n_2 \in N \cap \sem{\omega(\trg(\rho(e')))} \; \exists e \in E \cap \sem{\omega(e')} :\\
       &\quad \src(\rho(e)) \in \sem{\omega(\src(\rho(e')))} \wedge \trg(\rho(e)) = n_2
@@ -161,9 +176,61 @@ An example of a property graph type is given in \autoref{fig:pg-type-example}.
   \end{enumerate}
 \end{definition}
 
+\autoref{fig:conformance} contains some examples showing how each of these rules can be violated.
+
 Under these definitions, a schema edge requires that \emph{at least one} conforming edge exists in the property graph. That is, if a schema node has an incident edge (i.e. an incoming or outgoing edge that the schema node participates in), then any node that conforms to the schema node must also have at least one incident edge (in the same direction) that conforms to the schema edge. In the following, we will relax this requirement and introduce a more general notion of cardinality constraints.
 
-TODO: examples
+\begin{figure}[t]
+  \centering
+  \begin{subfigure}[t]{0.45\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{figures/conformance-node.pdf}
+    \caption{A \texttt{Person} is missing a \texttt{birthday}, which violates rule \ref{rule:conformance-node}.}
+    \label{fig:conformance-node}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}[t]{0.45\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{figures/conformance-edge.pdf}
+    \caption{A \texttt{knows} edge is missing a \texttt{since} property, which violates rule \ref{rule:conformance-edge}.}
+    \label{fig:conformance-edge}
+  \end{subfigure}
+
+  \vskip\baselineskip
+
+  \begin{subfigure}[t]{0.45\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{figures/conformance-edge-target.pdf}
+    \caption{The target of a \texttt{knows} edge is not a \texttt{Person}, which violates rule \ref{rule:conformance-edge}.}
+    \label{fig:conformance-edge-target}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}[t]{0.45\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{figures/conformance-out.pdf}
+    \caption{A \texttt{Person} is missing an outgoing \texttt{created} edge, which violates rule \ref{rule:conformance-out}.}
+    \label{fig:conformance-out}
+  \end{subfigure}
+
+  \vskip\baselineskip
+  
+  \begin{subfigure}[t]{0.45\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{figures/conformance-out-2.pdf}
+    \caption{A \texttt{Person} is missing an outgoing \texttt{knows} edge, which violates rule \ref{rule:conformance-out}.}
+    \label{fig:conformance-out-2}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}[t]{0.45\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{figures/conformance-in.pdf}
+    \caption{A \texttt{Post} is missing an incoming \texttt{created} edge, which violates rule \ref{rule:conformance-in}.}
+    \label{fig:conformance-in}
+  \end{subfigure}
+
+  \caption{Property graphs that do not conform to the property graph type of \autoref{fig:pg-type}. Violating nodes and edges have a red dotted outline.}
+  \label{fig:conformance}
+\end{figure}
 
 \subsection{Cardinality constraints}
 
@@ -198,32 +265,43 @@ We also use the functions $\src$ and $\trg$ to refer to the first and second int
   \end{itemize}
 \end{definition}
 
-TODO: property graph type with cardinality constraints
+An example of a property graph type with cardinality constraints is given in \autoref{fig:pg-type-card}. Note that this is a relaxed version of \autoref{fig:pg-type}.
+
+\begin{figure}[t]
+  \centering
+  \includegraphics{figures/pg-type-card.pdf}
+  \caption{A property graph type with cardinality constraints.}
+  \label{fig:pg-type-card}
+\end{figure}
 
 \begin{definition}[Property graph conformance]
   Given a property graph $$G = (N, E, \rho, \lambda, \pi)$$ and a property graph type $$\gtype = (N', E', \rho', \omega, \eta)$$ we say that $G$ \emph{conforms} to $\gtype$ if and only if all of the following rules hold.
 
   \begin{enumerate}
-    \item Every node conforms to a schema node:
+    \item\label{rule:conformance-card-node}
+    Every node conforms to a schema node:
     \begin{align*}
       &\forall n \in N \; \exists n' \in N' :\\
       &\quad n \in \sem{\omega(n')}
     \end{align*}
     
-    \item Every edge conforms to a schema edge, and the endpoints conform respectively:
+    \item\label{rule:conformance-card-edge}
+    Every edge conforms to a schema edge, and the endpoints conform respectively:
     \begin{align*}
       &\forall e \in E \; \exists e' \in E' :\\
       &\quad e \in \sem{\omega(e')} \wedge \src(\rho(e)) \in \sem{\omega(\src(\rho'(e')))}\\
       &\quad\quad\wedge \trg(\rho(e)) \in \sem{\omega(\trg(\rho'(e')))}
     \end{align*}
     
-    \item If a node conforms to a schema node, it must have the right number of outgoing edges of the right type:
+    \item\label{rule:conformance-card-out}
+    If a node conforms to a schema node, it must have the right number of outgoing edges of the right type:
     \begin{align*}
       &\forall e' \in E' \; \forall n_1 \in N \cap \sem{\omega(\src(\rho(e')))} \; \exists^{\src(\eta(e'))} e \in E \cap \sem{\omega(e')} :\\
       &\quad \src(\rho(e)) = n_1 \wedge \trg(\rho(e)) \in \sem{\omega(\trg(\rho(e')))}
     \end{align*}
 
-    \item If a node conforms to a schema node, it must have the right number of incoming edges of the right type:
+    \item\label{rule:conformance-card-in}
+    If a node conforms to a schema node, it must have the right number of incoming edges of the right type:
     \begin{align*}
       &\forall e' \in E' \; \forall n_2 \in N \cap \sem{\omega(\trg(\rho(e')))} \; \exists^{\trg(\eta(e'))} e \in E \cap \sem{\omega(e')} :\\
       &\quad \src(\rho(e)) \in \sem{\omega(\src(\rho(e')))} \wedge \trg(\rho(e)) = n_2
@@ -231,7 +309,45 @@ TODO: property graph type with cardinality constraints
   \end{enumerate}
 \end{definition}
 
-TODO: examples
+Compared to Definition \ref{def:pg-type}, rules \ref{rule:conformance-card-node} and \ref{rule:conformance-card-edge} have not changed, but \ref{rule:conformance-card-out} and \ref{rule:conformance-card-in} now ensure that there not too few or too many edges of a certain type.
+
+\autoref{fig:conformance-card} contains some examples showing the effects of these new rules.
+
+\begin{figure}[t]
+  \centering
+  \begin{subfigure}[t]{0.45\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{figures/conformance-card-out.pdf}
+    \caption{The graph conforms to the schema. A \texttt{Person} is allowed to not have created any \texttt{Post}s.}
+    \label{fig:conformance-card-node}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}[t]{0.45\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{figures/conformance-card-out-2.pdf}
+    \caption{The graph conforms to the schema. A \texttt{Person} is allowed to have no outgoing \texttt{knows} edges.}
+    \label{fig:conformance-card-edge}
+  \end{subfigure}
+
+  \vskip\baselineskip
+
+  \begin{subfigure}[t]{0.45\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{figures/conformance-card-too-many-in.pdf}
+    \caption{This \texttt{Post} has too many incoming \texttt{created} edges, which violates rule \ref{rule:conformance-card-in}.}
+    \label{fig:conformance-card-edge-target}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}[t]{0.45\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{figures/conformance-in.pdf}
+    \caption{A \texttt{Post} is missing an incoming \texttt{created} edge, which violates rule \ref{rule:conformance-card-in}.}
+    \label{fig:conformance-card-out}
+  \end{subfigure}
+
+  \caption{Property graphs validated against the property graph type of \autoref{fig:pg-type-card}. Violating nodes and edges have a red dotted outline.}
+  \label{fig:conformance-card}
+\end{figure}
 
 \subsection{Optional properties}
 
