@@ -115,11 +115,10 @@ We postulate the set of property types $\mathcal{T}$.
   Let $G = (N, E, \rho, \lambda, \pi)$ be a property graph and $\otype = (L, \rtype)$ an object type. The set of objects that \emph{conform} to $\otype$ is defined as $\sem{\otype} = \{o \in N \cup E \mid \lambda(o) = L \wedge \pi(o) \in \sem{\rtype}\}$.
 \end{definition}
 
-% TODO: rename property graph type to schema?
 % TODO: fix autoref to definitions
-\begin{definition}[Property graph type]
-  \label{def:pg-type}
-  A \emph{property graph type} is given by a tuple $\gtype = (N, E, \rho, \omega)$ where 
+\begin{definition}[Property graph schema]
+  \label{def:pg-schema}
+  A \emph{property graph schema} is given by a tuple $\gtype = (N, E, \rho, \omega)$ where 
   \begin{itemize}
     \item $N$ is a finite set of schema nodes;
     \item $E$ is a finite set of schema edges such that $N \cap E = \emptyset$;
@@ -130,19 +129,19 @@ We postulate the set of property types $\mathcal{T}$.
 
 We may informally say that an object $o$ conforms to a schema object $o'$, by which we mean that $o \in \sem{\omega(o')}$.
 
-The similarity between property graph types and property graphs is intentional. This allows us to visualize them in a similar ways, and to use the same mental model to think about them. In fact, a property graph type can be simulated by a property graph if we allow properties to take property types as values, i.e. $\ptypes \subseteq \mathcal{V}$. Then we let $\lambda$ and $\pi$ take the role of $\omega$, in the sense that $\lambda(o) = L$ and $\pi(o) = \rtype$ if $\omega(o) = (L, \rtype)$ for all objects $o$ in the property graph.
+The similarity between property graphs and schemas is intentional. This allows us to visualize them in a similar ways, and to use the same mental model to think about them. In fact, a schema can be simulated by a property graph if we allow properties to take property types as values, i.e. $\ptypes \subseteq \mathcal{V}$. Then we let $\lambda$ and $\pi$ take the role of $\omega$, in the sense that $\lambda(o) = L$ and $\pi(o) = \rtype$ if $\omega(o) = (L, \rtype)$ for all objects $o$ in the property graph.
 
-An example of a property graph type is given in \autoref{fig:pg-type}.
+An example of a property graph schema is given in \autoref{fig:pg-schema}.
 
 \begin{figure}[t]
   \centering
-  \includegraphics{figures/pg-type.pdf}
-  \caption{A property graph type.}
-  \label{fig:pg-type}
+  \includegraphics{figures/pg-schema.pdf}
+  \caption{A property graph schema.}
+  \label{fig:pg-schema}
 \end{figure}
 
-\begin{definition}[Property graph conformance]
-  Given a property graph $$G = (N, E, \rho, \lambda, \pi)$$ and a property graph type $$\gtype = (N', E', \rho', \omega)$$ we say that $G$ \emph{conforms} to $\gtype$ if and only if all of the following rules hold.
+\begin{definition}[Schema conformance]
+  Given a property graph $$G = (N, E, \rho, \lambda, \pi)$$ and a property graph schema $$\gtype = (N', E', \rho', \omega)$$ we say that $G$ \emph{conforms} to $\gtype$ if and only if all of the following rules hold.
 
   \begin{enumerate}
     \item\label{rule:conformance-node}
@@ -228,7 +227,7 @@ Under these definitions, a schema edge requires that \emph{at least one} conform
     \label{fig:conformance-in}
   \end{subfigure}
 
-  \caption{Property graphs that do not conform to the property graph type of \autoref{fig:pg-type}. Violating nodes and edges have a red dotted outline.}
+  \caption{Examples of property graphs that do not conform to the schema of \autoref{fig:pg-schema}. Violating nodes and edges have a red dotted outline.}
   \label{fig:conformance}
 \end{figure}
 
@@ -246,7 +245,7 @@ We first introduce a generalization of the existential quantifier which enables 
   \end{itemize}
 \end{definition}
 
-Next, we allow cardinality constraints on edges by revising the definitions of property graph type and property graph conformance.
+Next, we allow cardinality constraints on edges by revising the definitions of property graph schema and schema conformance.
 
 \begin{definition}[Cardinality constraint]
   A \emph{cardinality constraint} is an ordered pair of intervals $(n_1..m_1, \, n_2..m_2)$ where $n_1, n_2 \in \N$ and $m_1, m_2 \in \N^*$ with $\N = \{0, 1, 2, \ldots\}$ and $\N^* = \N \cup \{*\}$. The set of all cardinality constraints is denoted as $\mathcal{C}$.
@@ -254,8 +253,8 @@ Next, we allow cardinality constraints on edges by revising the definitions of p
 
 We also use the functions $\src$ and $\trg$ to refer to the first and second interval of a cardinality constraint, i.e. $\src((n_1..m_1, \, n_2..m_2)) = n_1..m_1$ and $\trg((n_1..m_1, \, n_2..m_2)) = n_2..m_2$.
 
-\begin{definition}[Property graph type]
-  A \emph{property graph type} is a tuple $$\gtype = (N, E, \rho, \omega, \eta)$$ where
+\begin{definition}[Property graph schema]
+  A \emph{property graph schema} is a tuple $$\gtype = (N, E, \rho, \omega, \eta)$$ where
   \begin{itemize}
     \item $N$ is a finite set of schema nodes;
     \item $E$ is a finite set of schema edges such that $N \cap E = \emptyset$;
@@ -265,17 +264,17 @@ We also use the functions $\src$ and $\trg$ to refer to the first and second int
   \end{itemize}
 \end{definition}
 
-An example of a property graph type with cardinality constraints is given in \autoref{fig:pg-type-card}. Note that this is a relaxed version of \autoref{fig:pg-type}.
+An example of a property graph schema with cardinality constraints is given in \autoref{fig:pg-schema-card}. Note that this is a relaxed version of \autoref{fig:pg-schema}.
 
 \begin{figure}[t]
   \centering
-  \includegraphics{figures/pg-type-card.pdf}
-  \caption{A property graph type with cardinality constraints.}
-  \label{fig:pg-type-card}
+  \includegraphics{figures/pg-schema-card.pdf}
+  \caption{A property graph schema with cardinality constraints.}
+  \label{fig:pg-schema-card}
 \end{figure}
 
-\begin{definition}[Property graph conformance]
-  Given a property graph $$G = (N, E, \rho, \lambda, \pi)$$ and a property graph type $$\gtype = (N', E', \rho', \omega, \eta)$$ we say that $G$ \emph{conforms} to $\gtype$ if and only if all of the following rules hold.
+\begin{definition}[Schema conformance]
+  Given a property graph $$G = (N, E, \rho, \lambda, \pi)$$ and a property graph schema $$\gtype = (N', E', \rho', \omega, \eta)$$ we say that $G$ \emph{conforms} to $\gtype$ if and only if all of the following rules hold.
 
   \begin{enumerate}
     \item\label{rule:conformance-card-node}
@@ -309,7 +308,7 @@ An example of a property graph type with cardinality constraints is given in \au
   \end{enumerate}
 \end{definition}
 
-Compared to Definition \ref{def:pg-type}, rules \ref{rule:conformance-card-node} and \ref{rule:conformance-card-edge} have not changed, but \ref{rule:conformance-card-out} and \ref{rule:conformance-card-in} now ensure that there not too few or too many edges of a certain type.
+Compared to Definition \ref{def:pg-schema}, rules \ref{rule:conformance-card-node} and \ref{rule:conformance-card-edge} have not changed, but \ref{rule:conformance-card-out} and \ref{rule:conformance-card-in} now ensure that there not too few or too many edges of a certain type.
 
 \autoref{fig:conformance-card} contains some examples showing the effects of these new rules.
 
@@ -345,7 +344,7 @@ Compared to Definition \ref{def:pg-type}, rules \ref{rule:conformance-card-node}
     \label{fig:conformance-card-out}
   \end{subfigure}
 
-  \caption{Property graphs validated against the property graph type of \autoref{fig:pg-type-card}. Violating nodes and edges have a red dotted outline.}
+  \caption{Examples of property graphs validated against the schema of \autoref{fig:pg-schema-card}. Violating nodes and edges have a red dotted outline.}
   \label{fig:conformance-card}
 \end{figure}
 
@@ -422,7 +421,7 @@ In \autoref{fig:subtyping}, a constraint is specified which we can express in wo
   \caption{A schema consisting of a supertype with two subtypes which cannot be modeled using our schema formalism. Any property graph that conforms to~(a) also conforms to~(b), but not the other way around.}
 \end{figure}
 
-\bibliographystyle{apalike}
-\bibliography{main}
+% \bibliographystyle{apalike}
+% \bibliography{main}
 
 \end{document}
