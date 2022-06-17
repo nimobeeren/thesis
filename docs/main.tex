@@ -56,6 +56,8 @@
 
 \section{Property Graphs}
 
+% TODO: gentle introduction
+
 We postulate the following countably infinite sets: the set of labels $\mathcal{L}$, the set of property names $\mathcal{N}$ and the set of property values $\mathcal{V}$.
 
 \begin{definition}[Record]
@@ -79,7 +81,7 @@ Given a node $u$, the set of \emph{outgoing} edges is given by $\{e \in E \mid \
 
 The functions $\src$ and $\trg$ map pairs to their first and second element, i.e. $\src((u, v)) = u$ and $\trg((u, v)) = v$. To refer to the source and target \emph{endpoints} of an edge $e$, we write $\src(\rho(e))$ and $\trg(\rho(e))$, respectively.
 
-An example of a property graph is given in \autoref{fig:pg}. Nodes and edges are drawn as rectangles and arrows, respectively. Each object is associated with a set of labels and properties. Edge properties are surrounded by `\{' and `\}', which are omitted when an edge has no properties.
+An example of a property graph is given in \autoref{fig:pg}. Nodes and edges are drawn as rectangles and arrows, respectively. Each object is associated with a set of labels and properties. Node labels are written in the top compartment, and node properties are written in the bottom compartment. Edge labels are drawn inside pills, and edge properties are surrounded by `\{' and `\}', which are omitted when an edge has no properties.
 
 \begin{figure}[t]
   \centering
@@ -89,6 +91,8 @@ An example of a property graph is given in \autoref{fig:pg}. Nodes and edges are
 \end{figure}
 
 \section{Property Graph Schemas}
+
+% TODO: gentle introduction, mention motivation of ER diagrams
 
 We postulate the set of property types $\mathcal{T}$.
 
@@ -106,7 +110,7 @@ We postulate the set of property types $\mathcal{T}$.
 \end{definition}
 
 \begin{definition}[Object type]
-  A \emph{object type} is a pair $\otype = (L, \rtype)$ where $L \subseteq \mathcal{L}$ is a finite set of labels and and $\rtype$ a record type. 
+  An \emph{object type} is a pair $\otype = (L, \rtype)$ where $L \subseteq \mathcal{L}$ is a finite set of labels and and $\rtype$ a record type. 
   % We will denote such object types also simply as $L\rtype$ or $\{ l_1 \ldots l_k \} \langle a_1 : \rtype_1, \ldots, a_n : \rtype_n \rangle$.
   The set of all object types is denoted as $\otypes$.
 \end{definition}
@@ -118,7 +122,7 @@ We postulate the set of property types $\mathcal{T}$.
 % TODO: fix autoref to definitions
 \begin{definition}[Property graph schema]
   \label{def:pg-schema}
-  A \emph{property graph schema} is given by a tuple $\gtype = (N, E, \rho, \omega)$ where 
+  A \emph{property graph schema} is a tuple $$\gtype = (N, E, \rho, \omega)$$ where 
   \begin{itemize}
     \item $N$ is a finite set of schema nodes;
     \item $E$ is a finite set of schema edges such that $N \cap E = \emptyset$;
@@ -129,9 +133,9 @@ We postulate the set of property types $\mathcal{T}$.
 
 We may informally say that an object $o$ conforms to a schema object $o'$, by which we mean that $o \in \sem{\omega(o')}$.
 
-The similarity between property graphs and schemas is intentional. This allows us to visualize them in a similar ways, and to use the same mental model to think about them. In fact, a schema can be simulated by a property graph if we allow properties to take property types as values, i.e. $\ptypes \subseteq \mathcal{V}$. Then we let $\lambda$ and $\pi$ take the role of $\omega$, in the sense that $\lambda(o) = L$ and $\pi(o) = \rtype$ if $\omega(o) = (L, \rtype)$ for all objects $o$ in the property graph.
+The similarity between property graphs and schemas is intentional. This allows us to visualize and think about them in a similar ways. In fact, a property graph schema can be simulated by a property graph if we allow properties to take property types as values, i.e. $\ptypes \subseteq \mathcal{V}$. Then we let $\lambda$ and $\pi$ take the role of $\omega$, in the sense that $\lambda(o) = L$ and $\pi(o) = \rtype$ if $\omega(o) = (L, \rtype)$ for all objects $o$ in the property graph.
 
-An example of a property graph schema is given in \autoref{fig:pg-schema}.
+An example of a property graph schema is given in \autoref{fig:pg-schema}. Schema nodes and edges are drawn in the same way as for data graphs, except properties have types as values.
 
 \begin{figure}[t]
   \centering
@@ -141,6 +145,7 @@ An example of a property graph schema is given in \autoref{fig:pg-schema}.
 \end{figure}
 
 \begin{definition}[Schema conformance]
+  \label{def:schema-conformance}
   Given a property graph $$G = (N, E, \rho, \lambda, \pi)$$ and a property graph schema $$\gtype = (N', E', \rho', \omega)$$ we say that $G$ \emph{conforms} to $\gtype$ if and only if all of the following rules hold.
 
   \begin{enumerate}
@@ -175,7 +180,7 @@ An example of a property graph schema is given in \autoref{fig:pg-schema}.
   \end{enumerate}
 \end{definition}
 
-\autoref{fig:conformance} contains some examples showing how each of these rules can be violated.
+\autoref{fig:conformance} contains some examples of property graphs which are validated against the schema of \autoref{fig:pg-schema}.
 
 Under these definitions, a schema edge requires that \emph{at least one} conforming edge exists in the property graph. That is, if a schema node has an incident edge (i.e. an incoming or outgoing edge that the schema node participates in), then any node that conforms to the schema node must also have at least one incident edge (in the same direction) that conforms to the schema edge. In the following, we will relax this requirement and introduce a more general notion of cardinality constraints.
 
@@ -240,18 +245,20 @@ We first introduce a generalization of the existential quantifier which enables 
   \begin{itemize}
     \item $\exists^{\geq n} x \in X : P(x) \equiv \exists x_1, \ldots, x_n \in X : P(x_1) \wedge \ldots \wedge P(x_n) \wedge \forall 1 \leq i < j \leq n : x_i \neq x_j$;
     \item $\exists^{\leq n} x \in X : P(x) \equiv \exists x_1, \ldots, x_n, x_{n+1}, \ldots, x_k \in X : P(x_1) \wedge \ldots \wedge P(x_k) \implies \forall n < i < j \leq k : x_i = x_j$;
-    \item $\exists^{n..m} x \in X : P(x) \equiv \exists^{\geq n} x \in X : P(x) \wedge \exists^{\leq m} x' \in X : P(x')$; and
-    \item $\exists^{n..*} x \in X : P(x) \equiv \exists^{\geq n} x \in X : P(x)$.
+    \item $\exists^{[n, m]} x \in X : P(x) \equiv \exists^{\geq n} x \in X : P(x) \wedge \exists^{\leq m} x' \in X : P(x')$;
+    \item $\exists^{[n, *]} x \in X : P(x) \equiv \exists^{\geq n} x \in X : P(x)$.
   \end{itemize}
 \end{definition}
 
-Next, we allow cardinality constraints on edges by revising the definitions of property graph schema and schema conformance.
+Next, we introduce the notion of a \emph{cardinality constraint}.
 
 \begin{definition}[Cardinality constraint]
-  A \emph{cardinality constraint} is an ordered pair of intervals $(n_1..m_1, \, n_2..m_2)$ where $n_1, n_2 \in \N$ and $m_1, m_2 \in \N^*$ with $\N = \{0, 1, 2, \ldots\}$ and $\N^* = \N \cup \{*\}$. The set of all cardinality constraints is denoted as $\mathcal{C}$.
+  A \emph{cardinality constraint} is an ordered pair of intervals $([n_1, m_1], \, [n_2, m_2])$ where $n_1, n_2 \in \N$ and $m_1, m_2 \in \N^*$ with $\N = \{0, 1, 2, \ldots\}$ and $\N^* = \N \cup \{*\}$. The set of all cardinality constraints is denoted as $\mathcal{C}$.
 \end{definition}
 
-We also use the functions $\src$ and $\trg$ to refer to the first and second interval of a cardinality constraint, i.e. $\src((n_1..m_1, \, n_2..m_2)) = n_1..m_1$ and $\trg((n_1..m_1, \, n_2..m_2)) = n_2..m_2$.
+The two intervals of a cardinality constraint apply to the source and target of an edge, respectively. We also use the functions $\src$ and $\trg$ to refer to the first and second interval of a cardinality constraint, i.e. $\src([n_1, m_1], \, [n_2, m_2]) = [n_1, m_1]$ and $\trg([n_1, m_1], \, [n_2, m_2]) = [n_2, m_2]$.
+
+Next, we revise the definitions of property graph schema and schema conformance, making use of our newly defined cardinality constraints. The following definitions supersede Definition~\ref{def:pg-schema} and~\ref{def:schema-conformance}.
 
 \begin{definition}[Property graph schema]
   A \emph{property graph schema} is a tuple $$\gtype = (N, E, \rho, \omega, \eta)$$ where
@@ -264,7 +271,7 @@ We also use the functions $\src$ and $\trg$ to refer to the first and second int
   \end{itemize}
 \end{definition}
 
-An example of a property graph schema with cardinality constraints is given in \autoref{fig:pg-schema-card}. Note that this is a relaxed version of \autoref{fig:pg-schema}.
+An example of a property graph schema with cardinality constraints is given in \autoref{fig:pg-schema-card}. Note that this is a relaxed variant of \autoref{fig:pg-schema}, in the sense that every graph that conforms to \autoref{fig:pg-schema} also conforms to \autoref{fig:pg-schema-card}, but not the other way around. Intervals such as $[n, m]$ are written as $n..m$, and $[n, n]$ is written simply as $n$, following conventions established in UML~\cite{uml}.
 
 \begin{figure}[t]
   \centering
@@ -308,23 +315,23 @@ An example of a property graph schema with cardinality constraints is given in \
   \end{enumerate}
 \end{definition}
 
-Compared to Definition \ref{def:pg-schema}, rules \ref{rule:conformance-card-node} and \ref{rule:conformance-card-edge} have not changed, but \ref{rule:conformance-card-out} and \ref{rule:conformance-card-in} now ensure that there not too few or too many edges of a certain type.
+Compared to Definition~\ref{def:schema-conformance}, rules~\ref{rule:conformance-card-node} and~\ref{rule:conformance-card-edge} are unchanged, but \ref{rule:conformance-card-out} and~\ref{rule:conformance-card-in} now ensure that there are not too few or too many edges of a certain type.
 
-\autoref{fig:conformance-card} contains some examples showing the effects of these new rules.
+\autoref{fig:conformance-card} contains some examples of property graphs which are validated against the schema of \autoref{fig:pg-schema-card}, taking into account the new rules for cardinality constraints.
 
 \begin{figure}[t]
   \centering
   \begin{subfigure}[t]{0.45\textwidth}
     \centering
     \includegraphics[width=\textwidth]{figures/conformance-card-out.pdf}
-    \caption{The graph conforms to the schema. A \texttt{Person} is allowed to not have created any \texttt{Post}s.}
+    \caption{Conforms to the schema. A \texttt{Person} is allowed to have created 0 \texttt{Post}s.}
     \label{fig:conformance-card-node}
   \end{subfigure}
   \hfill
   \begin{subfigure}[t]{0.45\textwidth}
     \centering
     \includegraphics[width=\textwidth]{figures/conformance-card-out-2.pdf}
-    \caption{The graph conforms to the schema. A \texttt{Person} is allowed to have no outgoing \texttt{knows} edges.}
+    \caption{Conforms to the schema. A \texttt{Person} is allowed to have no outgoing \texttt{knows} edges.}
     \label{fig:conformance-card-edge}
   \end{subfigure}
 
@@ -379,7 +386,7 @@ It may be desirable to allow a record to have properties with any name or any va
 
 \section{Limitations}
 
-Our schema formalisms come with a number of limitations. First, it is not possible to specify constraints over a graph pattern larger than two neighboring nodes and the edge between them. For example, say we want to allow a person to drive a car, but only when they have a driver's license. \autoref{fig:drivers-license} depicts a schema that models this using three nodes and two edges. Unfortunately, it is not possible to prevent a person from driving a car without having a driver's license. This illustrates the limited scope of the constraints that we can specify.
+Our schema formalisms come with a number of limitations. First, it is not possible to specify constraints over a graph pattern larger than two neighboring nodes and the edge between them. For example, say we want to allow a person to drive a car, but only when they have a driver's license. \autoref{fig:drivers-license} depicts a schema that models these entities and their relations this using three nodes and two edges. Unfortunately, it is not possible to prevent a person from driving a car without having a driver's license. This illustrates the limited scope of the constraints that we can specify.
 
 \begin{figure}[t]
   \centering
@@ -421,7 +428,8 @@ In \autoref{fig:subtyping}, a constraint is specified which we can express in wo
   \caption{A schema consisting of a supertype with two subtypes which cannot be modeled using our schema formalism. Any property graph that conforms to~(a) also conforms to~(b), but not the other way around.}
 \end{figure}
 
-% \bibliographystyle{apalike}
-% \bibliography{main}
+% TODO: include the number of ISO standard in reference
+\bibliographystyle{apalike}
+\bibliography{main}
 
 \end{document}
