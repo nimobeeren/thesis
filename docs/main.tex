@@ -63,6 +63,8 @@ Our notion of property graph represents data as a directed attributed multigraph
 
 Being a \emph{multigraph}, a property graph allows the existence of multiple edges between two nodes $u$ and $v$. Furthermore, we allow $u = v$, in which case the edge is called a \emph{self-loop}. We do not consider undirected edges, but they could be simulated by attaching a special label or property to an edge.
 
+% TODO: why not undirected?
+
 An example of a property graph is given in \autoref{fig:pg}. Node labels are written in the top compartment, and node properties are written in the bottom compartment. Edge properties are surrounded by `\{' and `\}', which may be omitted when an edge has no properties.
 
 For a formal definition, we assume the existence of the following countably infinite sets: the set of labels $\mathcal{L}$, the set of property names $\mathcal{N}$ and the set of property values $\mathcal{V}$.
@@ -96,10 +98,24 @@ The functions $\src$ and $\trg$ map pairs to their first and second element, i.e
 \section{Property Graph Schemas}
 
 % TODO: gentle introduction, mention motivation of ER diagrams
+% TODO: ER doesn't have direction, disambiguate with "arrow" in ER
 
-For a given property graph instance, it may be useful to formally describe its structure. Such a description may help to understand what we can do with a database, and allows inferring the type of results. Furthermore, we may want to prescribe some rules that the database should conform to, which ensure consistency and prevent mistakes. TODO: for both these purposes, schema, which is set of rules
+It has been proven useful to formally describe the structure of a database [TODO]. Such a description may help to understand what we can do with a database, allows us to perform inference and ensure consistency. Such a formal description can take the form of a \emph{schema}, which is a collection of rules which a database instance can be validated against.
 
-We first assume the existence of a set of property types $\mathcal{T}$. We then introduce a number of concepts that lead us to a formal definition of property graph schemas.
+A schema should allow modeling of real-world entities and their relationships. A more expressive schema language enables the specification of more complex constraints, although this may come with TODO: greater engineering effort? performance?
+
+% TODO: map ER features to PG concepts
+
+An example of a property graph schema is given in \autoref{fig:pg-schema}. The similarity between property graphs and schemas allows us to visualize and think about them iusing the same mental model. Schema nodes and edges are drawn in the same way as for data graphs, except properties are associated with types rather than concrete values.
+
+\begin{figure}[t]
+  \centering
+  \includegraphics{figures/pg-schema.pdf}
+  \caption{A property graph schema.}
+  \label{fig:pg-schema}
+\end{figure}
+
+To formally define property graph schemas and schema conformance, we first assume the existence of a set of property types $\mathcal{T}$. Next, we will introduce a number of supporting concepts.
 
 \begin{definition}[Property conformance]
   For each property type $\ptype \in \ptypes$ there is a set $\sem{\ptype} \subseteq \mathcal{V}$ that contains all property values that \emph{conform} to the type $\ptype$.
@@ -138,18 +154,14 @@ We first assume the existence of a set of property types $\mathcal{T}$. We then 
 
 We may informally say that an object $o$ conforms to a schema object $o'$, by which we mean that $o \in \sem{\omega(o')}$.
 
-The similarity between property graphs and schemas is intentional. This allows us to visualize and think about them in a similar ways. In fact, a property graph schema can be simulated by a property graph if we allow properties to take property types as values, i.e. $\ptypes \subseteq \mathcal{V}$. Then we let $\lambda$ and $\pi$ take the role of $\omega$, in the sense that $\lambda(o) = L$ and $\pi(o) = \rtype$ if $\omega(o) = (L, \rtype)$ for all objects $o$ in the property graph.
+Note that a property graph schema can be simulated by a property graph if we allow properties to take property types as values, i.e. $\ptypes \subseteq \mathcal{V}$. Then we let $\lambda$ and $\pi$ take the role of $\omega$, in the sense that $\lambda(o) = L$ and $\pi(o) = \rtype$ if $\omega(o) = (L, \rtype)$ for all objects $o$ in the property graph.
 
-An example of a property graph schema is given in \autoref{fig:pg-schema}. Schema nodes and edges are drawn in the same way as for data graphs, except properties have types as values.
-
-\begin{figure}[t]
-  \centering
-  \includegraphics{figures/pg-schema.pdf}
-  \caption{A property graph schema.}
-  \label{fig:pg-schema}
-\end{figure}
+Next, we define the rules that must hold for a property graph to conform to a schema.
 
 \begin{definition}[Schema conformance]
+  % TODO: use variables in english rules
+  % TODO: improve mapping between english and formal (3/4)
+  % Call this "basic" conformance
   \label{def:schema-conformance}
   Given a property graph $$G = (N, E, \rho, \lambda, \pi)$$ and a property graph schema $$\gtype = (N', E', \rho', \omega)$$ we say that $G$ \emph{conforms} to $\gtype$ if and only if all of the following rules hold.
 
@@ -254,6 +266,8 @@ We first introduce a generalization of the existential quantifier which enables 
     \item $\exists^{[n, *]} x \in X : P(x) \equiv \exists^{\geq n} x \in X : P(x)$.
   \end{itemize}
 \end{definition}
+
+% TODO: explain meaning of *
 
 Next, we introduce the notion of a \emph{cardinality constraint}.
 
