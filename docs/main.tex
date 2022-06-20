@@ -135,29 +135,27 @@ The goal of this subsection is to define a notion of property graph schema which
   \label{tab:er-pg}
 \end{table}
 
-An example of a property graph schema is given in \autoref{fig:pg-schema}. The similarity between property graphs and schemas allows us to visualize and think about them using the same mental model. Schema nodes and edges are drawn in the same way as for data graphs, but properties are associated with types rather than concrete values.
+An example of a basic property graph schema is given in \autoref{fig:pg-schema-basic}. The similarity between property graphs and schemas allows us to visualize and think about them using the same mental model. Schema nodes and edges are drawn in the same way as for data graphs, but properties are associated with types rather than concrete values.
 
 \begin{figure}[t]
   \centering
   \includegraphics{figures/pg-schema.pdf}
-  \caption{A property graph schema.}
-  \label{fig:pg-schema}
+  \caption{A basic property graph schema.}
+  \label{fig:pg-schema-basic}
 \end{figure}
 
 To formally define property graph schemas and schema conformance, we first assume the existence of a set of property types $\mathcal{T}$. Next, we introduce a number of supporting concepts.
 
-% TODO: rename to "basic" schema/conformance, and explain why
-
-\begin{definition}[Property conformance]
+\begin{definition}[Basic property conformance]
   For each property type $\ptype \in \ptypes$ there is a set $\sem{\ptype} \subseteq \mathcal{V}$ that contains all property values that \emph{conform} to the type $\ptype$.
 \end{definition}
 
-\begin{definition}[Record type]
+\begin{definition}[Basic record type]
   A \emph{record type} is a finite partial function $\rtype : \mathcal{N} \pto \ptypes$ that maps some property names to a property type.
   We denote such record types as $\langle a_1 : \ptype_1, \ldots, a_n : \ptype_n \rangle$.
 \end{definition}
 
-\begin{definition}[Record conformance]
+\begin{definition}[Basic record conformance]
   We say that a record $r$ \emph{conforms} to a record type $\rtype$, denoted $r \in \sem{\rtype}$, if for each property name $k \in \mathcal{N}$ it holds that (1) $r(k)$ is defined iff $\rtype(k)$ is defined and (2) $r(k) \in \sem{\rtype(k)}$ if $r(k)$ and $\rtype(k)$ are defined.
 \end{definition}
 
@@ -172,7 +170,7 @@ To formally define property graph schemas and schema conformance, we first assum
 \end{definition}
 
 % TODO: fix autoref to definitions
-\begin{definition}[Property graph schema]
+\begin{definition}[Basic property graph schema]
   \label{def:pg-schema}
   A \emph{property graph schema} is a tuple $$\gtype = (N, E, \rho, \omega)$$ where 
   \begin{itemize}
@@ -189,22 +187,21 @@ Note that a property graph schema can be simulated by a property graph if we all
 
 Next, we define the rules that must hold for a property graph to conform to a schema.
 
-\begin{definition}[Schema conformance]
+\begin{definition}[Basic schema conformance]
   % TODO: use variables in english rules
   % TODO: improve mapping between english and formal (3/4)
-  % Call this "basic" conformance
-  \label{def:schema-conformance}
+  \label{def:basic-schema-conformance}
   Given a property graph $$G = (N, E, \rho, \lambda, \pi)$$ and a property graph schema $$\gtype = (N', E', \rho', \omega)$$ we say that $G$ \emph{conforms} to $\gtype$ if and only if all of the following rules hold.
 
   \begin{enumerate}
-    \item\label{rule:conformance-node}
+    \item\label{rule:basic-conformance-node}
     Every node conforms to a schema node:
     \begin{align*}
       &\forall n \in N \; \exists n' \in N' :\\
       &\quad n \in \sem{\omega(n')}
     \end{align*}
     
-    \item\label{rule:conformance-edge}
+    \item\label{rule:basic-conformance-edge}
     Every edge conforms to a schema edge, and the endpoints conform respectively:
     \begin{align*}
       &\forall e \in E \; \exists e' \in E' :\\
@@ -212,14 +209,14 @@ Next, we define the rules that must hold for a property graph to conform to a sc
       &\quad\quad\wedge \trg(\rho(e)) \in \sem{\omega(\trg(\rho'(e')))}
     \end{align*}
     
-    \item\label{rule:conformance-out}
+    \item\label{rule:basic-conformance-out}
     If a node conforms to a schema node, it must have all the outgoing edges of the right type:
     \begin{align*}
       &\forall e' \in E' \; \forall n_1 \in N \cap \sem{\omega(\src(\rho(e')))} \; \exists e \in E \cap \sem{\omega(e')} :\\
       &\quad \src(\rho(e)) = n_1 \wedge \trg(\rho(e)) \in \sem{\omega(\trg(\rho(e')))}
     \end{align*}
 
-    \item\label{rule:conformance-in}
+    \item\label{rule:basic-conformance-in}
     If a node conforms to a schema node, it must have all the incoming edges of the right type:
     \begin{align*}
       &\forall e' \in E' \; \forall n_2 \in N \cap \sem{\omega(\trg(\rho(e')))} \; \exists e \in E \cap \sem{\omega(e')} :\\
@@ -228,7 +225,7 @@ Next, we define the rules that must hold for a property graph to conform to a sc
   \end{enumerate}
 \end{definition}
 
-\autoref{fig:conformance} contains some examples of property graphs which are validated against the schema of \autoref{fig:pg-schema}.
+\autoref{fig:conformance-basic} contains some examples of property graphs which are validated against the schema of \autoref{fig:pg-schema-basic}.
 
 Under these definitions, a schema edge requires that \emph{at least one} conforming edge exists in the property graph. That is, if a schema node has an incident edge (i.e. an incoming or outgoing edge that the schema node participates in), then any node that conforms to the schema node must also have at least one incident edge (in the same direction) that conforms to the schema edge. In the following, we relax this requirement and introduce a more general notion of cardinality constraints.
 
@@ -237,15 +234,15 @@ Under these definitions, a schema edge requires that \emph{at least one} conform
   \begin{subfigure}[t]{0.45\textwidth}
     \centering
     \includegraphics[width=\textwidth]{figures/conformance-node.pdf}
-    \caption{A \texttt{Person} is missing a \texttt{birthday}, which violates rule \ref{rule:conformance-node}.}
-    \label{fig:conformance-node}
+    \caption{A \texttt{Person} is missing a \texttt{birthday}, which violates rule \ref{rule:basic-conformance-node}.}
+    \label{fig:conformance-basic-node}
   \end{subfigure}
   \hfill
   \begin{subfigure}[t]{0.45\textwidth}
     \centering
     \includegraphics[width=\textwidth]{figures/conformance-edge.pdf}
-    \caption{A \texttt{knows} edge is missing a \texttt{since} property, which violates rule \ref{rule:conformance-edge}.}
-    \label{fig:conformance-edge}
+    \caption{A \texttt{knows} edge is missing a \texttt{since} property, which violates rule \ref{rule:basic-conformance-edge}.}
+    \label{fig:conformance-basic-edge}
   \end{subfigure}
 
   \vskip\baselineskip
@@ -253,15 +250,15 @@ Under these definitions, a schema edge requires that \emph{at least one} conform
   \begin{subfigure}[t]{0.45\textwidth}
     \centering
     \includegraphics[width=\textwidth]{figures/conformance-edge-target.pdf}
-    \caption{The target of a \texttt{knows} edge is not a \texttt{Person}, which violates rule \ref{rule:conformance-edge}.}
-    \label{fig:conformance-edge-target}
+    \caption{The target of a \texttt{knows} edge is not a \texttt{Person}, which violates rule \ref{rule:basic-conformance-edge}.}
+    \label{fig:conformance-basic-edge-target}
   \end{subfigure}
   \hfill
   \begin{subfigure}[t]{0.45\textwidth}
     \centering
     \includegraphics[width=\textwidth]{figures/conformance-out.pdf}
-    \caption{A \texttt{Person} is missing an outgoing \texttt{created} edge, which violates rule \ref{rule:conformance-out}.}
-    \label{fig:conformance-out}
+    \caption{A \texttt{Person} is missing an outgoing \texttt{created} edge, which violates rule \ref{rule:basic-conformance-out}.}
+    \label{fig:conformance-basic-out}
   \end{subfigure}
 
   \vskip\baselineskip
@@ -269,19 +266,19 @@ Under these definitions, a schema edge requires that \emph{at least one} conform
   \begin{subfigure}[t]{0.45\textwidth}
     \centering
     \includegraphics[width=\textwidth]{figures/conformance-out-2.pdf}
-    \caption{A \texttt{Person} is missing an outgoing \texttt{knows} edge, which violates rule \ref{rule:conformance-out}.}
-    \label{fig:conformance-out-2}
+    \caption{A \texttt{Person} is missing an outgoing \texttt{knows} edge, which violates rule \ref{rule:basic-conformance-out}.}
+    \label{fig:conformance-basic-out-2}
   \end{subfigure}
   \hfill
   \begin{subfigure}[t]{0.45\textwidth}
     \centering
     \includegraphics[width=\textwidth]{figures/conformance-in.pdf}
-    \caption{A \texttt{Post} is missing an incoming \texttt{created} edge, which violates rule \ref{rule:conformance-in}.}
-    \label{fig:conformance-in}
+    \caption{A \texttt{Post} is missing an incoming \texttt{created} edge, which violates rule \ref{rule:basic-conformance-in}.}
+    \label{fig:conformance-basic-in}
   \end{subfigure}
 
-  \caption{Examples of property graphs that do not conform to the schema of \autoref{fig:pg-schema}. Violating nodes and edges have a red dotted outline.}
-  \label{fig:conformance}
+  \caption{Examples of property graphs that do not conform to the schema of \autoref{fig:pg-schema-basic}. Violating nodes and edges have a red dotted outline.}
+  \label{fig:conformance-basic}
 \end{figure}
 
 \subsection{Cardinality constraints}
@@ -309,7 +306,7 @@ Next, we introduce the notion of a \emph{cardinality constraint}.
 
 The two intervals of a cardinality constraint apply to the source and target of an edge, respectively. We also use the functions $\src$ and $\trg$ to refer to the first and second interval of a cardinality constraint, i.e. $\src([n_1, m_1], \, [n_2, m_2]) = [n_1, m_1]$ and $\trg([n_1, m_1], \, [n_2, m_2]) = [n_2, m_2]$.
 
-Next, we revise the definitions of property graph schema and schema conformance, making use of our newly defined cardinality constraints. The following definitions supersede Definition~\ref{def:pg-schema} and~\ref{def:schema-conformance}.
+Next, we revise the definitions of property graph schema and schema conformance, making use of our newly defined cardinality constraints. The following definitions supersede Definition~\ref{def:pg-schema} and~\ref{def:basic-schema-conformance}.
 
 \begin{definition}[Property graph schema]
   A \emph{property graph schema} is a tuple $$\gtype = (N, E, \rho, \omega, \eta)$$ where
@@ -322,30 +319,29 @@ Next, we revise the definitions of property graph schema and schema conformance,
   \end{itemize}
 \end{definition}
 
-An example of a property graph schema with cardinality constraints is given in \autoref{fig:pg-schema-card}. Note that this is a relaxed variant of \autoref{fig:pg-schema}, in the sense that every graph that conforms to \autoref{fig:pg-schema} also conforms to \autoref{fig:pg-schema-card}, but not the other way around. Intervals such as $[n, m]$ are written as $n..m$, and $[n, n]$ is written simply as $n$, following conventions established in UML~\cite{uml}.
+An example of a property graph schema with cardinality constraints is given in \autoref{fig:pg-schema}. Note that this is a relaxed variant of \autoref{fig:pg-schema}, which is to say that every graph that conforms to \autoref{fig:pg-schema-basic} also conforms to \autoref{fig:pg-schema}, but not the other way around. Intervals such as $[n, m]$ are written as $n..m$, and $[n, n]$ is written simply as $n$, following notation established in UML~\cite{uml}. Contrary to some data modeling diagram notations, the arrow head is unrelated to cardinality, rather it specifies the direction of an edge.
 
-% TODO: ER doesn't have direction, disambiguate with "arrow" in ER
 % TODO: look-across vs same-side (I think we use same-side)
 
 \begin{figure}[t]
   \centering
   \includegraphics{figures/pg-schema-card.pdf}
   \caption{A property graph schema with cardinality constraints.}
-  \label{fig:pg-schema-card}
+  \label{fig:pg-schema}
 \end{figure}
 
 \begin{definition}[Schema conformance]
   Given a property graph $$G = (N, E, \rho, \lambda, \pi)$$ and a property graph schema $$\gtype = (N', E', \rho', \omega, \eta)$$ we say that $G$ \emph{conforms} to $\gtype$ if and only if all of the following rules hold.
 
   \begin{enumerate}
-    \item\label{rule:conformance-card-node}
+    \item\label{rule:conformance-node}
     Every node conforms to a schema node:
     \begin{align*}
       &\forall n \in N \; \exists n' \in N' :\\
       &\quad n \in \sem{\omega(n')}
     \end{align*}
     
-    \item\label{rule:conformance-card-edge}
+    \item\label{rule:conformance-edge}
     Every edge conforms to a schema edge, and the endpoints conform respectively:
     \begin{align*}
       &\forall e \in E \; \exists e' \in E' :\\
@@ -353,14 +349,14 @@ An example of a property graph schema with cardinality constraints is given in \
       &\quad\quad\wedge \trg(\rho(e)) \in \sem{\omega(\trg(\rho'(e')))}
     \end{align*}
     
-    \item\label{rule:conformance-card-out}
+    \item\label{rule:conformance-out}
     If a node conforms to a schema node, it must have the right number of outgoing edges of the right type:
     \begin{align*}
       &\forall e' \in E' \; \forall n_1 \in N \cap \sem{\omega(\src(\rho(e')))} \; \exists^{\src(\eta(e'))} e \in E \cap \sem{\omega(e')} :\\
       &\quad \src(\rho(e)) = n_1 \wedge \trg(\rho(e)) \in \sem{\omega(\trg(\rho(e')))}
     \end{align*}
 
-    \item\label{rule:conformance-card-in}
+    \item\label{rule:conformance-in}
     If a node conforms to a schema node, it must have the right number of incoming edges of the right type:
     \begin{align*}
       &\forall e' \in E' \; \forall n_2 \in N \cap \sem{\omega(\trg(\rho(e')))} \; \exists^{\trg(\eta(e'))} e \in E \cap \sem{\omega(e')} :\\
@@ -369,9 +365,9 @@ An example of a property graph schema with cardinality constraints is given in \
   \end{enumerate}
 \end{definition}
 
-Compared to Definition~\ref{def:schema-conformance}, rules~\ref{rule:conformance-card-node} and~\ref{rule:conformance-card-edge} are unchanged, but \ref{rule:conformance-card-out} and~\ref{rule:conformance-card-in} now ensure that there are not too few or too many edges of a certain type.
+Compared to Definition~\ref{def:basic-schema-conformance}, rules~\ref{rule:conformance-node} and~\ref{rule:conformance-edge} are unchanged, but \ref{rule:conformance-out} and~\ref{rule:conformance-in} now ensure that there are not too few or too many edges of a certain type.
 
-\autoref{fig:conformance-card} contains some examples of property graphs which are validated against the schema of \autoref{fig:pg-schema-card}, taking into account the new rules for cardinality constraints.
+\autoref{fig:conformance} contains some examples of property graphs which are validated against the schema of \autoref{fig:pg-schema}, taking into account the new rules for cardinality constraints.
 
 \begin{figure}[t]
   \centering
@@ -379,14 +375,14 @@ Compared to Definition~\ref{def:schema-conformance}, rules~\ref{rule:conformance
     \centering
     \includegraphics[width=\textwidth]{figures/conformance-card-out.pdf}
     \caption{Conforms to the schema. A \texttt{Person} is allowed to have created 0 \texttt{Post}s.}
-    \label{fig:conformance-card-node}
+    \label{fig:conformance-node}
   \end{subfigure}
   \hfill
   \begin{subfigure}[t]{0.45\textwidth}
     \centering
     \includegraphics[width=\textwidth]{figures/conformance-card-out-2.pdf}
     \caption{Conforms to the schema. A \texttt{Person} is allowed to have no outgoing \texttt{knows} edges.}
-    \label{fig:conformance-card-edge}
+    \label{fig:conformance-edge}
   \end{subfigure}
 
   \vskip\baselineskip
@@ -394,19 +390,19 @@ Compared to Definition~\ref{def:schema-conformance}, rules~\ref{rule:conformance
   \begin{subfigure}[t]{0.45\textwidth}
     \centering
     \includegraphics[width=\textwidth]{figures/conformance-card-too-many-in.pdf}
-    \caption{This \texttt{Post} has too many incoming \texttt{created} edges, which violates rule \ref{rule:conformance-card-in}.}
-    \label{fig:conformance-card-edge-target}
+    \caption{This \texttt{Post} has too many incoming \texttt{created} edges, which violates rule \ref{rule:conformance-in}.}
+    \label{fig:conformance-edge-target}
   \end{subfigure}
   \hfill
   \begin{subfigure}[t]{0.45\textwidth}
     \centering
     \includegraphics[width=\textwidth]{figures/conformance-in.pdf}
-    \caption{A \texttt{Post} is missing an incoming \texttt{created} edge, which violates rule \ref{rule:conformance-card-in}.}
-    \label{fig:conformance-card-out}
+    \caption{A \texttt{Post} is missing an incoming \texttt{created} edge, which violates rule \ref{rule:conformance-in}.}
+    \label{fig:conformance-out}
   \end{subfigure}
 
-  \caption{Examples of property graphs validated against the schema of \autoref{fig:pg-schema-card}. Violating nodes and edges have a red dotted outline.}
-  \label{fig:conformance-card}
+  \caption{Examples of property graphs validated against the schema of \autoref{fig:pg-schema}. Violating nodes and edges have a red dotted outline.}
+  \label{fig:conformance}
 \end{figure}
 
 \subsection{Optional properties}
