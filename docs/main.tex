@@ -55,6 +55,10 @@
 
 \begin{document}
 
+\section{Introduction}
+
+% Bring conceptual and logical model closer together
+
 \section{Property Graphs}
 
 We start by introducing our data model, which is based on the concept of a \emph{property graph}~\cite{deutsch2021gpml} as established by the Working Group for Database Languages~(WG3), which is a part of ISO/IEC JTC1/SC32. We use this data model in the rest of this document.
@@ -97,16 +101,41 @@ The functions $\src$ and $\trg$ map pairs to their first and second element, i.e
 
 \section{Property Graph Schemas}
 
-% TODO: gentle introduction, mention motivation of ER diagrams
-% TODO: ER doesn't have direction, disambiguate with "arrow" in ER
+It has been proven useful to formally describe the structure of a database [TODO]. Such a description may help to understand what we can do with a database, allows us to perform inference and ensure data integrity. Such a formal description can take the form of a \emph{schema}, which is a collection of rules which a database instance can be validated against.
 
-It has been proven useful to formally describe the structure of a database [TODO]. Such a description may help to understand what we can do with a database, allows us to perform inference and ensure consistency. Such a formal description can take the form of a \emph{schema}, which is a collection of rules which a database instance can be validated against.
+A schema should allow modeling of real-world entities and their relationships. A more expressive schema language enables the specification of more complex constraints, but may come at a cost of greater research and engineering effort, as well as worse runtime performance. This needs to be balanced in our choice of schema language.
 
-A schema should allow modeling of real-world entities and their relationships. A more expressive schema language enables the specification of more complex constraints, although this may come with TODO: greater engineering effort? performance?
+To explore the schema features that are commonly used in practice, we can look at some existing data modeling techniques. As a baseline, we consider the Entity--Relationship (ER) model as proposed by Chen~\cite{chen1976entity}. This model incorporates entities, relationships, attributes, and values. An \emph{entity} is a ``thing'' that can be uniquely identified, a \emph{relationship} is an association between entities, and an \emph{attribute--value} pair represents information about an entity or relationship. Furthermore, an entity may have a \emph{role} in a relationship, such as ``wife'' or ``husband'' in a marriage relationship between two persons.
+% TODO: better example of role
 
-% TODO: map ER features to PG concepts
+After the original specification, the ER model has been extended in various ways. For example, a notation which introduced cardinality constraints, optionality, and subtype relations was developed by Barker \cite{barker1990entity}.
 
-An example of a property graph schema is given in \autoref{fig:pg-schema}. The similarity between property graphs and schemas allows us to visualize and think about them iusing the same mental model. Schema nodes and edges are drawn in the same way as for data graphs, except properties are associated with types rather than concrete values.
+In the next subsection, we first establish a basic definition of property graph schema, which we then extend with additional features such as cardinality constraints (\autoref{sec:cardinality}) and optional properties (\autoref{sec:optional-properties}).
+
+\subsection{Basic definition}
+
+The goal of this subsection is to define a notion of property graph schema which incorporates the most basic features of the ER model: entities, relationships, attributes, and values.
+
+\autoref{tab:er-pg} shows how the basic elements of the ER model can be mapped to the property graph model. Note that there are no named roles in the property graph model, but the direction of an edge does allow the distinction between the source and target of an edge. Conversely, the direction of an edge can be represented using roles in the ER model.
+
+\begin{table}[t]
+  \centering
+  \begin{tabular}{|l|l|}
+    \hline
+    \textbf{ER} & \textbf{PG} \\
+    \hline
+    Entity & Node \\
+    Relationship & Edge \\
+    Role & Edge direction* \\
+    Attribute & Property name \\
+    Value & Value \\
+    \hline
+  \end{tabular}
+  \caption{Mapping between entity--relationship and property graph concepts. Roles and edge direction can be used for similar purposes, but are not equivalent.}
+  \label{tab:er-pg}
+\end{table}
+
+An example of a property graph schema is given in \autoref{fig:pg-schema}. The similarity between property graphs and schemas allows us to visualize and think about them using the same mental model. Schema nodes and edges are drawn in the same way as for data graphs, but properties are associated with types rather than concrete values.
 
 \begin{figure}[t]
   \centering
@@ -115,7 +144,9 @@ An example of a property graph schema is given in \autoref{fig:pg-schema}. The s
   \label{fig:pg-schema}
 \end{figure}
 
-To formally define property graph schemas and schema conformance, we first assume the existence of a set of property types $\mathcal{T}$. Next, we will introduce a number of supporting concepts.
+To formally define property graph schemas and schema conformance, we first assume the existence of a set of property types $\mathcal{T}$. Next, we introduce a number of supporting concepts.
+
+% TODO: rename to "basic" schema/conformance, and explain why
 
 \begin{definition}[Property conformance]
   For each property type $\ptype \in \ptypes$ there is a set $\sem{\ptype} \subseteq \mathcal{V}$ that contains all property values that \emph{conform} to the type $\ptype$.
@@ -123,7 +154,7 @@ To formally define property graph schemas and schema conformance, we first assum
 
 \begin{definition}[Record type]
   A \emph{record type} is a finite partial function $\rtype : \mathcal{N} \pto \ptypes$ that maps some property names to a property type.
-  We will denote such record types as $\langle a_1 : \ptype_1, \ldots, a_n : \ptype_n \rangle$.
+  We denote such record types as $\langle a_1 : \ptype_1, \ldots, a_n : \ptype_n \rangle$.
 \end{definition}
 
 \begin{definition}[Record conformance]
@@ -132,7 +163,7 @@ To formally define property graph schemas and schema conformance, we first assum
 
 \begin{definition}[Object type]
   An \emph{object type} is a pair $\otype = (L, \rtype)$ where $L \subseteq \mathcal{L}$ is a finite set of labels and and $\rtype$ a record type. 
-  % We will denote such object types also simply as $L\rtype$ or $\{ l_1 \ldots l_k \} \langle a_1 : \rtype_1, \ldots, a_n : \rtype_n \rangle$.
+  % We denote such object types also simply as $L\rtype$ or $\{ l_1 \ldots l_k \} \langle a_1 : \rtype_1, \ldots, a_n : \rtype_n \rangle$.
   The set of all object types is denoted as $\otypes$.
 \end{definition}
 
@@ -199,7 +230,7 @@ Next, we define the rules that must hold for a property graph to conform to a sc
 
 \autoref{fig:conformance} contains some examples of property graphs which are validated against the schema of \autoref{fig:pg-schema}.
 
-Under these definitions, a schema edge requires that \emph{at least one} conforming edge exists in the property graph. That is, if a schema node has an incident edge (i.e. an incoming or outgoing edge that the schema node participates in), then any node that conforms to the schema node must also have at least one incident edge (in the same direction) that conforms to the schema edge. In the following, we will relax this requirement and introduce a more general notion of cardinality constraints.
+Under these definitions, a schema edge requires that \emph{at least one} conforming edge exists in the property graph. That is, if a schema node has an incident edge (i.e. an incoming or outgoing edge that the schema node participates in), then any node that conforms to the schema node must also have at least one incident edge (in the same direction) that conforms to the schema edge. In the following, we relax this requirement and introduce a more general notion of cardinality constraints.
 
 \begin{figure}[t]
   \centering
@@ -254,6 +285,7 @@ Under these definitions, a schema edge requires that \emph{at least one} conform
 \end{figure}
 
 \subsection{Cardinality constraints}
+\label{sec:cardinality}
 
 We first introduce a generalization of the existential quantifier which enables counting the number of distinct variables that satisfy a predicate.
 
@@ -291,6 +323,9 @@ Next, we revise the definitions of property graph schema and schema conformance,
 \end{definition}
 
 An example of a property graph schema with cardinality constraints is given in \autoref{fig:pg-schema-card}. Note that this is a relaxed variant of \autoref{fig:pg-schema}, in the sense that every graph that conforms to \autoref{fig:pg-schema} also conforms to \autoref{fig:pg-schema-card}, but not the other way around. Intervals such as $[n, m]$ are written as $n..m$, and $[n, n]$ is written simply as $n$, following conventions established in UML~\cite{uml}.
+
+% TODO: ER doesn't have direction, disambiguate with "arrow" in ER
+% TODO: look-across vs same-side (I think we use same-side)
 
 \begin{figure}[t]
   \centering
@@ -375,6 +410,7 @@ Compared to Definition~\ref{def:schema-conformance}, rules~\ref{rule:conformance
 \end{figure}
 
 \subsection{Optional properties}
+\label{sec:optional-properties}
 
 We revise the definition of record by adding a special property value $\undefined$, which indicates that the value of a property is not defined.
 
@@ -392,7 +428,7 @@ We adjust the definitions of property conformance, record type, and record confo
 
 \begin{definition}[Record type]
   A \emph{record type} is a total function $\rtype : \mathcal{N} \to \ptypes$ that maps property names to a property type.
-  % We will denote such record types as $\langle a_1 : \rtype_1, \ldots, a_n : \rtype_n \rangle$.
+  % We denote such record types as $\langle a_1 : \rtype_1, \ldots, a_n : \rtype_n \rangle$.
 \end{definition}
 
 \begin{definition}[Record conformance]
@@ -425,7 +461,7 @@ Our schema formalisms come with a number of limitations. First, it is not possib
 
 % In general, it's not possible to say that an object must conform to type 1 OR type 2 (union type). Problem with labels follows from that. But also union of two records is not possible.
 
-Furthermore, subtype relations cannot be expressed in general. To see the problem, consider the schema depicted in \autoref{fig:subtyping}. How could we express this using our schema formalism? An attempt is given in \autoref{fig:subtyping-ours}, where properties of the supertype \texttt{Message} are copied and distributed over all its subtypes, and the edge from \texttt{Comment} to \texttt{Message} is accompanied by an edge from \texttt{Comment} to Post and from \texttt{Comment} to itself. While the properties are modelled correctly in this case, it breaks down when we look at the cardinalities.
+Furthermore, subtype relations cannot be expressed in general. To see the problem, consider the schema depicted in \autoref{fig:subtyping}. How could we express this using our schema formalism? An attempt is given in \autoref{fig:subtyping-ours}, where properties of the supertype \texttt{Message} are copied and distributed over all its subtypes, and the edge from \texttt{Comment} to \texttt{Message} is accompanied by an edge from \texttt{Comment} to Post and from \texttt{Comment} to itself. While the properties are modeled correctly in this case, it breaks down when we look at the cardinalities.
 
 In \autoref{fig:subtyping}, a constraint is specified which we can express in words as ``every \texttt{Comment} is a reply of exactly one \texttt{Message} (or a subtype of \texttt{Message})''. However, it is not possible to specifiy such a constraint without using subtype relations, as in \autoref{fig:subtyping-ours}. This solution allows \texttt{Comment}s which are not a reply to anything, or which are a reply to more than one thing. Then again, if we disregard the cardinality constraints, the two schemas are equivalent. This example shows that our schema formalism can be used to model some but not all subtype relations.
 
