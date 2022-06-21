@@ -10,7 +10,7 @@
 \usepackage{caption}
 \usepackage{subcaption}
 
-% TODO: theorem end symbols
+% Definitions
 \theoremstyle{definition}
 \newtheorem{definition}{Definition}
 
@@ -190,14 +190,14 @@ Next, we define the rules that must hold for a property graph to conform to a sc
 
   \begin{enumerate}
     \item\label{rule:conformance-basic-node}
-    Every node $n$ conforms to a schema node $n'$:
+    Every node $n$ conforms to some schema node $n'$:
     \begin{align*}
       &\forall n \in N \; \exists n' \in N' :\\
       &\quad n \in \sem{\omega(n')}
     \end{align*}
     
     \item\label{rule:conformance-basic-edge}
-    Every edge $e$ conforms to a schema edge $e'$, and the endpoints of $e$ conform to the endpoints of $e'$ respectively:
+    Every edge $e$ conforms to some schema edge $e'$, and the endpoints of $e$ conform to the respective endpoints of $e'$:
     \begin{align*}
       &\forall e \in E \; \exists e' \in E' :\\
       &\quad e \in \sem{\omega(e')} \wedge \src(\rho(e)) \in \sem{\omega(\src(\rho'(e')))}\\
@@ -332,14 +332,14 @@ An example of a property graph schema with cardinality constraints is given in \
 
   \begin{enumerate}
     \item\label{rule:conformance-node}
-    Every node $n$ conforms to a schema node $n'$:
+    Every node $n$ conforms to some schema node $n'$:
     \begin{align*}
       &\forall n \in N \; \exists n' \in N' :\\
       &\quad n \in \sem{\omega(n')}
     \end{align*}
     
     \item\label{rule:conformance-edge}
-    Every edge $e$ conforms to a schema edge $e'$, and the endpoints of $e$ conform to the endpoints of $e'$ respectively:
+    Every edge $e$ conforms to some schema edge $e'$, and the endpoints of $e$ conform to the respective endpoints of $e'$:
     \begin{align*}
       &\forall e \in E \; \exists e' \in E' :\\
       &\quad e \in \sem{\omega(e')} \wedge \src(\rho(e)) \in \sem{\omega(\src(\rho'(e')))}\\
