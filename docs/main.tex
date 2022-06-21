@@ -61,7 +61,7 @@
 
 \section{Property Graphs}
 
-We start by introducing our data model, which is based on the concept of a \emph{property graph}~\cite{deutsch2021gpml} as established by the Working Group for Database Languages~(WG3), which is a part of ISO/IEC JTC1/SC32. We use this data model in the rest of this document.
+We start by introducing our data model, which is based on the concept of a \emph{property graph} as established by the Working Group for Database Languages~(WG3), which is a part of ISO/IEC JTC1/SC32~\cite{deutsch2021gpml}. We use this data model in the rest of this document.
 
 Our notion of property graph represents data as a directed attributed multigraph. Nodes and edges carry data in the form of a set of labels and a set of key--value pairs, called \emph{properties}. We use the umbrella term \emph{objects} to refer to nodes and edges.
 
@@ -105,10 +105,10 @@ It has been proven useful to formally describe the structure of a database [TODO
 
 A schema should allow modeling of real-world entities and their relationships. A more expressive schema language enables the specification of more complex constraints, but may come at a cost of greater research and engineering effort, as well as worse runtime performance. This needs to be balanced in our choice of schema language.
 
-To explore the schema features that are commonly used in practice, we can look at some existing data modeling techniques. As a baseline, we consider the Entity--Relationship (ER) model as proposed by Chen~\cite{chen1976entity}. This model incorporates entities, relationships, attributes, and values. An \emph{entity} is a ``thing'' that can be uniquely identified, a \emph{relationship} is an association between entities, and an \emph{attribute--value} pair represents information about an entity or relationship. Furthermore, an entity may have a \emph{role} in a relationship, such as ``wife'' or ``husband'' in a marriage relationship.
+To explore the schema features that are commonly used in practice, we can look at some existing data modeling techniques. As a baseline, we consider the Entity--Relationship (ER) model as proposed by \cite{chen1976entity}. This model incorporates entities, relationships, attributes, and values. An \emph{entity} is a ``thing'' that can be uniquely identified, a \emph{relationship} is an association between entities, and an \emph{attribute--value} pair represents information about an entity or relationship. Furthermore, an entity may have a \emph{role} in a relationship, such as ``wife'' or ``husband'' in a marriage relationship.
 % TODO: better example of role
 
-After the original specification, the ER model has been extended in various ways. For example, a notation which introduced cardinality constraints, optionality, and subtype relations was developed by Barker \cite{barker1990entity}.
+After the original specification, the ER model has been extended in various ways. For example, a notation which introduced cardinality constraints, optionality, and subtype relations was developed by \cite{barker1990entity}.
 
 In the next subsection, we first establish a basic definition of property graph schema, which we then extend with additional features such as cardinality constraints (\autoref{sec:cardinality}) and optional properties (\autoref{sec:optional-properties}).
 
@@ -294,6 +294,7 @@ We first introduce a generalization of the existential quantifier which enables 
   The \emph{counting quantifier} is defined as follows. Given two numbers $n, m \in \N$, a predicate $P$, and a set $X$, define
   \begin{itemize}
     \item $\exists^{\geq n} x \in X : P(x) \equiv \exists x_1, \ldots, x_n \in X : P(x_1) \wedge \ldots \wedge P(x_n) \wedge \forall 1 \leq i < j \leq n : x_i \neq x_j$;
+    % FIXME: this might be ambiguous, add brackets?
     \item $\exists^{\leq n} x \in X : P(x) \equiv \exists x_1, \ldots, x_n, x_{n+1}, \ldots, x_k \in X : P(x_1) \wedge \ldots \wedge P(x_k) \implies \forall n < i < j \leq k : x_i = x_j$;
     \item $\exists^{[n, m]} x \in X : P(x) \equiv \exists^{\geq n} x \in X : P(x) \wedge \exists^{\leq m} x' \in X : P(x')$;
     \item $\exists^{[n, *]} x \in X : P(x) \equiv \exists^{\geq n} x \in X : P(x)$.
@@ -323,7 +324,7 @@ Next, we revise the definitions of property graph schema and schema conformance,
   \end{itemize}
 \end{definition}
 
-An example of a property graph schema with cardinality constraints is given in \autoref{fig:pg-schema}. Intervals such as $[n, m]$ are written as $n..m$, and $[n, n]$ is written simply as $n$, following notation established in UML~\cite{uml}. We use the ``look-here'' notation (as opposed to ``look-across''), meaning that the interval indicates the minimum and maximum number of edges that the node on that side of the edge must participate in. Contrary to some data modeling diagram conventions, the arrow head is unrelated to cardinality, instead it specifies the direction of an edge. Note  that every property graph that conforms to \autoref{fig:pg-schema-basic} also conforms to \autoref{fig:pg-schema}, but not the other way around.
+An example of a property graph schema with cardinality constraints is given in \autoref{fig:pg-schema}. Intervals such as $[n, m]$ are written as $n..m$, and $[n, n]$ is written simply as $n$, following notation established in UML~\cite{uml}. Furthermore, we use the ``look-here'' notation (as opposed to ``look-across''), meaning that the interval indicates the minimum and maximum number of edges that the node on that side of the edge must participate in. Contrary to some data modeling diagram conventions, the arrow head is unrelated to cardinality, instead it specifies the direction of an edge. Note  that every property graph that conforms to \autoref{fig:pg-schema-basic} also conforms to \autoref{fig:pg-schema}, but not the other way around.
 
 \begin{figure}[t]
   \centering
@@ -426,7 +427,7 @@ We adjust the definitions of property conformance, record type, and record confo
 
 \begin{definition}[Property conformance]
   \label{def:property-conformance}
-  For each property type $\ptype \in \ptypes$ there is a set $\sem{\ptype} \subseteq \mathcal{V} \cup \{\undefined\}$ that contains all property values that \emph{conform} to the type $\ptype$. We say $\ptype$ is \emph{optional} iff $\undefined \in \sem{\ptype}$. We use the notation $\ptype?$ to make a property optional, i.e. $\sem{\ptype?} = \sem{\ptype} \cup \{ \undefined \}$.
+  For each property type $\ptype \in \ptypes$ there is a set $\sem{\ptype} \subseteq \mathcal{V} \cup \{\undefined\}$ that contains all property values that \emph{conform} to the type $\ptype$. We say $\ptype$ is \emph{optional} iff $\undefined \in \sem{\ptype}$. We use the notation $\ptype?$ to mark a property as optional, i.e. $\sem{\ptype?} = \sem{\ptype} \cup \{ \undefined \}$.
 \end{definition}
 
 \begin{definition}[Record type]
@@ -488,8 +489,7 @@ In \autoref{fig:subtyping}, a constraint is specified which we can express in wo
   \caption{A schema consisting of a supertype with two subtypes which cannot be modeled using our schema formalism. Any property graph that conforms to~(a) also conforms to~(b), but not the other way around.}
 \end{figure}
 
-% TODO: include the number of ISO standard in reference
-\bibliographystyle{abbrv}
+\bibliographystyle{apalike}
 \bibliography{main}
 
 \end{document}
