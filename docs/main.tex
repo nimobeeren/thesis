@@ -154,7 +154,7 @@ To formally define property graph schemas and schema conformance, we first assum
 \begin{definition}[Basic record type]
   \label{def:record-type-basic}
   A \emph{record type} is a finite partial function $\rtype : \mathcal{N} \pto \ptypes$ that maps some property names to a property type.
-  We denote such record types as $\langle a_1 : \ptype_1, \ldots, a_n : \ptype_n \rangle$.
+  % We denote such record types as $\langle a_1 : \ptype_1, \ldots, a_n : \ptype_n \rangle$.
 \end{definition}
 
 \begin{definition}[Basic record conformance]
@@ -300,8 +300,6 @@ We first introduce a generalization of the existential quantifier which enables 
   \end{itemize}
 \end{definition}
 
-% TODO: explain meaning of *
-
 Next, we introduce the notion of a \emph{cardinality constraint}.
 
 \begin{definition}[Cardinality constraint]
@@ -325,9 +323,7 @@ Next, we revise the definitions of property graph schema and schema conformance,
   \end{itemize}
 \end{definition}
 
-An example of a property graph schema with cardinality constraints is given in \autoref{fig:pg-schema}. Note that this is a relaxed variant of \autoref{fig:pg-schema}, which is to say that every graph that conforms to \autoref{fig:pg-schema-basic} also conforms to \autoref{fig:pg-schema}, but not the other way around. Intervals such as $[n, m]$ are written as $n..m$, and $[n, n]$ is written simply as $n$, following notation established in UML~\cite{uml}. Contrary to some data modeling diagram notations, the arrow head is unrelated to cardinality, rather it specifies the direction of an edge.
-
-% TODO: look-across vs same-side (I think we use same-side)
+An example of a property graph schema with cardinality constraints is given in \autoref{fig:pg-schema}. Intervals such as $[n, m]$ are written as $n..m$, and $[n, n]$ is written simply as $n$, following notation established in UML~\cite{uml}. We use the ``look-here'' notation (as opposed to ``look-across''), meaning that the interval indicates the minimum and maximum number of edges that the node on that side of the edge must participate in. Contrary to some data modeling diagram conventions, the arrow head is unrelated to cardinality, instead it specifies the direction of an edge. Note  that every property graph that conforms to \autoref{fig:pg-schema-basic} also conforms to \autoref{fig:pg-schema}, but not the other way around.
 
 \begin{figure}[t]
   \centering
