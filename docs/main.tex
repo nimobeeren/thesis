@@ -65,9 +65,7 @@ We start by introducing our data model, which is based on the concept of a \emph
 
 Our notion of property graph represents data as a directed attributed multigraph. Nodes and edges carry data in the form of a set of labels and a set of key--value pairs, called \emph{properties}. We use the umbrella term \emph{objects} to refer to nodes and edges.
 
-Being a \emph{multigraph}, a property graph allows the existence of multiple edges between two nodes $u$ and $v$. Furthermore, we allow $u = v$, in which case the edge is called a \emph{self-loop}. We do not consider undirected edges, but they could be simulated by attaching a special label or property to an edge.
-
-% TODO: why not undirected?
+Being a \emph{multigraph}, a property graph allows the existence of multiple edges between two nodes $u$ and $v$. Furthermore, we allow $u = v$, in which case the edge is called a \emph{self-loop}. For ease of notation, we do not consider undirected edges, although they could be simulated by attaching a special label or property to an edge.
 
 An example of a property graph is given in \autoref{fig:pg}. Node labels are written in the top compartment, and node properties are written in the bottom compartment. Edge properties are surrounded by `\{' and `\}', which may be omitted when an edge has no properties.
 
@@ -105,7 +103,7 @@ It has been proven useful to formally describe the structure of a database [TODO
 
 A schema should allow modeling of real-world entities and their relationships. A more expressive schema language enables the specification of more complex constraints, but may come at a cost of greater research and engineering effort, as well as worse runtime performance. This needs to be balanced in our choice of schema language.
 
-To explore the schema features that are commonly used in practice, we can look at some existing data modeling techniques. As a baseline, we consider the Entity--Relationship (ER) model as proposed by Chen~\cite{chen1976entity}. This model incorporates entities, relationships, attributes, and values. An \emph{entity} is a ``thing'' that can be uniquely identified, a \emph{relationship} is an association between entities, and an \emph{attribute--value} pair represents information about an entity or relationship. Furthermore, an entity may have a \emph{role} in a relationship, such as ``wife'' or ``husband'' in a marriage relationship between two persons.
+To explore the schema features that are commonly used in practice, we can look at some existing data modeling techniques. As a baseline, we consider the Entity--Relationship (ER) model as proposed by Chen~\cite{chen1976entity}. This model incorporates entities, relationships, attributes, and values. An \emph{entity} is a ``thing'' that can be uniquely identified, a \emph{relationship} is an association between entities, and an \emph{attribute--value} pair represents information about an entity or relationship. Furthermore, an entity may have a \emph{role} in a relationship, such as ``wife'' or ``husband'' in a marriage relationship.
 % TODO: better example of role
 
 After the original specification, the ER model has been extended in various ways. For example, a notation which introduced cardinality constraints, optionality, and subtype relations was developed by Barker \cite{barker1990entity}.
@@ -188,21 +186,19 @@ Note that a property graph schema can be simulated by a property graph if we all
 Next, we define the rules that must hold for a property graph to conform to a schema.
 
 \begin{definition}[Basic schema conformance]
-  % TODO: use variables in english rules
-  % TODO: improve mapping between english and formal (3/4)
   \label{def:schema-conformance-basic}
   Given a property graph $$G = (N, E, \rho, \lambda, \pi)$$ and a property graph schema $$\gtype = (N', E', \rho', \omega)$$ we say that $G$ \emph{conforms} to $\gtype$ if and only if all of the following rules hold.
 
   \begin{enumerate}
     \item\label{rule:conformance-basic-node}
-    Every node conforms to a schema node:
+    Every node $n$ conforms to a schema node $n'$:
     \begin{align*}
       &\forall n \in N \; \exists n' \in N' :\\
       &\quad n \in \sem{\omega(n')}
     \end{align*}
     
     \item\label{rule:conformance-basic-edge}
-    Every edge conforms to a schema edge, and the endpoints conform respectively:
+    Every edge $e$ conforms to a schema edge $e'$, and the endpoints of $e$ conform to the endpoints of $e'$ respectively:
     \begin{align*}
       &\forall e \in E \; \exists e' \in E' :\\
       &\quad e \in \sem{\omega(e')} \wedge \src(\rho(e)) \in \sem{\omega(\src(\rho'(e')))}\\
@@ -210,17 +206,19 @@ Next, we define the rules that must hold for a property graph to conform to a sc
     \end{align*}
     
     \item\label{rule:conformance-basic-out}
-    If a node conforms to a schema node, it must have all the outgoing edges of the right type:
+    If a node $n$ conforms to the source of a schema edge $e'$, it must have all the outgoing edges of the right type:
     \begin{align*}
-      &\forall e' \in E' \; \forall n_1 \in N \cap \sem{\omega(\src(\rho(e')))} \; \exists e \in E \cap \sem{\omega(e')} :\\
-      &\quad \src(\rho(e)) = n_1 \wedge \trg(\rho(e)) \in \sem{\omega(\trg(\rho(e')))}
+      &\forall n \in N \; \forall e' \in E':\\
+      &\quad \big[n \in \sem{\omega(\src(\rho(e')))} \implies \exists e \in E \cap \sem{\omega(e')} :\\
+      &\quad\quad \src(\rho(e)) = n \wedge \trg(\rho(e)) \in \sem{\omega(\trg(\rho(e')))}\big]
     \end{align*}
 
     \item\label{rule:conformance-basic-in}
-    If a node conforms to a schema node, it must have all the incoming edges of the right type:
+    If a node $n$ conforms to the target of a schema edge $e'$, it must have all the incoming edges of the right type:
     \begin{align*}
-      &\forall e' \in E' \; \forall n_2 \in N \cap \sem{\omega(\trg(\rho(e')))} \; \exists e \in E \cap \sem{\omega(e')} :\\
-      &\quad \src(\rho(e)) \in \sem{\omega(\src(\rho(e')))} \wedge \trg(\rho(e)) = n_2
+      &\forall n \in N \; \forall e' \in E'  :\\
+      &\quad \big[n \in \sem{\omega(\trg(\rho(e')))} \implies \exists e \in E \cap \sem{\omega(e')} :\\
+      &\quad\quad \src(\rho(e)) \in \sem{\omega(\src(\rho(e')))} \wedge \trg(\rho(e)) = n\big]
     \end{align*}
   \end{enumerate}
 \end{definition}
@@ -335,14 +333,14 @@ An example of a property graph schema with cardinality constraints is given in \
 
   \begin{enumerate}
     \item\label{rule:conformance-node}
-    Every node conforms to a schema node:
+    Every node $n$ conforms to a schema node $n'$:
     \begin{align*}
       &\forall n \in N \; \exists n' \in N' :\\
       &\quad n \in \sem{\omega(n')}
     \end{align*}
     
     \item\label{rule:conformance-edge}
-    Every edge conforms to a schema edge, and the endpoints conform respectively:
+    Every edge $e$ conforms to a schema edge $e'$, and the endpoints of $e$ conform to the endpoints of $e'$ respectively:
     \begin{align*}
       &\forall e \in E \; \exists e' \in E' :\\
       &\quad e \in \sem{\omega(e')} \wedge \src(\rho(e)) \in \sem{\omega(\src(\rho'(e')))}\\
@@ -350,22 +348,24 @@ An example of a property graph schema with cardinality constraints is given in \
     \end{align*}
     
     \item\label{rule:conformance-out}
-    If a node conforms to a schema node, it must have the right number of outgoing edges of the right type:
+    If a node $n$ conforms to the source of a schema edge $e'$, it must have the right number of outgoing edges of the right type:
     \begin{align*}
-      &\forall e' \in E' \; \forall n_1 \in N \cap \sem{\omega(\src(\rho(e')))} \; \exists^{\src(\eta(e'))} e \in E \cap \sem{\omega(e')} :\\
-      &\quad \src(\rho(e)) = n_1 \wedge \trg(\rho(e)) \in \sem{\omega(\trg(\rho(e')))}
+      &\forall n \in N \; \forall e' \in E':\\
+      &\quad \big[n \in \sem{\omega(\src(\rho(e')))} \implies \exists^{\src(\eta(e'))} e \in E \cap \sem{\omega(e')} :\\
+      &\quad\quad \src(\rho(e)) = n \wedge \trg(\rho(e)) \in \sem{\omega(\trg(\rho(e')))}\big]
     \end{align*}
 
     \item\label{rule:conformance-in}
-    If a node conforms to a schema node, it must have the right number of incoming edges of the right type:
+    If a node $n$ conforms to the target of a schema edge $e'$, it must have the right number of incoming edges of the right type:
     \begin{align*}
-      &\forall e' \in E' \; \forall n_2 \in N \cap \sem{\omega(\trg(\rho(e')))} \; \exists^{\trg(\eta(e'))} e \in E \cap \sem{\omega(e')} :\\
-      &\quad \src(\rho(e)) \in \sem{\omega(\src(\rho(e')))} \wedge \trg(\rho(e)) = n_2
+      &\forall n \in N \; \forall e' \in E'  :\\
+      &\quad \big[n \in \sem{\omega(\trg(\rho(e')))} \implies \exists^{\trg(\eta(e'))} e \in E \cap \sem{\omega(e')} :\\
+      &\quad\quad \src(\rho(e)) \in \sem{\omega(\src(\rho(e')))} \wedge \trg(\rho(e)) = n\big]
     \end{align*}
   \end{enumerate}
 \end{definition}
 
-Compared to Definition~\ref{def:schema-conformance-basic}, rules~\ref{rule:conformance-node} and~\ref{rule:conformance-edge} are unchanged, but \ref{rule:conformance-out} and~\ref{rule:conformance-in} now ensure that there are not too few or too many edges of a certain type.
+Compared to Definition~\ref{def:schema-conformance-basic}, rules~\ref{rule:conformance-node} and~\ref{rule:conformance-edge} are unchanged, but the counting quantifiers in~\ref{rule:conformance-out} and~\ref{rule:conformance-in} now ensure that nodes do not have too few or too many edges of a certain type.
 
 \autoref{fig:conformance} contains some examples of property graphs which are validated against the schema of \autoref{fig:pg-schema}, taking into account the new rules for cardinality constraints.
 
@@ -459,7 +459,7 @@ Our schema formalisms come with a number of limitations. First, it is not possib
 
 Furthermore, subtype relations cannot be expressed in general. To see the problem, consider the schema depicted in \autoref{fig:subtyping}. How could we express this using our schema formalism? An attempt is given in \autoref{fig:subtyping-ours}, where properties of the supertype \texttt{Message} are copied and distributed over all its subtypes, and the edge from \texttt{Comment} to \texttt{Message} is accompanied by an edge from \texttt{Comment} to Post and from \texttt{Comment} to itself. While the properties are modeled correctly in this case, it breaks down when we look at the cardinalities.
 
-In \autoref{fig:subtyping}, a constraint is specified which we can express in words as ``every \texttt{Comment} is a reply of exactly one \texttt{Message} (or a subtype of \texttt{Message})''. However, it is not possible to specifiy such a constraint without using subtype relations, as in \autoref{fig:subtyping-ours}. This solution allows \texttt{Comment}s which are not a reply to anything, or which are a reply to more than one thing. Then again, if we disregard the cardinality constraints, the two schemas are equivalent. This example shows that our schema formalism can be used to model some but not all subtype relations.
+In \autoref{fig:subtyping}, a constraint is specified which we can express in words as ``every \texttt{Comment} is a reply of exactly one \texttt{Message} (or a subtype of \texttt{Message})''. However, it is not possible to specifiy such a constraint without subtype relations, as illustrated by \autoref{fig:subtyping-ours}. This solution allows \texttt{Comment}s which are not a reply to anything, or which are a reply to more than one thing. Then again, if we disregard the cardinality constraints, the two schemas are equivalent. This example shows that our schema formalism can be used to model some but not all subtype relations.
 
 \begin{figure}[t]
   \centering
@@ -473,7 +473,7 @@ In \autoref{fig:subtyping}, a constraint is specified which we can express in wo
   \begin{subfigure}[t]{0.45\textwidth}
     \centering
     \includegraphics[width=\textwidth]{figures/subtyping-ours.pdf}
-    \caption{An attempt to express the same schema without using subtype relations. Note that the this schema is strictly more permissive than~(a).}
+    \caption{An attempt to express the same schema without subtype relations. Note that this schema is strictly more permissive than~(a).}
     \label{fig:subtyping-ours}
   \end{subfigure}
   \caption{A schema consisting of a supertype with two subtypes which cannot be modeled using our schema formalism. Any property graph that conforms to~(a) also conforms to~(b), but not the other way around.}
