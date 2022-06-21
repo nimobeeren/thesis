@@ -57,17 +57,21 @@
 
 \section{Introduction}
 
+It has been proven useful to formally describe the structure of a database [TODO]. Such a description may help to understand what we can do with a database, perform inference, and ensure data integrity. Such a formal description can take the form of a \emph{schema}, which is a collection of rules which a database instance can be validated against.
+
+% Existing schema approaches are local only: no structural constraints
+
 % Bring conceptual and logical model closer together
 
 \section{Property Graphs}
 
-We start by introducing our data model, which is based on the concept of a \emph{property graph} as established by the Working Group for Database Languages~(WG3), which is a part of ISO/IEC JTC1/SC32~\cite{deutsch2021gpml}. We use this data model in the rest of this document.
+We start by introducing our data model, which is based on the concept of a \emph{property graph} as established by the Working Group for Database Languages~(WG3) as part of ISO/IEC JTC1/SC32~\cite{deutsch2021gpml}. We use this data model in the rest of this document.
 
 Our notion of property graph represents data as a directed attributed multigraph. Nodes and edges carry data in the form of a set of labels and a set of key--value pairs, called \emph{properties}. We use the umbrella term \emph{objects} to refer to nodes and edges.
 
 Being a \emph{multigraph}, a property graph allows the existence of multiple edges between two nodes $u$ and $v$. Furthermore, we allow $u = v$, in which case the edge is called a \emph{self-loop}. For ease of notation, we do not consider undirected edges, although they could be simulated by attaching a special label or property to an edge.
 
-An example of a property graph is given in \autoref{fig:pg}. Node labels are written in the top compartment, and node properties are written in the bottom compartment. Edge properties are surrounded by `\{' and `\}', which may be omitted when an edge has no properties.
+An example of a property graph is given in \autoref{fig:pg}. Nodes are drawn as boxes, and edges are drawn as arrows. Node labels are written in the top compartment, and node properties are written in the bottom compartment. Edge labels are written inside a pill and edge properties are surrounded by `\{' and `\}', which may be omitted when an edge has no properties.
 
 For a formal definition, we assume the existence of the following countably infinite sets: the set of labels $\mathcal{L}$, the set of property names $\mathcal{N}$ and the set of property values $\mathcal{V}$.
 
@@ -101,14 +105,11 @@ The functions $\src$ and $\trg$ map pairs to their first and second element, i.e
 
 \section{Property Graph Schemas}
 
-It has been proven useful to formally describe the structure of a database [TODO]. Such a description may help to understand what we can do with a database, allows us to perform inference and ensure data integrity. Such a formal description can take the form of a \emph{schema}, which is a collection of rules which a database instance can be validated against.
-
 A schema should allow modeling of real-world entities and their relationships. A more expressive schema language enables the specification of more complex constraints, but may come at a cost of greater research and engineering effort, as well as worse runtime performance. This needs to be balanced in our choice of schema language.
 
-To explore the schema features that are commonly used in practice, we can look at some existing data modeling techniques. As a baseline, we consider the Entity--Relationship (ER) model as proposed by \cite{chen1976entity}. This model incorporates entities, relationships, attributes, and values. An \emph{entity} is a ``thing'' that can be uniquely identified, a \emph{relationship} is an association between entities, and an \emph{attribute--value} pair represents information about an entity or relationship. Furthermore, an entity may have a \emph{role} in a relationship, such as ``wife'' or ``husband'' in a marriage relationship.
-% TODO: better example of role
+To explore the schema features that are commonly used in practice, we can look at some existing data modeling techniques. As a baseline, we consider the Entity--Relationship (ER) model as proposed by~\cite{chen1976entity}. This model incorporates entities, relationships, attributes, and values. An \emph{entity} is a ``thing'' that can be uniquely identified, a \emph{relationship} is an association between entities, and an \emph{attribute--value} pair represents information about an entity or relationship. Furthermore, an entity may have a \emph{role} in a relationship, such as ``wife'' or ``husband'' in a marriage relationship.
 
-After the original specification, the ER model has been extended in various ways. For example, a notation which introduced cardinality constraints, optionality, and subtype relations was developed by \cite{barker1990entity}.
+After the original specification, the ER model has been extended in various ways. For example, a notation which introduced cardinality constraints, optionality, and subtype relations was developed by~\cite{barker1990entity}.
 
 In the next subsection, we first establish a basic definition of property graph schema, which we then extend with additional features such as cardinality constraints (\autoref{sec:cardinality}) and optional properties (\autoref{sec:optional-properties}).
 
