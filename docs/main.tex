@@ -70,11 +70,13 @@ An example of a property graph is given in \autoref{fig:pg}. Node labels are wri
 
 For a formal definition, we assume the existence of the following countably infinite sets: the set of labels $\mathcal{L}$, the set of property names $\mathcal{N}$ and the set of property values $\mathcal{V}$.
 
-\begin{definition}[Record]
+\begin{definition}[Basic record]
+  \label{def:record-basic}
   A \emph{record} is a finite partial function $r : \mathcal{N} \pto \mathcal{V}$ that maps some property names to property values. The set of all records is denoted as $\mathcal{R}$.
 \end{definition}
 
 \begin{definition}[Property graph]
+  \label{def:pg}
   A \emph{property graph} is a tuple $$G = (N, E, \rho, \lambda, \pi)$$ where
   \begin{itemize}
     \item $N$ is a finite set of nodes;
@@ -144,25 +146,30 @@ An example of a basic property graph schema is given in \autoref{fig:pg-schema-b
 To formally define property graph schemas and schema conformance, we first assume the existence of a set of property types $\mathcal{T}$. Next, we introduce a number of supporting concepts.
 
 \begin{definition}[Basic property conformance]
+  \label{def:property-conformance-basic}
   For each property type $\ptype \in \ptypes$ there is a set $\sem{\ptype} \subseteq \mathcal{V}$ that contains all property values that \emph{conform} to the type $\ptype$.
 \end{definition}
 
 \begin{definition}[Basic record type]
+  \label{def:record-type-basic}
   A \emph{record type} is a finite partial function $\rtype : \mathcal{N} \pto \ptypes$ that maps some property names to a property type.
   We denote such record types as $\langle a_1 : \ptype_1, \ldots, a_n : \ptype_n \rangle$.
 \end{definition}
 
 \begin{definition}[Basic record conformance]
+  \label{def:record-conformance-basic}
   We say that a record $r$ \emph{conforms} to a record type $\rtype$, denoted $r \in \sem{\rtype}$, if for each property name $k \in \mathcal{N}$ it holds that (1) $r(k)$ is defined iff $\rtype(k)$ is defined and (2) $r(k) \in \sem{\rtype(k)}$ if $r(k)$ and $\rtype(k)$ are defined.
 \end{definition}
 
 \begin{definition}[Object type]
+  \label{def:object-type}
   An \emph{object type} is a pair $\otype = (L, \rtype)$ where $L \subseteq \mathcal{L}$ is a finite set of labels and and $\rtype$ a record type. 
   % We denote such object types also simply as $L\rtype$ or $\{ l_1 \ldots l_k \} \langle a_1 : \rtype_1, \ldots, a_n : \rtype_n \rangle$.
   The set of all object types is denoted as $\otypes$.
 \end{definition}
 
 \begin{definition}[Object conformance]
+  \label{def:object-conformance}
   Let $G = (N, E, \rho, \lambda, \pi)$ be a property graph and $\otype = (L, \rtype)$ an object type. The set of objects that \emph{conform} to $\otype$ is defined as $\sem{\otype} = \{o \in N \cup E \mid \lambda(o) = L \wedge \pi(o) \in \sem{\rtype}\}$.
 \end{definition}
 
@@ -298,6 +305,7 @@ We first introduce a generalization of the existential quantifier which enables 
 Next, we introduce the notion of a \emph{cardinality constraint}.
 
 \begin{definition}[Cardinality constraint]
+  \label{def:cardinality-constraint}
   A \emph{cardinality constraint} is an ordered pair of intervals $([n_1, m_1], \, [n_2, m_2])$ where $n_1, n_2 \in \N$ and $m_1, m_2 \in \N^*$ with $\N = \{0, 1, 2, \ldots\}$ and $\N^* = \N \cup \{*\}$. The set of all cardinality constraints is denoted as $\mathcal{C}$.
 \end{definition}
 
@@ -306,6 +314,7 @@ The two intervals of a cardinality constraint apply to the source and target of 
 Next, we revise the definitions of property graph schema and schema conformance, making use of our newly defined cardinality constraints. The following definitions supersede Definition~\ref{def:pg-schema-basic} and~\ref{def:schema-conformance-basic}.
 
 \begin{definition}[Property graph schema]
+  \label{def:pg-schema}
   A \emph{property graph schema} is a tuple $$\gtype = (N, E, \rho, \omega, \eta)$$ where
   \begin{itemize}
     \item $N$ is a finite set of schema nodes;
@@ -328,6 +337,7 @@ An example of a property graph schema with cardinality constraints is given in \
 \end{figure}
 
 \begin{definition}[Schema conformance]
+  \label{def:schema-conformance}
   Given a property graph $$G = (N, E, \rho, \lambda, \pi)$$ and a property graph schema $$\gtype = (N', E', \rho', \omega, \eta)$$ we say that $G$ \emph{conforms} to $\gtype$ if and only if all of the following rules hold.
 
   \begin{enumerate}
@@ -407,9 +417,10 @@ Compared to Definition~\ref{def:schema-conformance-basic}, rules~\ref{rule:confo
 \subsection{Optional properties}
 \label{sec:optional-properties}
 
-We revise the definition of record by adding a special property value $\undefined$, which indicates that the value of a property is not defined.
+We revise the definition of record by adding a special property value $\undefined$, which indicates that the value of a property is not defined. The following definitions supersede Definition~\ref{def:record-basic}, \ref{def:property-conformance-basic}, \ref{def:record-type-basic}, and \ref{def:record-conformance-basic}.
 
 \begin{definition}[Record]
+  \label{def:record}
   A \emph{record} is a total function $r : \mathcal{N} \to \mathcal{V} \cup \{\undefined\}$ that maps property names to property values or the special value $\undefined$. The set of all records is denoted as $\mathcal{R}$.
 \end{definition}
 
@@ -418,15 +429,18 @@ For a record $r$ and a property name $k \in \mathcal{N}$ such that $r(k)$ was pr
 We adjust the definitions of property conformance, record type, and record conformance accordingly.
 
 \begin{definition}[Property conformance]
+  \label{def:property-conformance}
   For each property type $\ptype \in \ptypes$ there is a set $\sem{\ptype} \subseteq \mathcal{V} \cup \{\undefined\}$ that contains all property values that \emph{conform} to the type $\ptype$. We say $\ptype$ is \emph{optional} iff $\undefined \in \sem{\ptype}$. We use the notation $\ptype?$ to make a property optional, i.e. $\sem{\ptype?} = \sem{\ptype} \cup \{ \undefined \}$.
 \end{definition}
 
 \begin{definition}[Record type]
+  \label{def:record-type}
   A \emph{record type} is a total function $\rtype : \mathcal{N} \to \ptypes$ that maps property names to a property type.
   % We denote such record types as $\langle a_1 : \rtype_1, \ldots, a_n : \rtype_n \rangle$.
 \end{definition}
 
 \begin{definition}[Record conformance]
+  \label{def:record-conformance}
   We say that a record $r$ \emph{conforms} to a record type $\rtype$, denoted $r \in \sem{\rtype}$, if and only if for each property name $k \in \mathcal{N}$ it holds that $r(k) \in \sem{\rtype(k)}$.
 \end{definition}
 
