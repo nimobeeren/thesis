@@ -193,7 +193,7 @@ To formally define property graph schemas and schema conformance, we first assum
   \end{itemize}
 \end{definition}
 
-We may informally say that an object $o$ conforms to a schema object $o'$, by which we mean that $o \in \sem{\omega(o')}$.
+We may informally say that an object $o$ conforms to a schema object $o'$, while it would be more accurate to say that $o$ conforms to the \emph{object type} that is associated with schema object $o'$, i.e $o \in \sem{\omega(o')}$,.
 
 Note that a property graph schema can be simulated by a property graph if we allow properties to take property types as values, i.e. $\ptypes \subseteq \mathcal{V}$. Then we let $\lambda$ and $\pi$ take the role of $\omega$, in the sense that $\lambda(o) = L$ and $\pi(o) = \rtype$ if $\omega(o) = (L, \rtype)$ for all objects $o$ in the property graph.
 
