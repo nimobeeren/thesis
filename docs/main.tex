@@ -10,6 +10,11 @@
 \usepackage{caption}
 \usepackage{subcaption}
 
+% Bibliography and citation style
+\usepackage[square]{natbib}
+\bibliographystyle{apalike}
+\renewcommand{\refname}{Bibliography}
+
 % Definitions
 \theoremstyle{definition}
 \newtheorem{definition}{Definition}
@@ -61,7 +66,7 @@
 
 Graph databases have been steadily growing in popularity in recent years, receiving attention in the form of fundamental research as well as practical usage. One of the spearpoints of the graph database is its flexibility. While the traditionally dominant relational datamodel organizes data into tables and requires a fixed schema, graphs offer a simple yet powerful model consisting of nodes and edges which can be structured freely.
 
-However, this freedom comes at a cost. Without a schema, we miss out on opportunities for query optimization \cite{chakravarthy1990logic, meier2013semantic}, we risk degradation of data integrity, and we lack a formally verifiable source of documentation. By bringing back schemas to the graph world, the flexibility of graph databases can be combined with the robustness of relational databases.
+However, this freedom comes at a cost. Without a schema, we miss out on opportunities for query optimization \citep{chakravarthy1990logic, buneman1997adding, meier2013semantic}, we risk degradation of data integrity, and we lack a formally verifiable source of documentation. By bringing back schemas to the graph world, the flexibility of graph databases can be combined with the robustness of relational databases.
 
 The \emph{property graph model} is the predominant data model among graph database systems today. It provides an intuitive way of modeling entities as nodes, and their relationships as edges. Both nodes and edges are associated with labels, and they hold data in the form of key--value pairs known as \emph{properties}. We can imagine local constraints, such as mandatory properties on nodes or edges, as well as constraints on the structure of the graph, such as mandatory edges between nodes. To the best of our knowledge, there exists no published work that addresses the specification and validation of all these types of constraints using a single schema formalism.
 
@@ -69,7 +74,7 @@ Our overarching goal is to develop an end-to-end framework for property graph sc
 
 \section{Property Graphs}
 
-We start by introducing our data model, which is based on the definition of \emph{property graph} established by the Working Group for Database Languages~(WG3) as part of ISO/IEC JTC1/SC32~\cite{deutsch2021gpml}. We use this data model in the rest of this document.
+We start by introducing our data model, which is based on the definition of \emph{property graph} established by the Working Group for Database Languages~(WG3) as part of ISO/IEC JTC1/SC32 \citep{deutsch2021gpml}. We use this data model in the rest of this document.
 
 Our notion of property graph represents data as a directed attributed multigraph. Nodes and edges carry data in the form of a set of labels and a set of key--value pairs, called \emph{properties}. We use the umbrella term \emph{objects} to refer to nodes and edges. Being a \emph{multigraph}, a property graph allows the existence of multiple edges between two nodes $u$ and $v$. Furthermore, we allow $u = v$, in which case the edge is called a \emph{self-loop}. For ease of notation, we do not consider undirected edges, although they could be simulated by attaching a special label or property to an edge.
 
@@ -109,9 +114,9 @@ The functions $\src$ and $\trg$ map pairs to their first and second element, i.e
 
 A schema should allow modeling of real-world entities and their relationships. A more expressive schema language enables the specification of more complex constraints, but may come at a cost of greater research and engineering effort, as well as worse runtime performance. This needs to be balanced in our choice of schema language.
 
-To explore the schema features that are commonly used in practice, let us look at some existing data modeling techniques. As a baseline, we consider the Entity--Relationship (ER) model as proposed by~\cite{chen1976entity}. This model incorporates entities, relationships, attributes, and values. An \emph{entity} is a ``thing'' that can be uniquely identified, a \emph{relationship} is an association between entities, and an \emph{attribute--value} pair represents information about an entity or relationship. Furthermore, an entity may have a \emph{role} in a relationship, such as ``wife'' or ``husband'' in a marriage relationship. These are the fundamental concepts underlying many data modeling methods in use today.
+To explore the schema features that are commonly used in practice, let us look at some existing data modeling techniques. As a baseline, we consider the Entity--Relationship (ER) model as proposed by~\citet{chen1976entity}. This model incorporates entities, relationships, attributes, and values. An \emph{entity} is a ``thing'' that can be uniquely identified, a \emph{relationship} is an association between entities, and an \emph{attribute--value} pair represents information about an entity or relationship. Furthermore, an entity may have a \emph{role} in a relationship, such as ``wife'' or ``husband'' in a marriage relationship. These are the fundamental concepts underlying many data modeling methods in use today.
 
-After the original specification, the ER model has been extended in various ways. For example, a notation which introduced cardinality constraints, optionality, and subtype relations was developed by~\cite{barker1990entity}. With these additions, we can create a more nuanced data model, which more closely matches the real world.
+After the original specification, the ER model has been extended in various ways. For example, a notation which introduced cardinality constraints, optionality, and subtype relations was developed by~\citet{barker1990entity}. With these additions, we can create a more nuanced data model, which more closely matches the real world.
 
 In the next subsection, we first establish a basic definition of property graph schema, which we then extend with additional features such as cardinality constraints (\autoref{sec:cardinality}) and optional properties (\autoref{sec:optional-properties}).
 
@@ -327,7 +332,7 @@ Next, we revise the definitions of property graph schema and schema conformance,
   \end{itemize}
 \end{definition}
 
-An example of a property graph schema with cardinality constraints is given in \autoref{fig:pg-schema}. Intervals such as $[n, m]$ are written as $n..m$, and $[n, n]$ is written simply as $n$, following notation established in UML~\cite{uml}. Furthermore, we use the ``look-here'' notation (as opposed to ``look-across''), meaning that the interval indicates the minimum and maximum number of edges that the node on that side of the edge must participate in. Contrary to some data modeling diagram conventions, the arrow head is unrelated to cardinality, instead it specifies the direction of an edge. Note  that every property graph that conforms to \autoref{fig:pg-schema-basic} also conforms to \autoref{fig:pg-schema}, but not the other way around.
+An example of a property graph schema with cardinality constraints is given in \autoref{fig:pg-schema}. Intervals such as $[n, m]$ are written as $n..m$, and $[n, n]$ is written simply as $n$, following notation established in UML~\citep{uml}. Furthermore, we use the ``look-here'' notation (as opposed to ``look-across''), meaning that the interval indicates the minimum and maximum number of edges that the node on that side of the edge must participate in. Contrary to some data modeling diagram conventions, the arrow head is unrelated to cardinality, instead it specifies the direction of an edge. Note  that every property graph that conforms to \autoref{fig:pg-schema-basic} also conforms to \autoref{fig:pg-schema}, but not the other way around.
 
 \begin{figure}[t]
   \centering
@@ -492,7 +497,11 @@ In \autoref{fig:subtyping}, a constraint is specified which we can express in wo
   \caption{A schema consisting of a supertype with two subtypes which cannot be modeled using our schema formalism. Any property graph that conforms to~(a) also conforms to~(b), but not the other way around.}
 \end{figure}
 
-\bibliographystyle{apalike}
+\section{Related Work}
+
+Schemas for graph data have been discussed extensively in the literature. \citet{buneman1997adding} proposes a method that represents both data and schema as edge-labeled graphs. This allows the specification of the types of edges which are allowed in a database, but does not cover mandatory edges or more general edge cardinality constraints.
+
+
 \bibliography{main}
 
 \end{document}
