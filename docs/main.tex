@@ -475,6 +475,8 @@ Our schema formalisms come with a number of limitations. First, it is not possib
 
 % In general, it's not possible to say that an object must conform to type 1 OR type 2 (union type). Problem with labels follows from that. But also union of two records is not possible.
 
+% It's also not possible to say that there may only exist one edge between the same two nodes, or to enforce that a node has two edges to different nodes (mutual exclusion?)
+
 Furthermore, subtype relations cannot be expressed in general. To see the problem, consider the schema depicted in \autoref{fig:subtyping}. How could we express this using our schema formalism? An attempt is given in \autoref{fig:subtyping-ours}, where properties of the supertype \texttt{Message} are copied and distributed over all its subtypes, and the edge from \texttt{Comment} to \texttt{Message} is accompanied by an edge from \texttt{Comment} to Post and from \texttt{Comment} to itself. While the properties are modeled correctly in this case, it breaks down when we look at the cardinalities.
 
 In \autoref{fig:subtyping}, a constraint is specified which we can express in words as ``every \texttt{Comment} is a reply of exactly one \texttt{Message} (or a subtype of \texttt{Message})''. However, it is not possible to specifiy such a constraint without subtype relations, as illustrated by \autoref{fig:subtyping-ours}. This solution allows \texttt{Comment}s which are not a reply to anything, or which are a reply to more than one thing. Then again, if we disregard the cardinality constraints, the two schemas are equivalent. This example shows that our schema formalism can be used to model some but not all subtype relations.
@@ -499,8 +501,19 @@ In \autoref{fig:subtyping}, a constraint is specified which we can express in wo
 
 \section{Related Work}
 
-Schemas for graph data have been discussed extensively in the literature. \citet{buneman1997adding} proposes a method that represents both data and schema as edge-labeled graphs. This allows the specification of the types of edges which are allowed in a database, but does not cover mandatory edges or more general edge cardinality constraints.
+% TODO: graph integrity constraints
 
+Some approaches to graph schema have been discussed in the literature. \citet{buneman1997adding} propose a method that represents both data and schema as edge-labeled graphs. This enables the specification of the types of edges and paths that are allowed to occur in a database instance, but does not cover mandatory edges or more general cardinality constraints.
+
+\citet{colazzo2015typing} introduce another schema formalism for edge-labeled data graphs. They define a schema as a set of pairs $(r_{in}, r_{out})$, where $r_{in}$ and $r_{out}$ are regular expressions. The semantics is that every node must match a schema element $(r_{in}, r_{out})$, meaning that the node's incoming edges match $r_{in}$ and its outgoing edges match $r_{out}$. Using Regular Path Queries (RPQs), edge cardinality can be exactly specified. When extending the language to Nested Regular Expressions (NREs), it is possible to specify structural constraints over arbitrarily large graph patterns.
+
+SHACL\footnote{\url{https://www.w3.org/TR/shacl/}} is a language for specifying constraints on RDF graphs. These constraints themselves are also represented as RDF graphs, and are called \emph{shapes}. Constraints on values, data types and cardinality are supported. This enables specification of allowed, optional, and mandatory edges. A review of the formal frameworks used to study the SHACL language and the validation of RDF graphs against SHACL schemas can be found in \citet{pareti2022shacl}.
+
+The property graph data model has been adopted by numerous contemporary graph database systems (dating back to at least 2007 with the first release of Neo4j\footnote{\url{https://neo4j.com/open-source-project/}}), but a formal specification was missing until one was proposed by \citet{angles2018property}. The author also brought integrity constraints to the property graph model, and defined a basic notion of schema using first-order logic rules. In this approach, no distinction was made between mandatory and optional properties, nor were cardinality constraints addressed.
+
+\citet{bonifati2019schema} present a property graph schema validation approach based on graph homomorphisms. They differentiate between mandatory and optional properties, though edges are always interpreted as optional. Cardinality constraints are not discussed. The authors look at schemas from two different angles: they can be descriptive in the sense that they only reflect the data, or they can be prescriptive by means of enforcing constraints on data. This distinction is relevant in particular to the topic of schema evolution, where it may be desirable to switch between these two modes as an application matures. It is noted that most contemporary graph database systems only provide descriptive schema tools.
+
+% TODO: FLASc?
 
 \bibliography{main}
 
