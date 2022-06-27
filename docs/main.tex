@@ -505,7 +505,7 @@ In \autoref{fig:subtyping}, a constraint is specified which we can express in wo
 
 The problem of expressing and validating integrity constraints for graphs has received some attention in the scientific community. A large part of this research has been on functional dependencies, which has been studied extensively in the context of relational databases \citep{fagin1984theory,abiteboul1999data}. The idea of functional dependencies has been adapted to graph data, with the first work focussing on \emph{key constraints}, which aim to uniquely identify entities represented by nodes \citep{fan2015keys}. These have been extended to include more general dependencies \citep{fan2016functional}. The current state of the art of key constraints is presented in \textsc{PG-Keys} \citep{angles2021keys}.
 
-% TODO: other kinds of graph integrity constraints
+% TODO: other kinds of graph integrity constraints (pokorny 2017?)
 
 Some approaches to graph schema have been discussed in the literature. \citet{buneman1997adding} propose a method that represents both data and schema as edge-labeled graphs. This enables the specification of the types of edges and paths that are allowed to occur in a database instance, but does not cover mandatory edges or more general cardinality constraints.
 

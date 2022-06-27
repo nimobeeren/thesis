@@ -325,13 +325,12 @@ test("multiple cardinality constraints are violated", async () => {
   expect(violatingEdges.records).toHaveLength(0);
 
   const violatingIncomingEdges = await validateIncomingEdges(session);
-  expect(violatingIncomingEdges.records).toHaveLength(2);
-  expect(violatingIncomingEdges.records[0].get(0).identity).toEqual(
-    noCreatorPostId
+  const violatingIncomingEdgeIds = violatingIncomingEdges.records.map(
+    (record) => record.get(0).identity
   );
-  expect(violatingIncomingEdges.records[1].get(0).identity).toEqual(
-    tooManyCreatorsPostId
-  );
+  expect(violatingIncomingEdgeIds).toHaveLength(2);
+  expect(violatingIncomingEdgeIds).toContainEqual(noCreatorPostId);
+  expect(violatingIncomingEdgeIds).toContainEqual(tooManyCreatorsPostId);
 
   const violatingOutgoingEdges = await validateOutgoingEdges(session);
   expect(violatingOutgoingEdges.records).toHaveLength(1);
@@ -363,15 +362,17 @@ test("nodes can have optional properties", async () => {
     dataResult.records[0].get("missingMandatory").identity;
 
   const violatingNodes = await validateNodes(session);
-  expect(violatingNodes.records).toHaveLength(3);
-  // User has a property not specified in the schema
-  expect(violatingNodes.records[0].get(0).identity).toEqual(notAllowedUserId);
-  // User has an optional property, but the wrong type
-  expect(violatingNodes.records[1].get(0).identity).toEqual(wrongTypeUserId);
-  // User is missing a mandatory property
-  expect(violatingNodes.records[2].get(0).identity).toEqual(
-    missingMandatoryUserId
+  const violatingNodeIds = violatingNodes.records.map(
+    (record) => record.get(0).identity
   );
+
+  expect(violatingNodeIds).toHaveLength(3);
+  // User has a property not specified in the schema
+  expect(violatingNodeIds).toContainEqual(notAllowedUserId);
+  // User has an optional property, but the wrong type
+  expect(violatingNodeIds).toContainEqual(wrongTypeUserId);
+  // User is missing a mandatory property
+  expect(violatingNodeIds).toContainEqual(missingMandatoryUserId);
 
   const violatingEdges = await validateEdges(session);
   expect(violatingEdges.records).toHaveLength(0);
@@ -409,15 +410,16 @@ test("edges can have optional properties", async () => {
   expect(violatingNodes.records).toHaveLength(0);
 
   const violatingEdges = await validateEdges(session);
-  expect(violatingEdges.records).toHaveLength(3);
-  // CREATED edge has a property not specified in the schema
-  expect(violatingEdges.records[0].get(0).identity).toEqual(notAllowedUserId);
-  // CREATED edge has an optional property, but the wrong type
-  expect(violatingEdges.records[1].get(0).identity).toEqual(wrongTypeUserId);
-  // CREATED edge is missing a mandatory property
-  expect(violatingEdges.records[2].get(0).identity).toEqual(
-    missingMandatoryUserId
+  const violatingEdgeIds = violatingEdges.records.map(
+    (record) => record.get(0).identity
   );
+  expect(violatingEdgeIds).toHaveLength(3);
+  // CREATED edge has a property not specified in the schema
+  expect(violatingEdgeIds).toContainEqual(notAllowedUserId);
+  // CREATED edge has an optional property, but the wrong type
+  expect(violatingEdgeIds).toContainEqual(wrongTypeUserId);
+  // CREATED edge is missing a mandatory property
+  expect(violatingEdgeIds).toContainEqual(missingMandatoryUserId);
 
   const violatingIncomingEdges = await validateIncomingEdges(session);
   expect(violatingIncomingEdges.records).toHaveLength(0);
