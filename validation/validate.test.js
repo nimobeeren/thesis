@@ -60,18 +60,18 @@ test("the empty graph conforms to the empty schema", async () => {
 test("graph conforms to schema", async () => {
   // Create the schema
   await session.run(`
-    CREATE (user:Schema:User { name: "STRING", age: "INTEGER" })-[:FOLLOWS { since: "ZonedDateTime" }]->(user),
-    (user)-[:LIKES]->(post:Schema:Post { content: "STRING", createdAt: "ZonedDateTime" })
+    CREATE (user:Schema:User {name: "STRING", age: "INTEGER"})-[:FOLLOWS {since: "ZonedDateTime"}]->(user),
+    (user)-[:LIKES]->(post:Schema:Post {content: "STRING", createdAt: "ZonedDateTime"})
   `);
 
   // Create the data
   await session.run(`
-    CREATE (user1:Data:User { name: "Francesca", age: 42 }),
-    (user2:Data:User { name: "Rose", age: 24 }),
+    CREATE (user1:Data:User {name: "Francesca", age: 42}),
+    (user2:Data:User {name: "Rose", age: 24}),
     (user1)-[:FOLLOWS {since: datetime("2022-02-27")}]->(user2),
     (user2)-[:FOLLOWS {since: datetime("2022-02-27")}]->(user1),
-    (user1)-[:LIKES]->(post1:Data:Post { content: "Hello", createdAt: datetime("2022-05-30T13:37:01") }),
-    (user2)-[:LIKES]->(post2:Data:Post { content: "World", createdAt: datetime("2022-05-31T5:42:02") })
+    (user1)-[:LIKES]->(post1:Data:Post {content: "Hello", createdAt: datetime("2022-05-30T13:37:01")}),
+    (user2)-[:LIKES]->(post2:Data:Post {content: "World", createdAt: datetime("2022-05-31T5:42:02")})
   `);
 
   const violatingNodes = await validateNodes(session);
@@ -90,12 +90,12 @@ test("graph conforms to schema", async () => {
 test("node is missing mandatory property", async () => {
   // Create the schema
   await session.run(
-    `CREATE (user:Schema:User { name: "STRING", age: "INTEGER" })`
+    `CREATE (user:Schema:User {name: "STRING", age: "INTEGER"})`
   );
 
   // Create the data
   const dataResult = await session.run(
-    `CREATE (user:Data:User { name: "Rose" }) RETURN user`
+    `CREATE (user:Data:User {name: "Rose"}) RETURN user`
   );
 
   const userNodeId = dataResult.records[0].get("user").identity;
@@ -117,14 +117,14 @@ test("node is missing mandatory property", async () => {
 test("edge is missing mandatory property", async () => {
   // Create the schema
   await session.run(`
-    CREATE (:Schema:User { name: "STRING", age: "INTEGER" })-[:CREATED { at: "ZonedDateTime" }]->
-    (:Schema:Post { content: "STRING" })
+    CREATE (:Schema:User {name: "STRING", age: "INTEGER"})-[:CREATED {at: "ZonedDateTime"}]->
+    (:Schema:Post {content: "STRING"})
   `);
 
   // Create the data
   const dataResult = await session.run(`
-    CREATE (user:Data:User { name: "Nick", age: 38 })-[created:CREATED]->
-    (post:Data:Post { content: "Diggity" })
+    CREATE (user:Data:User {name: "Nick", age: 38})-[created:CREATED]->
+    (post:Data:Post {content: "Diggity"})
     RETURN created
   `);
 
@@ -149,15 +149,15 @@ test("node is missing incoming edge", async () => {
   // Create the schema
   // Every Post must be created by at least one User
   await session.run(`
-    CREATE (:Schema:User { name: "STRING", age: "INTEGER" })
+    CREATE (:Schema:User {name: "STRING", age: "INTEGER"})
     -[:CREATED {__inMin: 1}]->
-    (:Schema:Post { content: "STRING" })
+    (:Schema:Post {content: "STRING"})
   `);
 
   // Create the data
   const dataResult = await session.run(`
-    CREATE (:Data:User { name: "Francesca", age: 42 })-[:CREATED]->(:Data:Post { content: "🍔" }),
-    (post:Data:Post { content: "🥬" })
+    CREATE (:Data:User {name: "Francesca", age: 42})-[:CREATED]->(:Data:Post {content: "🍔"}),
+    (post:Data:Post {content: "🥬"})
     RETURN post
   `);
 
@@ -182,15 +182,15 @@ test("node is missing outgoing edge", async () => {
   // Create the schema
   // Every User must create at least one Post
   await session.run(`
-    CREATE (:Schema:User { name: "STRING", age: "INTEGER" })
+    CREATE (:Schema:User {name: "STRING", age: "INTEGER"})
     -[:CREATED {__outMin: 1}]->
-    (:Schema:Post { content: "STRING" })
+    (:Schema:Post {content: "STRING"})
   `);
 
   // Create the data
   const dataResult = await session.run(`
-    CREATE (:Data:User { name: "Francesca", age: 42 })-[:CREATED]->(:Data:Post { content: "🐑" }),
-    (user:Data:User { name: "Rose", age: 24 })
+    CREATE (:Data:User {name: "Francesca", age: 42})-[:CREATED]->(:Data:Post {content: "🐑"}),
+    (user:Data:User {name: "Rose", age: 24})
     RETURN user
   `);
 
