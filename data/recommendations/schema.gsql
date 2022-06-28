@@ -1,0 +1,94 @@
+DROP ALL
+
+CREATE VERTEX Movie (
+    budget INT,
+    countries LIST<STRING>,
+    imdbId STRING,
+    imdbRating FLOAT,
+    imdbVotes INT,
+    languages LIST<STRING>,
+    PRIMARY_ID movieId STRING,
+    plot STRING,
+    poster STRING,
+    released STRING,
+    revenue INT,
+    runtime INT,
+    title STRING,
+    tmdbId STRING,
+    url STRING,
+    year INT
+)
+WITH primary_id_as_attribute="TRUE"
+
+CREATE VERTEX Actor (
+    bio STRING,
+    born DATETIME,
+    bornIn STRING,
+    died DATETIME,
+    imdbId STRING,
+    name STRING,
+    poster STRING,
+    PRIMARY_ID tmdbId STRING,
+    url STRING
+)
+WITH primary_id_as_attribute="TRUE"
+
+CREATE VERTEX Director (
+    bio STRING,
+    born DATETIME,
+    bornIn STRING,
+    died DATETIME,
+    imdbId STRING,
+    name STRING,
+    poster STRING,
+    PRIMARY_ID tmdbId STRING,
+    url STRING
+)
+WITH primary_id_as_attribute="TRUE"
+
+CREATE VERTEX ActorDirector (
+    bio STRING,
+    born DATETIME,
+    bornIn STRING,
+    died DATETIME,
+    imdbId STRING,
+    name STRING,
+    poster STRING,
+    PRIMARY_ID tmdbId STRING,
+    url STRING
+)
+WITH primary_id_as_attribute="TRUE"
+
+CREATE VERTEX User (
+    name STRING,
+    PRIMARY_ID userId STRING
+)
+
+CREATE VERTEX Genre (
+    PRIMARY_ID name STRING,
+)
+WITH primary_id_as_attribute="TRUE"
+
+CREATE DIRECTED EDGE ACTED_IN (
+    FROM Actor|ActorDirector, TO Movie,
+    role STRING
+)
+WITH REVERSE_EDGE="ACTED_IN_REVERSE"
+
+CREATE DIRECTED EDGE DIRECTOR_OF (
+    FROM Director|ActorDirector, TO Movie,
+    role STRING
+)
+WITH REVERSE_EDGE="DIRECTOR_OF_REVERSE"
+
+CREATE DIRECTED EDGE RATED (
+    FROM User, TO Movie,
+    rating FLOAT,
+    timestamp INT  
+)
+WITH REVERSE_EDGE="RATED_REVERSE"
+
+CREATE DIRECTED EDGE IN_GENRE (
+    FROM Movie, TO Genre
+)
+WITH REVERSE_EDGE="IN_GENRE_REVERSE"

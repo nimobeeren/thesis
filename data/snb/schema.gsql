@@ -1,0 +1,64 @@
+// Adapted from: https://github.com/tigergraph/gsql-docs/blob/338405525773805f7bc648f2670ef8a9df66d110/modules/tutorials/attachments/setup.gsql
+
+/*
+ * Copyright (c) 2020 TigerGraph, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+*/
+
+DROP ALL
+
+CREATE VERTEX Comment (PRIMARY_ID id UINT, creation_date DATETIME, location_ip STRING,
+    browser_used STRING, content STRING, length UINT) WITH primary_id_as_attribute="TRUE"
+CREATE VERTEX Post (PRIMARY_ID id UINT, image_file STRING, creation_date DATETIME,
+    location_ip STRING, browser_used STRING, lang STRING, content STRING,
+    length UINT) WITH primary_id_as_attribute="TRUE"
+
+// organization
+CREATE VERTEX Company (PRIMARY_ID id UINT, name STRING, url STRING) WITH primary_id_as_attribute="TRUE"
+CREATE VERTEX University (PRIMARY_ID id UINT, name STRING, url STRING) WITH primary_id_as_attribute="TRUE"
+
+// place
+CREATE VERTEX City (PRIMARY_ID id UINT, name STRING, url STRING) WITH primary_id_as_attribute="TRUE"
+CREATE VERTEX Country (PRIMARY_ID id UINT, name STRING, url STRING) WITH primary_id_as_attribute="TRUE"
+CREATE VERTEX Continent (PRIMARY_ID id UINT, name STRING, url STRING) WITH primary_id_as_attribute="TRUE"
+
+// etc
+CREATE VERTEX Forum (PRIMARY_ID id UINT, title STRING, creation_date DATETIME) WITH primary_id_as_attribute="TRUE"
+CREATE VERTEX Person (PRIMARY_ID id UINT, first_name STRING, last_name STRING, gender STRING, birthday DATETIME,
+   creation_date DATETIME, location_ip STRING, browser_used STRING, speaks set<STRING>, email set<STRING>)
+   WITH primary_id_as_attribute="TRUE"
+CREATE VERTEX Tag (PRIMARY_ID id UINT, name STRING, url STRING) WITH primary_id_as_attribute="TRUE"
+CREATE VERTEX Tag_Class (PRIMARY_ID id UINT, name STRING, url STRING) WITH primary_id_as_attribute="TRUE"
+
+// create edge types
+CREATE DIRECTED EDGE Container_Of (FROM Forum, TO Post) WITH REVERSE_EDGE="Container_Of_Reverse"
+CREATE DIRECTED EDGE Has_Creator (FROM Comment|Post, TO Person) WITH REVERSE_EDGE="Has_Creator_Reverse"
+CREATE DIRECTED EDGE Has_Interest (FROM Person, TO Tag) WITH REVERSE_EDGE="Has_Interest_Reverse"
+CREATE DIRECTED EDGE Has_Member (FROM Forum, TO Person, join_date DATETIME) WITH REVERSE_EDGE="Has_Member_Reverse"
+CREATE DIRECTED EDGE Has_Moderator (FROM Forum, TO Person) WITH REVERSE_EDGE="Has_Moderator_Reverse"
+CREATE DIRECTED EDGE Has_Tag (FROM Comment|Post|Forum, TO Tag) WITH REVERSE_EDGE="Has_Tag_Reverse"
+CREATE DIRECTED EDGE Has_Type (FROM Tag, TO Tag_Class) WITH REVERSE_EDGE="Has_Type_Reverse"
+CREATE DIRECTED EDGE Is_Located_In (FROM Comment, TO Country
+                                  | FROM Post, TO Country
+                                  | FROM Company, TO Country
+                                  | FROM Person, TO City
+                                  | FROM University, TO City) WITH REVERSE_EDGE="Is_Located_In_Reverse"
+CREATE DIRECTED EDGE Is_Part_Of (FROM City, TO Country
+                               | FROM Country, TO Continent) WITH REVERSE_EDGE="Is_Part_Of_Reverse"
+CREATE DIRECTED EDGE Is_Subclass_Of (FROM Tag_Class, TO Tag_Class) WITH REVERSE_EDGE="Is_Subclass_Of_Reverse"
+CREATE UNDIRECTED EDGE Knows (FROM Person, TO Person, creation_date DATETIME)
+CREATE DIRECTED EDGE Likes (FROM Person, TO Comment|Post, creation_date DATETIME) WITH REVERSE_EDGE="Likes_Reverse"
+CREATE DIRECTED EDGE Reply_Of (FROM Comment, TO Comment|Post) WITH REVERSE_EDGE="Reply_Of_Reverse"
+CREATE DIRECTED EDGE Study_At (FROM Person, TO University, class_year INT) WITH REVERSE_EDGE="Study_At_Reverse"
+CREATE DIRECTED EDGE Work_At (FROM Person, TO Company, work_from INT) WITH REVERSE_EDGE="Work_At_Reverse"
