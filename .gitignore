@@ -3,3 +3,6 @@ __pycache__/
 
 node_modules/
 .env
+
+# Symlinks to actual data files
+data/**/data
