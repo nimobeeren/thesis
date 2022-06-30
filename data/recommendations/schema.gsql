@@ -1,13 +1,14 @@
 DROP ALL
 
+BEGIN
 CREATE VERTEX Movie (
+    PRIMARY_ID movieId STRING,
     budget INT,
     countries LIST<STRING>,
     imdbId STRING,
     imdbRating FLOAT,
     imdbVotes INT,
     languages LIST<STRING>,
-    PRIMARY_ID movieId STRING,
     plot STRING,
     poster STRING,
     released STRING,
@@ -19,8 +20,11 @@ CREATE VERTEX Movie (
     year INT
 )
 WITH primary_id_as_attribute="TRUE"
+END
 
+BEGIN
 CREATE VERTEX Actor (
+    PRIMARY_ID tmdbId STRING,
     bio STRING,
     born DATETIME,
     bornIn STRING,
@@ -28,12 +32,14 @@ CREATE VERTEX Actor (
     imdbId STRING,
     name STRING,
     poster STRING,
-    PRIMARY_ID tmdbId STRING,
     url STRING
 )
 WITH primary_id_as_attribute="TRUE"
+END
 
+BEGIN
 CREATE VERTEX Director (
+    PRIMARY_ID tmdbId STRING,
     bio STRING,
     born DATETIME,
     bornIn STRING,
@@ -41,12 +47,14 @@ CREATE VERTEX Director (
     imdbId STRING,
     name STRING,
     poster STRING,
-    PRIMARY_ID tmdbId STRING,
     url STRING
 )
 WITH primary_id_as_attribute="TRUE"
+END
 
+BEGIN
 CREATE VERTEX ActorDirector (
+    PRIMARY_ID tmdbId STRING,
     bio STRING,
     born DATETIME,
     bornIn STRING,
@@ -54,41 +62,54 @@ CREATE VERTEX ActorDirector (
     imdbId STRING,
     name STRING,
     poster STRING,
-    PRIMARY_ID tmdbId STRING,
     url STRING
 )
 WITH primary_id_as_attribute="TRUE"
+END
 
+BEGIN
 CREATE VERTEX User (
-    name STRING,
-    PRIMARY_ID userId STRING
-)
-
-CREATE VERTEX Genre (
-    PRIMARY_ID name STRING,
+    PRIMARY_ID userId STRING,
+    name STRING
 )
 WITH primary_id_as_attribute="TRUE"
+END
 
+BEGIN
+CREATE VERTEX Genre (
+    PRIMARY_ID name STRING
+)
+WITH primary_id_as_attribute="TRUE"
+END
+
+BEGIN
 CREATE DIRECTED EDGE ACTED_IN (
     FROM Actor|ActorDirector, TO Movie,
     role STRING
 )
 WITH REVERSE_EDGE="ACTED_IN_REVERSE"
+END
 
+BEGIN
 CREATE DIRECTED EDGE DIRECTOR_OF (
     FROM Director|ActorDirector, TO Movie,
     role STRING
 )
 WITH REVERSE_EDGE="DIRECTOR_OF_REVERSE"
+END
 
+BEGIN
 CREATE DIRECTED EDGE RATED (
     FROM User, TO Movie,
     rating FLOAT,
     timestamp INT  
 )
 WITH REVERSE_EDGE="RATED_REVERSE"
+END
 
+BEGIN
 CREATE DIRECTED EDGE IN_GENRE (
     FROM Movie, TO Genre
 )
 WITH REVERSE_EDGE="IN_GENRE_REVERSE"
+END
