@@ -1,0 +1,47 @@
+// CREATE GRAPH Recommendations (Movie, Actor, Director, ActorDirector, User, Genre, ACTED_IN, DIRECTOR_OF, RATED, IN_GENRE)
+CREATE GRAPH Recommendations (Movie, Actor)
+
+USE GRAPH Recommendations
+
+BEGIN
+CREATE LOADING JOB load_recommendations FOR GRAPH Recommendations {
+   DEFINE FILENAME moviesFile="/home/tigergraph/mydata/recommendations/movies-tg.csv";
+   DEFINE FILENAME actorsFile="/home/tigergraph/mydata/recommendations/actors.csv";
+
+   LOAD moviesFile TO VERTEX Movie VALUES (
+      $"movieId",
+      $"budget",
+      SPLIT($"countries", "|"),
+      $"imdbId",
+      $"imdbRating",
+      $"imdbVotes",
+      SPLIT($"languages", "|"),
+      $"plot",
+      $"poster",
+      $"released",
+      $"revenue",
+      $"runtime",
+      $"title",
+      $"tmdbId",
+      $"url",
+      $"year"
+   )
+   USING header="true", separator=",", quote="double";
+
+   // LEFT HERE: some actors are not loaded correctly, error on "born" attribute
+   LOAD actorsFile TO VERTEX Actor VALUES (
+      $"tmdbId",
+      $"bio",
+      $"born",
+      $"bornIn",
+      $"died",
+      $"imdbId",
+      $"name",
+      $"poster",
+      $"url"
+   )
+   USING header="true", separator=",", quote="double";
+}
+END
+
+RUN LOADING JOB load_recommendations
