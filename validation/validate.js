@@ -3,7 +3,7 @@ const macros = {
     return `
       // all labels match, except Data and Schema labels
       [label IN labels(${dn}) WHERE label <> "Data"] = [label IN labels(${sn}) WHERE label <> "Schema"]
-      // all properties of dn are in specified in sn and the right type
+      // all properties of dn are specified in sn and the right type
       AND all(k IN keys(${dn}) WHERE ${sn}[k] IS NOT NULL AND apoc.meta.type(${dn}[k]) = replace(${sn}[k], "?", ""))
       // all mandatory properties of sn are present in dn
       AND all(k in keys(${sn}) WHERE ${sn}[k] ENDS WITH "?" OR ${dn}[k] IS NOT NULL)
