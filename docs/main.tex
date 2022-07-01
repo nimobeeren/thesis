@@ -220,13 +220,12 @@ Next, we define the rules that must hold for a property graph to conform to a sc
   \end{enumerate}
 \end{definition}
 
-\autoref{fig:conformance-basic} contains some examples of property graphs which are validated against the schema of \autoref{fig:pg-schema-basic}.
+\autoref{fig:conformance-basic} contains some examples of property graphs which are validated against the schema of \autoref{fig:pg-schema-basic}. In particular, \autoref{fig:conformance-basic-in} shows a case that we might want to prevent (a \texttt{Post} with no creator), but the current schema formalism cannot express this.
 
 Intuitively, rule~\ref{rule:conformance-basic-node} specifies the types of nodes that are allowed to exist in the graph. If there exists a node in the graph that is not specified in the schema, the graph does not conform. Rule~\ref{rule:conformance-basic-edge} similarly specifies the allowed types of edges. In contrast to rule~\ref{rule:conformance-basic-node}, it looks not only at the properties of the edge itself, but also at the source and target nodes. This prevents a node from having an edge that is not explicitly allowed, even if that edge itself does conform to some schema edge.
 
 Under these definitions, it is not possible to specify that an edge is mandatory. In the following, we introduce a notion of cardinality constraints which makes this possible.
 
-% TODO: update examples
 \begin{figure}[t]
   \centering
   \begin{subfigure}[t]{0.45\textwidth}
@@ -254,28 +253,12 @@ Under these definitions, it is not possible to specify that an edge is mandatory
   \hfill
   \begin{subfigure}[t]{0.45\textwidth}
     \centering
-    \includegraphics[width=\textwidth]{figures/conformance-basic-out.pdf}
-    \caption{A \texttt{Person} is missing an outgoing \texttt{created} edge, which violates rule \ref{rule:conformance-basic-out}.}
-    \label{fig:conformance-basic-out}
-  \end{subfigure}
-
-  \vskip\baselineskip
-  
-  \begin{subfigure}[t]{0.45\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{figures/conformance-basic-out-2.pdf}
-    \caption{A \texttt{Person} is missing an outgoing \texttt{knows} edge, which violates rule \ref{rule:conformance-basic-out}.}
-    \label{fig:conformance-basic-out-2}
-  \end{subfigure}
-  \hfill
-  \begin{subfigure}[t]{0.45\textwidth}
-    \centering
     \includegraphics[width=\textwidth]{figures/conformance-basic-in.pdf}
-    \caption{A \texttt{Post} is missing an incoming \texttt{created} edge, which violates rule \ref{rule:conformance-basic-in}.}
+    \caption{A \texttt{Post} is missing an incoming \texttt{created} edge, but this does not violate any rules.}
     \label{fig:conformance-basic-in}
   \end{subfigure}
 
-  \caption{Examples of property graphs that do not conform to the schema of \autoref{fig:pg-schema-basic}. Violating nodes and edges have a red dotted outline.}
+  \caption{Examples of property graphs validated against the schema of \autoref{fig:pg-schema-basic}. Violating nodes and edges have a red dotted outline.}
   \label{fig:conformance-basic}
 \end{figure}
 
