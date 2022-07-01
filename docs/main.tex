@@ -43,8 +43,6 @@
 \newcommand{\rtypes}{\mathcal{T}^\mathsf{r}}
 \newcommand{\otype}{\tau^\mathsf{o}}
 \newcommand{\otypes}{\mathcal{T}^\mathsf{o}}
-\newcommand{\gtype}{\tau^\mathsf{g}}
-\newcommand{\gtypes}{\mathcal{T}^\mathsf{g}}
 
 % Semantics (double brackets)
 \newcommand{\lsem}{\ensuremath{[\![}}
@@ -116,7 +114,7 @@ A schema should allow modeling of real-world entities and their relationships. A
 
 To explore the schema features that are commonly used in practice, let us look at some existing data modeling techniques. As a baseline, we consider the Entity--Relationship (ER) model as proposed by~\citet{chen1976entity}. This model incorporates entities, relationships, attributes, and values. An \emph{entity} is a ``thing'' that can be uniquely identified, a \emph{relationship} is an association between entities, and an \emph{attribute--value} pair represents information about an entity or relationship. Furthermore, an entity may have a \emph{role} in a relationship, such as ``wife'' or ``husband'' in a marriage relationship. These are the fundamental concepts underlying many data modeling methods in use today.
 
-After the original specification, the ER model has been extended in various ways. For example, a notation which introduced cardinality constraints, optionality, and subtype relations was developed by~\citet{barker1990entity}. With these additions, we can create a more nuanced data model, which more closely matches the real world.
+After the original specification, the ER model has been extended in various ways. For example, a notation which introduced cardinality constraints, optionality, and subtype relations was developed by~\citet{barker1990entity}. With these additions, we can create a more nuanced data model which fits the real world more closely.
 
 In the next subsection, we first establish a basic definition of property graph schema, which we then extend with additional features such as cardinality constraints (\autoref{sec:cardinality}) and optional properties (\autoref{sec:optional-properties}).
 
@@ -184,7 +182,7 @@ To formally define property graph schemas and schema conformance, we first assum
 
 \begin{definition}[Basic property graph schema]
   \label{def:pg-schema-basic}
-  A \emph{property graph schema} is a tuple $$\gtype = (N, E, \rho, \omega)$$ where 
+  A \emph{property graph schema} is a tuple $$S = (N, E, \rho, \omega)$$ where 
   \begin{itemize}
     \item $N$ is a finite set of schema nodes;
     \item $E$ is a finite set of schema edges such that $N \cap E = \emptyset$;
@@ -201,7 +199,7 @@ Next, we define the rules that must hold for a property graph to conform to a sc
 
 \begin{definition}[Basic schema conformance]
   \label{def:schema-conformance-basic}
-  Given a property graph $$G = (N, E, \rho, \lambda, \pi)$$ and a property graph schema $$\gtype = (N', E', \rho', \omega)$$ we say that $G$ \emph{conforms} to $\gtype$ if and only if all of the following rules hold.
+  Given a property graph $$G = (N, E, \rho, \lambda, \pi)$$ and a property graph schema $$S = (N', E', \rho', \omega)$$ we say that $G$ \emph{conforms} to $S$ if and only if all of the following rules hold.
 
   \begin{enumerate}
     \item\label{rule:conformance-basic-node}
@@ -291,7 +289,7 @@ Next, we revise the definitions of property graph schema and schema conformance,
 
 \begin{definition}[Property graph schema]
   \label{def:pg-schema}
-  A \emph{property graph schema} is a tuple $$\gtype = (N, E, \rho, \omega, \eta)$$ where
+  A \emph{property graph schema} is a tuple $$S = (N, E, \rho, \omega, \eta)$$ where
   \begin{itemize}
     \item $N$ is a finite set of schema nodes;
     \item $E$ is a finite set of schema edges such that $N \cap E = \emptyset$;
@@ -312,7 +310,7 @@ An example of a property graph schema with cardinality constraints is given in \
 
 \begin{definition}[Schema conformance]
   \label{def:schema-conformance}
-  Given a property graph $$G = (N, E, \rho, \lambda, \pi)$$ and a property graph schema $$\gtype = (N', E', \rho', \omega, \eta)$$ we say that $G$ \emph{conforms} to $\gtype$ if and only if all of the following rules hold.
+  Given a property graph $$G = (N, E, \rho, \lambda, \pi)$$ and a property graph schema $$S = (N', E', \rho', \omega, \eta)$$ we say that $G$ \emph{conforms} to $S$ if and only if all of the following rules hold.
 
   \begin{enumerate}
     \item\label{rule:conformance-node}
