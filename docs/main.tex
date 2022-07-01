@@ -157,7 +157,7 @@ To formally define property graph schemas and schema conformance, we first assum
   For each property type $\ptype \in \ptypes$ there is a set $\sem{\ptype} \subseteq \mathcal{V}$ that contains all property values that \emph{conform} to the type $\ptype$.
 \end{definition}
 
-The concept of property type is similar to a \emph{value set} in the ER model. Value sets and property types are used to specify which values may be associated with an attribute, and which values a property is allowed to have\footnote{Note the subtle difference in terminology: an ER attribute is associated with a value, whereas a property has a name and a value}.
+The concept of property type is similar to a \emph{value set} in the ER model. Value sets and property types are used to specify which values may be associated with an attribute, or which values a property is allowed to have\footnote{Note the subtle difference in terminology: an ER attribute is associated with a value, whereas a property has a name and a value}. A minor difference is that \citet{chen1976entity} postulates that values from different value sets can be equivalent, while we do not have a notion of value equivalence.
 
 \begin{definition}[Basic record type]
   \label{def:record-type-basic}
@@ -197,7 +197,7 @@ We may informally say that an object $o$ conforms to a schema object $o'$, while
 
 Note that a property graph schema can be simulated by a property graph if we allow properties to take property types as values, i.e. $\ptypes \subseteq \mathcal{V}$. Then we let $\lambda$ and $\pi$ take the role of $\omega$, in the sense that $\lambda(o) = L$ and $\pi(o) = \rtype$ if $\omega(o) = (L, \rtype)$ for all objects $o$ in the property graph.
 
-We can relate our formalism to the ER model once again. Our definitions of schema nodes and schema edges are analogous to the concepts of \emph{entity set} and \emph{relationship set}, respectively. Entity sets and schema nodes represent classes of entities that have something in common, whereas relationship sets and schema edges represent classes of relationships. A minor difference is that \citet{chen1976entity} postulates that values from different value sets can be equivalent, while we do not have a notion of value equivalence. \autoref{tab:er-pg-schema} summarizes the relationship between the ER model and our schema formalism.
+We can relate our formalism to the ER model once again. Our definitions of schema nodes and schema edges are analogous to the concepts of \emph{entity set} and \emph{relationship set}, respectively. Entity sets and schema nodes represent classes of entities that have something in common, whereas relationship sets and schema edges represent classes of relationships. \autoref{tab:er-pg-schema} summarizes the relationship between the ER model and our schema formalism.
 
 \begin{table}[t]
   \centering
@@ -214,7 +214,7 @@ We can relate our formalism to the ER model once again. Our definitions of schem
   \label{tab:er-pg-schema}
 \end{table}
 
-Next, we define the rules that must hold for a property graph to conform to a schema.
+Next, we define what it means for a property graph to conform to a schema.
 
 \begin{definition}[Basic schema conformance]
   \label{def:schema-conformance-basic}
