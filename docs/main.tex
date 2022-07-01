@@ -207,40 +207,26 @@ Next, we define the rules that must hold for a property graph to conform to a sc
     \item\label{rule:conformance-basic-node}
     Every node $n$ conforms to some schema node $n'$:
     \begin{align*}
-      &\forall n \in N \; \exists n' \in N' :\\
-      &\quad n \in \sem{\omega(n')}
+      &\forall n \in N \; \exists n' \in N' : n \in \sem{\omega(n')}
     \end{align*}
     
     \item\label{rule:conformance-basic-edge}
-    Every edge $e$ conforms to some schema edge $e'$, and the endpoints of $e$ conform to the respective endpoints of $e'$:
+    Every edge $e$ conforms to some schema edge $e'$, and the source and target nodes of $e$ conform to the respective endpoints of $e'$:
     \begin{align*}
       &\forall e \in E \; \exists e' \in E' :\\
-      &\quad e \in \sem{\omega(e')} \wedge \src(\rho(e)) \in \sem{\omega(\src(\rho'(e')))}\\
-      &\quad\quad\wedge \trg(\rho(e)) \in \sem{\omega(\trg(\rho'(e')))}
-    \end{align*}
-    
-    \item\label{rule:conformance-basic-out}
-    If a node $n$ conforms to the source of a schema edge $e'$, it must have all the outgoing edges of the right type:
-    \begin{align*}
-      &\forall n \in N \; \forall e' \in E':\\
-      &\quad \big[n \in \sem{\omega(\src(\rho(e')))} \implies \exists e \in E \cap \sem{\omega(e')} :\\
-      &\quad\quad \src(\rho(e)) = n \wedge \trg(\rho(e)) \in \sem{\omega(\trg(\rho(e')))}\big]
-    \end{align*}
-
-    \item\label{rule:conformance-basic-in}
-    If a node $n$ conforms to the target of a schema edge $e'$, it must have all the incoming edges of the right type:
-    \begin{align*}
-      &\forall n \in N \; \forall e' \in E'  :\\
-      &\quad \big[n \in \sem{\omega(\trg(\rho(e')))} \implies \exists e \in E \cap \sem{\omega(e')} :\\
-      &\quad\quad \src(\rho(e)) \in \sem{\omega(\src(\rho(e')))} \wedge \trg(\rho(e)) = n\big]
+      &\quad e \in \sem{\omega(e')} \wedge \src(\rho(e)) \in \sem{\omega(\src(\rho'(e')))}
+      \wedge \trg(\rho(e)) \in \sem{\omega(\trg(\rho'(e')))}
     \end{align*}
   \end{enumerate}
 \end{definition}
 
 \autoref{fig:conformance-basic} contains some examples of property graphs which are validated against the schema of \autoref{fig:pg-schema-basic}.
 
-Under these definitions, a schema edge requires that \emph{at least one} conforming edge exists in the property graph. That is, if a schema node has an incident edge (i.e. an incoming or outgoing edge that the schema node participates in), then any node that conforms to the schema node must also have at least one incident edge (in the same direction) that conforms to the schema edge. In the following, we relax this requirement and introduce a more general notion of cardinality constraints.
+Intuitively, rule~\ref{rule:conformance-basic-node} specifies the types of nodes that are allowed to exist in the graph. If there exists a node in the graph that is not specified in the schema, the graph does not conform. Rule~\ref{rule:conformance-basic-edge} similarly specifies the allowed types of edges. In contrast to rule~\ref{rule:conformance-basic-node}, it looks not only at the properties of the edge itself, but also at the source and target nodes. This prevents a node from having an edge that is not explicitly allowed, even if that edge itself does conform to some schema edge.
 
+Under these definitions, it is not possible to specify that an edge is mandatory. In the following, we introduce a notion of cardinality constraints which makes this possible.
+
+% TODO: update examples
 \begin{figure}[t]
   \centering
   \begin{subfigure}[t]{0.45\textwidth}
@@ -318,7 +304,7 @@ Next, we introduce the notion of a \emph{cardinality constraint}.
 
 The two intervals of a cardinality constraint apply to the source and target of an edge, respectively. We also use the functions $\src$ and $\trg$ to refer to the first and second interval of a cardinality constraint, i.e. $\src([n_1, m_1], \, [n_2, m_2]) = [n_1, m_1]$ and $\trg([n_1, m_1], \, [n_2, m_2]) = [n_2, m_2]$.
 
-Next, we revise the definitions of property graph schema and schema conformance, making use of our newly defined cardinality constraints. The following definitions supersede \autoref{def:pg-schema-basic} and~\ref{def:schema-conformance-basic}.
+Next, we revise the definitions of property graph schema and schema conformance, making use of our newly defined cardinality constraints. The following definitions subsume \autoref{def:pg-schema-basic} and~\ref{def:schema-conformance-basic}.
 
 \begin{definition}[Property graph schema]
   \label{def:pg-schema}
@@ -349,16 +335,14 @@ An example of a property graph schema with cardinality constraints is given in \
     \item\label{rule:conformance-node}
     Every node $n$ conforms to some schema node $n'$:
     \begin{align*}
-      &\forall n \in N \; \exists n' \in N' :\\
-      &\quad n \in \sem{\omega(n')}
+      &\forall n \in N \; \exists n' \in N' : n \in \sem{\omega(n')}
     \end{align*}
-    
+
     \item\label{rule:conformance-edge}
-    Every edge $e$ conforms to some schema edge $e'$, and the endpoints of $e$ conform to the respective endpoints of $e'$:
+    Every edge $e$ conforms to some schema edge $e'$, and the source and target nodes of $e$ conform to the respective endpoints of $e'$:
     \begin{align*}
       &\forall e \in E \; \exists e' \in E' :\\
-      &\quad e \in \sem{\omega(e')} \wedge \src(\rho(e)) \in \sem{\omega(\src(\rho'(e')))}\\
-      &\quad\quad\wedge \trg(\rho(e)) \in \sem{\omega(\trg(\rho'(e')))}
+      &\quad e \in \sem{\omega(e')} \wedge \src(\rho(e)) \in \sem{\omega(\src(\rho'(e')))}\wedge \trg(\rho(e)) \in \sem{\omega(\trg(\rho'(e')))}
     \end{align*}
     
     \item\label{rule:conformance-out}
@@ -379,9 +363,9 @@ An example of a property graph schema with cardinality constraints is given in \
   \end{enumerate}
 \end{definition}
 
-Compared to \autoref{def:schema-conformance-basic}, rules~\ref{rule:conformance-node} and~\ref{rule:conformance-edge} are unchanged, but the counting quantifiers in~\ref{rule:conformance-out} and~\ref{rule:conformance-in} now ensure that nodes do not have too few or too many edges of a particular type.
+\autoref{fig:conformance} contains some examples of property graphs which are validated against the schema of \autoref{fig:pg-schema}, taking into account the new rules.
 
-\autoref{fig:conformance} contains some examples of property graphs which are validated against the schema of \autoref{fig:pg-schema}, taking into account the new rules for cardinality constraints.
+Compared to \autoref{def:schema-conformance-basic}, rules~\ref{rule:conformance-node} and~\ref{rule:conformance-edge} are unchanged, while rules~\ref{rule:conformance-out} and~\ref{rule:conformance-in} enforce cardinality constraints on edges. With these new rules, we can enforce mandatory edges, i.e. a cardinality constraint of ``at least one''.
 
 \begin{figure}[t]
   \centering
@@ -422,7 +406,7 @@ Compared to \autoref{def:schema-conformance-basic}, rules~\ref{rule:conformance-
 \subsection{Optional properties}
 \label{sec:optional-properties}
 
-We revise the definition of record by adding a special property value $\undefined$, which indicates that the value of a property is not defined. The following definitions supersede Definition~\ref{def:record-basic}, \ref{def:property-conformance-basic}, \ref{def:record-type-basic}, and \ref{def:record-conformance-basic}.
+We revise the definition of record by adding a special property value $\undefined$, which indicates that the value of a property is not defined. The following definitions subsume Definition~\ref{def:record-basic}, \ref{def:property-conformance-basic}, \ref{def:record-type-basic}, and \ref{def:record-conformance-basic}.
 
 \begin{definition}[Record]
   \label{def:record}
