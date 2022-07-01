@@ -112,7 +112,7 @@ The functions $\src$ and $\trg$ map pairs to their first and second element, i.e
 
 A schema should allow modeling of real-world entities and their relationships. A more expressive schema language enables the specification of more complex constraints, but may come at a cost of greater research and engineering effort, as well as worse runtime performance. This needs to be balanced in our choice of schema language.
 
-To explore the schema features that are commonly used in practice, let us look at some existing data modeling techniques. As a baseline, we consider the Entity--Relationship (ER) model as proposed by~\citet{chen1976entity}. This model incorporates entities, relationships, attributes, and values. An \emph{entity} is a ``thing'' that can be uniquely identified, a \emph{relationship} is an association between entities, and an \emph{attribute--value} pair represents information about an entity or relationship. Furthermore, an entity may have a \emph{role} in a relationship, such as ``wife'' or ``husband'' in a marriage relationship. These are the fundamental concepts underlying many data modeling methods in use today.
+To explore the schema features that are commonly used in practice, let us look at some existing data modeling techniques. As a baseline, we consider the Entity--Relationship (ER) model as proposed by~\citet{chen1976entity}. This model incorporates entities, relationships, attributes, and values. An \emph{entity} is a ``thing'' that can be uniquely identified, a \emph{relationship} is an association between entities, and an \emph{attribute--value} pair represents information about an entity or relationship. Furthermore, an entity may have a \emph{role} in a relationship, such as ``wife'' or ``husband'' in a marriage relationship. These are the concepts underlying many conceptual data modeling methods in use today.
 
 After the original specification, the ER model has been extended in various ways. For example, a notation which introduced cardinality constraints, optionality, and subtype relations was developed by~\citet{barker1990entity}. With these additions, we can create a more nuanced data model which fits the real world more closely.
 
@@ -157,6 +157,8 @@ To formally define property graph schemas and schema conformance, we first assum
   For each property type $\ptype \in \ptypes$ there is a set $\sem{\ptype} \subseteq \mathcal{V}$ that contains all property values that \emph{conform} to the type $\ptype$.
 \end{definition}
 
+The concept of property type is similar to a \emph{value set} in the ER model. Value sets and property types are used to specify which values may be associated with an attribute, and which values a property is allowed to have\footnote{Note the subtle difference in terminology: an ER attribute is associated with a value, whereas a property has a name and a value}.
+
 \begin{definition}[Basic record type]
   \label{def:record-type-basic}
   A \emph{record type} is a finite partial function $\rtype : \mathcal{N} \pto \ptypes$ that maps some property names to a property type.
@@ -191,9 +193,26 @@ To formally define property graph schemas and schema conformance, we first assum
   \end{itemize}
 \end{definition}
 
-We may informally say that an object $o$ conforms to a schema object $o'$, while it would be more accurate to say that $o$ conforms to the \emph{object type} that is associated with schema object $o'$, i.e $o \in \sem{\omega(o')}$,.
+We may informally say that an object $o$ conforms to a schema object $o'$, while it would be more accurate to say that $o$ conforms to the \emph{object type} that is associated with schema object $o'$, i.e $o \in \sem{\omega(o')}$.
 
 Note that a property graph schema can be simulated by a property graph if we allow properties to take property types as values, i.e. $\ptypes \subseteq \mathcal{V}$. Then we let $\lambda$ and $\pi$ take the role of $\omega$, in the sense that $\lambda(o) = L$ and $\pi(o) = \rtype$ if $\omega(o) = (L, \rtype)$ for all objects $o$ in the property graph.
+
+We can relate our formalism to the ER model once again. Our definitions of schema nodes and schema edges are analogous to the concepts of \emph{entity set} and \emph{relationship set}, respectively. Entity sets and schema nodes represent classes of entities that have something in common, whereas relationship sets and schema edges represent classes of relationships. A minor difference is that \citet{chen1976entity} postulates that values from different value sets can be equivalent, while we do not have a notion of value equivalence. \autoref{tab:er-pg-schema} summarizes the relationship between the ER model and our schema formalism.
+
+\begin{table}[t]
+  \centering
+  \begin{tabular}{|l|l|}
+    \hline
+    \textbf{ER} & \textbf{PG Schema} \\
+    \hline
+    Entity set & Schema node \\
+    Relationship set & Schema edge \\
+    Value set & Property type* \\
+    \hline
+  \end{tabular}
+  \caption{Mapping between entity--relationship and property graph schema concepts. Strictly speaking, a property type $\ptype$ is not a set, but $\sem{\ptype}$ is.}
+  \label{tab:er-pg-schema}
+\end{table}
 
 Next, we define the rules that must hold for a property graph to conform to a schema.
 
