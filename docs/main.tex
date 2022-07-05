@@ -128,13 +128,13 @@ In this subsection, we define a notion of property graph schema which incorporat
   \centering
   \begin{tabular}{|l|l|}
     \hline
-    \textbf{ER} & \textbf{PG} \\
+    \textbf{ER}  & \textbf{PG}     \\
     \hline
-    Entity & Node \\
-    Relationship & Edge \\
-    Attribute & Property name \\
-    Value & Value \\
-    Role & Edge direction* \\
+    Entity       & Node            \\
+    Relationship & Edge            \\
+    Attribute    & Property name   \\
+    Value        & Value           \\
+    Role         & Edge direction* \\
     \hline
   \end{tabular}
   \caption{Mapping between entity--relationship and property graph concepts. Roles and edge direction can be used for similar purposes, but are not equivalent.}
@@ -172,7 +172,7 @@ The concept of property type is similar to a \emph{value set} in the ER model. V
 
 \begin{definition}[Object type]
   \label{def:object-type}
-  An \emph{object type} is a pair $\otype = (L, \rtype)$ where $L \subseteq \mathcal{L}$ is a finite set of labels and and $\rtype$ a record type. 
+  An \emph{object type} is a pair $\otype = (L, \rtype)$ where $L \subseteq \mathcal{L}$ is a finite set of labels and and $\rtype$ a record type.
   % We denote such object types also simply as $L\rtype$ or $\{ l_1 \ldots l_k \} \langle a_1 : \rtype_1, \ldots, a_n : \rtype_n \rangle$.
   The set of all object types is denoted as $\otypes$.
 \end{definition}
@@ -184,7 +184,7 @@ The concept of property type is similar to a \emph{value set} in the ER model. V
 
 \begin{definition}[Basic property graph schema]
   \label{def:pg-schema-basic}
-  A \emph{property graph schema} is a tuple $$S = (N, E, \rho, \omega)$$ where 
+  A \emph{property graph schema} is a tuple $$S = (N, E, \rho, \omega)$$ where
   \begin{itemize}
     \item $N$ is a finite set of schema nodes;
     \item $E$ is a finite set of schema edges such that $N \cap E = \emptyset$;
@@ -203,11 +203,11 @@ We can relate our formalism to the ER model once again. Our definitions of schem
   \centering
   \begin{tabular}{|l|l|}
     \hline
-    \textbf{ER} & \textbf{PG Schema} \\
+    \textbf{ER}      & \textbf{PG Schema} \\
     \hline
-    Entity set & Schema node \\
-    Relationship set & Schema edge \\
-    Value set & Property type* \\
+    Entity set       & Schema node        \\
+    Relationship set & Schema edge        \\
+    Value set        & Property type*     \\
     \hline
   \end{tabular}
   \caption{Mapping between entity--relationship and property graph schema concepts. Strictly speaking, a property type $\ptype$ is not a set, but $\sem{\ptype}$ is.}
@@ -222,18 +222,18 @@ Next, we define what it means for a property graph to conform to a schema.
 
   \begin{enumerate}
     \item\label{rule:conformance-basic-node}
-    Every node $n$ conforms to some schema node $n'$:
-    \begin{align*}
-      &\forall n \in N \; \exists n' \in N' : n \in \sem{\omega(n')}
-    \end{align*}
-    
+          Every node $n$ conforms to some schema node $n'$:
+          \begin{align*}
+             & \forall n \in N \; \exists n' \in N' : n \in \sem{\omega(n')}
+          \end{align*}
+
     \item\label{rule:conformance-basic-edge}
-    Every edge $e$ conforms to some schema edge $e'$, and the source and target nodes of $e$ conform to the respective endpoints of $e'$:
-    \begin{align*}
-      &\forall e \in E \; \exists e' \in E' :\\
-      &\quad e \in \sem{\omega(e')} \wedge \src(\rho(e)) \in \sem{\omega(\src(\rho'(e')))}
-      \wedge \trg(\rho(e)) \in \sem{\omega(\trg(\rho'(e')))}
-    \end{align*}
+          Every edge $e$ conforms to some schema edge $e'$, and the source and target nodes of $e$ conform to the respective endpoints of $e'$:
+          \begin{align*}
+             & \forall e \in E \; \exists e' \in E' :                                              \\
+             & \quad e \in \sem{\omega(e')} \wedge \src(\rho(e)) \in \sem{\omega(\src(\rho'(e')))}
+            \wedge \trg(\rho(e)) \in \sem{\omega(\trg(\rho'(e')))}
+          \end{align*}
   \end{enumerate}
 \end{definition}
 
@@ -288,7 +288,7 @@ We first introduce a generalization of the existential quantifier which enables 
   The \emph{counting quantifier} is defined as follows. Given two numbers $n, m \in \N$, a predicate $P$, and a set $X$, define
   \begin{itemize}
     \item $\exists^{\geq n} x \in X : P(x) \equiv \exists x_1, \ldots, x_n \in X : P(x_1) \wedge \ldots \wedge P(x_n) \wedge \forall 1 \leq i < j \leq n : x_i \neq x_j$;
-    % FIXME: this might be ambiguous, add brackets?
+          % FIXME: this might be ambiguous, add brackets?
     \item $\exists^{\leq n} x \in X : P(x) \equiv \exists x_1, \ldots, x_n, x_{n+1}, \ldots, x_k \in X : P(x_1) \wedge \ldots \wedge P(x_k) \implies \forall n < i < j \leq k : x_i = x_j$;
     \item $\exists^{[n, m]} x \in X : P(x) \equiv \exists^{\geq n} x \in X : P(x) \wedge \exists^{\leq m} x' \in X : P(x')$;
     \item $\exists^{[n, *]} x \in X : P(x) \equiv \exists^{\geq n} x \in X : P(x)$.
@@ -333,33 +333,33 @@ An example of a property graph schema with cardinality constraints is given in \
 
   \begin{enumerate}
     \item\label{rule:conformance-node}
-    Every node $n$ conforms to some schema node $n'$:
-    \begin{align*}
-      &\forall n \in N \; \exists n' \in N' : n \in \sem{\omega(n')}
-    \end{align*}
+          Every node $n$ conforms to some schema node $n'$:
+          \begin{align*}
+             & \forall n \in N \; \exists n' \in N' : n \in \sem{\omega(n')}
+          \end{align*}
 
     \item\label{rule:conformance-edge}
-    Every edge $e$ conforms to some schema edge $e'$, and the source and target nodes of $e$ conform to the respective endpoints of $e'$:
-    \begin{align*}
-      &\forall e \in E \; \exists e' \in E' :\\
-      &\quad e \in \sem{\omega(e')} \wedge \src(\rho(e)) \in \sem{\omega(\src(\rho'(e')))}\wedge \trg(\rho(e)) \in \sem{\omega(\trg(\rho'(e')))}
-    \end{align*}
-    
+          Every edge $e$ conforms to some schema edge $e'$, and the source and target nodes of $e$ conform to the respective endpoints of $e'$:
+          \begin{align*}
+             & \forall e \in E \; \exists e' \in E' :                                                                                                    \\
+             & \quad e \in \sem{\omega(e')} \wedge \src(\rho(e)) \in \sem{\omega(\src(\rho'(e')))}\wedge \trg(\rho(e)) \in \sem{\omega(\trg(\rho'(e')))}
+          \end{align*}
+
     \item\label{rule:conformance-out}
-    If a node $n$ conforms to the source of a schema edge $e'$, it must have the right number of outgoing edges of the right type:
-    \begin{align*}
-      &\forall n \in N \; \forall e' \in E':\\
-      &\quad \big[n \in \sem{\omega(\src(\rho(e')))} \implies \exists^{\src(\eta(e'))} e \in E \cap \sem{\omega(e')} :\\
-      &\quad\quad \src(\rho(e)) = n \wedge \trg(\rho(e)) \in \sem{\omega(\trg(\rho(e')))}\big]
-    \end{align*}
+          If a node $n$ conforms to the source of a schema edge $e'$, it must have the right number of outgoing edges of the right type:
+          \begin{align*}
+             & \forall n \in N \; \forall e' \in E':                                                                           \\
+             & \quad \big[n \in \sem{\omega(\src(\rho(e')))} \implies \exists^{\src(\eta(e'))} e \in E \cap \sem{\omega(e')} : \\
+             & \quad\quad \src(\rho(e)) = n \wedge \trg(\rho(e)) \in \sem{\omega(\trg(\rho(e')))}\big]
+          \end{align*}
 
     \item\label{rule:conformance-in}
-    If a node $n$ conforms to the target of a schema edge $e'$, it must have the right number of incoming edges of the right type:
-    \begin{align*}
-      &\forall n \in N \; \forall e' \in E'  :\\
-      &\quad \big[n \in \sem{\omega(\trg(\rho(e')))} \implies \exists^{\trg(\eta(e'))} e \in E \cap \sem{\omega(e')} :\\
-      &\quad\quad \src(\rho(e)) \in \sem{\omega(\src(\rho(e')))} \wedge \trg(\rho(e)) = n\big]
-    \end{align*}
+          If a node $n$ conforms to the target of a schema edge $e'$, it must have the right number of incoming edges of the right type:
+          \begin{align*}
+             & \forall n \in N \; \forall e' \in E'  :                                                                         \\
+             & \quad \big[n \in \sem{\omega(\trg(\rho(e')))} \implies \exists^{\trg(\eta(e'))} e \in E \cap \sem{\omega(e')} : \\
+             & \quad\quad \src(\rho(e)) \in \sem{\omega(\src(\rho(e')))} \wedge \trg(\rho(e)) = n\big]
+          \end{align*}
   \end{enumerate}
 \end{definition}
 
@@ -437,7 +437,10 @@ We adjust the definitions of property conformance, record type, and record confo
 
 It may be desirable to allow a record to have properties with any name or any value. Such \emph{open record types} can already be expressed under the current definitions. For a record type $\rtype$, we can allow properties with any name by setting $\rtype(k) = \ptype?$ for all (previously unspecified) property names $k \in \mathcal{N}$, where $\ptype$ is an arbitrary property type. Note that there may be infinitely many such $k$, so in practice we may want to have a special syntax to express this. We can allow these properties to have any value by choosing a $\ptype$ such that $\sem{\ptype} = \mathcal{V}$, or we can restrict them to a subset of $\mathcal{V}$.
 
-\section{Limitations}
+\section{Discussion}
+
+% TODO: lack of key constraints?
+% TODO: suggest richer constraint language
 
 Our schema formalisms come with a number of limitations. First, it is not possible to specify constraints over a graph pattern larger than two neighboring nodes and the edge between them. For example, say we want to allow a person to drive a car, but only when they have a driver's license. \autoref{fig:drivers-license} depicts a schema that models these entities and their relations this using three nodes and two edges. Unfortunately, it is not possible to prevent a person from driving a car without having a driver's license. This illustrates the limited scope of the constraints that we can specify.
 
@@ -487,9 +490,15 @@ In \autoref{fig:subtyping}, a constraint is specified which we can express in wo
 
 \section{Related Work}
 
+\subsection{Graph Integrity Constraints}
+
+% TODO: refer to querying graphs book instead of discussing integrity constraints here
+
 The problem of expressing and validating integrity constraints for graphs has received some attention in the scientific community. A large part of this research has been on functional dependencies, which has been studied extensively in the context of relational databases \citep{fagin1984theory,abiteboul1999data}. The idea of functional dependencies has been adapted to graph data, with the first work focussing on \emph{key constraints}, which aim to uniquely identify entities represented by nodes \citep{fan2015keys}. These have been extended to include more general dependencies \citep{fan2016functional}. The current state of the art of key constraints is presented in \textsc{PG-Keys} \citep{angles2021keys}.
 
 % TODO: other kinds of graph integrity constraints (pokorny 2017?)
+
+\subsection{Graph Schema}
 
 Some approaches to graph schema have been discussed in the literature. \citet{buneman1997adding} propose a method that represents both data and schema as edge-labeled graphs. This enables the specification of the types of edges and paths that are allowed to occur in a database instance, but does not cover mandatory edges or more general cardinality constraints.
 
@@ -497,11 +506,15 @@ Some approaches to graph schema have been discussed in the literature. \citet{bu
 
 SHACL\footnote{\url{https://www.w3.org/TR/shacl/}} is a language for specifying constraints on RDF graphs. These constraints themselves are also represented as RDF graphs, and are called \emph{shapes}. Constraints on values, data types and cardinality are supported. This enables specification of allowed, optional, and mandatory edges. A review of the formal frameworks used to study the SHACL language and the validation of RDF graphs against SHACL schemas can be found in \citet{pareti2022shacl}.
 
+\subsection{Property Graph Schema}
+
 The property graph data model has been adopted by numerous contemporary graph database systems (dating back to at least 2007 with the first release of Neo4j\footnote{\url{https://neo4j.com/open-source-project/}}), but a formal specification was missing until one was proposed by \citet{angles2018property}. The author also brought integrity constraints to the property graph model, and defined a basic notion of schema using first-order logic rules. In this approach, no distinction was made between mandatory and optional properties, nor were cardinality constraints addressed.
 
 \citet{bonifati2019schema} present a property graph schema validation approach based on graph homomorphisms. They differentiate between mandatory and optional properties, though edges are always interpreted as optional. Cardinality constraints are not discussed. The authors look at schemas from two different angles: they can be descriptive in the sense that they only reflect the data, or they can be prescriptive by means of enforcing constraints on data. This distinction is relevant in particular to the topic of schema evolution, where it may be desirable to switch between these two modes as an application matures. It is noted that most contemporary graph database systems only provide descriptive schema tools.
 
-% TODO: FLASc?
+\citet{lbath2021inference} look at property graph schemas from the perspective of schema inference. Their goal is to extract an accurate and complete schema for an arbitrary property graph instance. To this end, a property graph schema formalism is defined, supporting cardinality constraints, mandatory and optional edges, as well as subtyping. In addition, a syntax for schema definition is presented, and the schema inference pipeline is evaluated using real-world datasets. The problem of validating a graph against a given schema is not addressed. Statistical methods are applied in \citep{bonifati2022hierarchical} to improve performance.
+
+\citet{lei2021thesis} proposes a semi-automated method for schema extraction which incorporates expert knowledge. The user can adjust parameters and similarity measures which affect how the schema is generated. An implementation and experimental results are given. Cardinality constraints are not covered.
 
 \bibliography{main}
 
