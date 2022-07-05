@@ -70,6 +70,34 @@ The \emph{property graph model} is the predominant data model among graph databa
 
 Our overarching goal is to develop an end-to-end framework for property graph schema specification and validation. To this end, we propose a schema formalism capable of expressing local and structural constraints, we provide a prototypical implementation for schema validation in the form of graph queries, and we investigate the practical feasibility of this approach on current graph database systems and realistic datasets.
 
+\section{Related Work}
+
+\subsection{Graph Integrity Constraints}
+
+% TODO: refer to querying graphs book instead of discussing integrity constraints here
+
+The problem of expressing and validating integrity constraints for graphs has received some attention in the scientific community. A large part of this research has been on functional dependencies, which has been studied extensively in the context of relational databases \citep{fagin1984theory,abiteboul1999data}. The idea of functional dependencies has been adapted to graph data, with the first work focussing on \emph{key constraints}, which aim to uniquely identify entities represented by nodes \citep{fan2015keys}. These have been extended to include more general dependencies \citep{fan2016functional}. The current state of the art of key constraints is presented in \textsc{PG-Keys} \citep{angles2021keys}.
+
+% TODO: other kinds of graph integrity constraints (pokorny 2017?)
+
+\subsection{Graph Schema}
+
+Some approaches to graph schema have been discussed in the literature. While these methods are based on different graph models, they may be adapted to the property graph model. \citet{buneman1997adding} propose a method that represents both data and schema as edge-labeled graphs. This enables the specification of the types of edges and paths that are allowed to occur in a database instance, but does not cover mandatory edges or more general cardinality constraints.
+
+\citet{colazzo2015typing} introduce another schema formalism for edge-labeled data graphs. They define a schema as a set of pairs $(r_{in}, r_{out})$, where $r_{in}$ and $r_{out}$ are regular expressions. The semantics is that every node must match a schema element $(r_{in}, r_{out})$, meaning that the node's incoming edges match $r_{in}$ and its outgoing edges match $r_{out}$. Using Regular Path Queries (RPQs), edge cardinality can be exactly specified. When extending the language to Nested Regular Expressions (NREs), it is possible to specify structural constraints over arbitrarily large graph patterns.
+
+SHACL\footnote{\url{https://www.w3.org/TR/shacl/}} is a language for specifying constraints on RDF graphs. These constraints themselves are also represented as RDF graphs, and are called \emph{shapes}. Constraints on values, data types and cardinality are supported. This enables specification of allowed, optional, and mandatory edges. A review of the formal frameworks used to study the SHACL language and the validation of RDF graphs against SHACL schemas can be found in \citet{pareti2022shacl}.
+
+\subsection{Property Graph Schema}
+
+The property graph data model has been adopted by numerous contemporary graph database systems (dating back to at least 2007 with the first release of Neo4j\footnote{\url{https://neo4j.com/open-source-project/}}), but a formal specification was missing until one was proposed by \citet{angles2018property}. The author also brought integrity constraints to the property graph model, and defined a basic notion of schema using first-order logic rules. In this approach, no distinction was made between mandatory and optional properties, nor were cardinality constraints addressed.
+
+\citet{bonifati2019schema} present a property graph schema validation approach based on graph homomorphisms. They differentiate between mandatory and optional properties, though edges are always interpreted as optional. Cardinality constraints are not discussed. The authors look at schemas from two different angles: they can be descriptive in the sense that they only reflect the data, or they can be prescriptive by means of enforcing constraints on data. This distinction is relevant in particular to the topic of schema evolution, where it may be desirable to switch between these two modes as an application matures. It is noted that most contemporary graph database systems only provide descriptive schema tools.
+
+\citet{lbath2021inference} look at property graph schemas from the perspective of schema inference. Their goal is to extract an accurate and complete schema for an arbitrary property graph instance. To this end, a property graph schema formalism is defined, supporting cardinality constraints, mandatory and optional edges, as well as subtyping. In addition, a syntax for schema definition is presented, and the schema inference pipeline is evaluated using real-world datasets. The problem of validating a graph against a given schema is not addressed. Statistical methods are applied in \citep{bonifati2022hierarchical} to improve performance.
+
+\citet{lei2021thesis} proposes a semi-automated method for schema extraction which incorporates expert knowledge. The user can adjust parameters and similarity measures which affect how the schema is generated. An implementation and experimental results are given. Cardinality constraints are not covered.
+
 \section{Property Graphs}
 
 We start by introducing our data model, which is based on the definition of \emph{property graph} established by the Working Group for Database Languages~(WG3) as part of ISO/IEC JTC1/SC32 \citep{deutsch2021gpml}. We use this data model in the rest of this document.
@@ -487,34 +515,6 @@ In \autoref{fig:subtyping}, a constraint is specified which we can express in wo
   \end{subfigure}
   \caption{A schema consisting of a supertype with two subtypes which cannot be modeled using our schema formalism. Any property graph that conforms to~(a) also conforms to~(b), but not the other way around.}
 \end{figure}
-
-\section{Related Work}
-
-\subsection{Graph Integrity Constraints}
-
-% TODO: refer to querying graphs book instead of discussing integrity constraints here
-
-The problem of expressing and validating integrity constraints for graphs has received some attention in the scientific community. A large part of this research has been on functional dependencies, which has been studied extensively in the context of relational databases \citep{fagin1984theory,abiteboul1999data}. The idea of functional dependencies has been adapted to graph data, with the first work focussing on \emph{key constraints}, which aim to uniquely identify entities represented by nodes \citep{fan2015keys}. These have been extended to include more general dependencies \citep{fan2016functional}. The current state of the art of key constraints is presented in \textsc{PG-Keys} \citep{angles2021keys}.
-
-% TODO: other kinds of graph integrity constraints (pokorny 2017?)
-
-\subsection{Graph Schema}
-
-Some approaches to graph schema have been discussed in the literature. \citet{buneman1997adding} propose a method that represents both data and schema as edge-labeled graphs. This enables the specification of the types of edges and paths that are allowed to occur in a database instance, but does not cover mandatory edges or more general cardinality constraints.
-
-\citet{colazzo2015typing} introduce another schema formalism for edge-labeled data graphs. They define a schema as a set of pairs $(r_{in}, r_{out})$, where $r_{in}$ and $r_{out}$ are regular expressions. The semantics is that every node must match a schema element $(r_{in}, r_{out})$, meaning that the node's incoming edges match $r_{in}$ and its outgoing edges match $r_{out}$. Using Regular Path Queries (RPQs), edge cardinality can be exactly specified. When extending the language to Nested Regular Expressions (NREs), it is possible to specify structural constraints over arbitrarily large graph patterns.
-
-SHACL\footnote{\url{https://www.w3.org/TR/shacl/}} is a language for specifying constraints on RDF graphs. These constraints themselves are also represented as RDF graphs, and are called \emph{shapes}. Constraints on values, data types and cardinality are supported. This enables specification of allowed, optional, and mandatory edges. A review of the formal frameworks used to study the SHACL language and the validation of RDF graphs against SHACL schemas can be found in \citet{pareti2022shacl}.
-
-\subsection{Property Graph Schema}
-
-The property graph data model has been adopted by numerous contemporary graph database systems (dating back to at least 2007 with the first release of Neo4j\footnote{\url{https://neo4j.com/open-source-project/}}), but a formal specification was missing until one was proposed by \citet{angles2018property}. The author also brought integrity constraints to the property graph model, and defined a basic notion of schema using first-order logic rules. In this approach, no distinction was made between mandatory and optional properties, nor were cardinality constraints addressed.
-
-\citet{bonifati2019schema} present a property graph schema validation approach based on graph homomorphisms. They differentiate between mandatory and optional properties, though edges are always interpreted as optional. Cardinality constraints are not discussed. The authors look at schemas from two different angles: they can be descriptive in the sense that they only reflect the data, or they can be prescriptive by means of enforcing constraints on data. This distinction is relevant in particular to the topic of schema evolution, where it may be desirable to switch between these two modes as an application matures. It is noted that most contemporary graph database systems only provide descriptive schema tools.
-
-\citet{lbath2021inference} look at property graph schemas from the perspective of schema inference. Their goal is to extract an accurate and complete schema for an arbitrary property graph instance. To this end, a property graph schema formalism is defined, supporting cardinality constraints, mandatory and optional edges, as well as subtyping. In addition, a syntax for schema definition is presented, and the schema inference pipeline is evaluated using real-world datasets. The problem of validating a graph against a given schema is not addressed. Statistical methods are applied in \citep{bonifati2022hierarchical} to improve performance.
-
-\citet{lei2021thesis} proposes a semi-automated method for schema extraction which incorporates expert knowledge. The user can adjust parameters and similarity measures which affect how the schema is generated. An implementation and experimental results are given. Cardinality constraints are not covered.
 
 \bibliography{main}
 
