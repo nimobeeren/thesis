@@ -13,6 +13,8 @@ CREATE LOADING JOB load_recommendations FOR GRAPH Recommendations {
     DEFINE FILENAME genresFile="/home/tigergraph/mydata/recommendations/genres.csv";
     // Edges
     DEFINE FILENAME actedInFile="/home/tigergraph/mydata/recommendations/actedIn.csv";
+    DEFINE FILENAME actorDirectorActedInFile="/home/tigergraph/mydata/recommendations/actorDirectorActedIn.csv";
+    DEFINE FILENAME actorDirectorDirectedFile="/home/tigergraph/mydata/recommendations/actorDirectorDirected.csv";
     DEFINE FILENAME directedFile="/home/tigergraph/mydata/recommendations/directed.csv";
     DEFINE FILENAME inGenreFile="/home/tigergraph/mydata/recommendations/inGenre.csv";
     DEFINE FILENAME ratedFile="/home/tigergraph/mydata/recommendations/rated.csv";
@@ -93,7 +95,7 @@ CREATE LOADING JOB load_recommendations FOR GRAPH Recommendations {
     )
     USING HEADER="true", SEPARATOR=",", QUOTE="double";
 
-    // FIXME: ACTED_IN edges from an ActorDirector are skipped
+    // Only includes ACTED_IN edges starting from an Actor
     LOAD actedInFile TO EDGE ACTED_IN VALUES (
       $"_start" Actor,
       $"_end",
@@ -101,7 +103,23 @@ CREATE LOADING JOB load_recommendations FOR GRAPH Recommendations {
     )
     USING HEADER="true", SEPARATOR=",", QUOTE="double", VERTEX_MUST_EXIST="true";
 
-    // FIXME: DIRECTOR_OF edges from an ActorDirector are skipped
+    // Only includes ACTED_IN edges starting from an ActorDirector
+    LOAD actorDirectorActedInFile TO EDGE ACTED_IN VALUES (
+      $"_start" ActorDirector,
+      $"_end",
+      $"role"
+    )
+    USING HEADER="true", SEPARATOR=",", QUOTE="double", VERTEX_MUST_EXIST="true";
+
+    // Only includes DIRECTOR_OF edges starting from an ActorDirector
+    LOAD actorDirectorDirectedFile TO EDGE DIRECTOR_OF VALUES (
+      $"_start" ActorDirector,
+      $"_end",
+      $"role"
+    )
+    USING HEADER="true", SEPARATOR=",", QUOTE="double", VERTEX_MUST_EXIST="true";// DIRECTOR_OF edges from an ActorDirector are skipped
+
+    // Only includes DIRECTOR_OF edges starting from a Director
     LOAD directedFile TO EDGE DIRECTOR_OF VALUES (
       $"_start" Director,
       $"_end",
