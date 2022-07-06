@@ -1,16 +1,21 @@
-CREATE GRAPH Recommendations (Movie, Actor, Director, ActorDirector, User, Genre, IN_GENRE)
+CREATE GRAPH Recommendations (Movie, Actor, Director, ActorDirector, User, Genre, ACTED_IN, DIRECTOR_OF, IN_GENRE, RATED)
 
 USE GRAPH Recommendations
 
 BEGIN
 CREATE LOADING JOB load_recommendations FOR GRAPH Recommendations {
+    // Vertices
     DEFINE FILENAME moviesFile="/home/tigergraph/mydata/recommendations/movies-tg.csv";
     DEFINE FILENAME actorsFile="/home/tigergraph/mydata/recommendations/actors.csv";
     DEFINE FILENAME directorsFile="/home/tigergraph/mydata/recommendations/directors.csv";
     DEFINE FILENAME actorDirectorsFile="/home/tigergraph/mydata/recommendations/actorDirectors.csv";
     DEFINE FILENAME usersFile="/home/tigergraph/mydata/recommendations/users.csv";
     DEFINE FILENAME genresFile="/home/tigergraph/mydata/recommendations/genres.csv";
+    // Edges
+    DEFINE FILENAME actedInFile="/home/tigergraph/mydata/recommendations/actedIn.csv";
+    DEFINE FILENAME directedFile="/home/tigergraph/mydata/recommendations/directed.csv";
     DEFINE FILENAME inGenreFile="/home/tigergraph/mydata/recommendations/inGenre.csv";
+    DEFINE FILENAME ratedFile="/home/tigergraph/mydata/recommendations/rated.csv";
 
     LOAD moviesFile TO VERTEX Movie VALUES (
         $"_id",
@@ -31,7 +36,7 @@ CREATE LOADING JOB load_recommendations FOR GRAPH Recommendations {
         $"url",
         $"year"
     )
-    USING header="true", separator=",", quote="double";
+    USING HEADER="true", SEPARATOR=",", QUOTE="double";
 
     LOAD actorsFile TO VERTEX Actor VALUES (
         $"_id",
@@ -45,7 +50,7 @@ CREATE LOADING JOB load_recommendations FOR GRAPH Recommendations {
         $"tmdbId",
         $"url"
     )
-    USING header="true", separator=",", quote="double";
+    USING HEADER="true", SEPARATOR=",", QUOTE="double";
 
     LOAD directorsFile TO VERTEX Director VALUES (
         $"_id",
@@ -59,7 +64,7 @@ CREATE LOADING JOB load_recommendations FOR GRAPH Recommendations {
         $"tmdbId",
         $"url"
     )
-    USING header="true", separator=",", quote="double";
+    USING HEADER="true", SEPARATOR=",", QUOTE="double";
 
     LOAD actorDirectorsFile TO VERTEX ActorDirector VALUES (
         $"_id",
@@ -73,26 +78,50 @@ CREATE LOADING JOB load_recommendations FOR GRAPH Recommendations {
         $"tmdbId",
         $"url"
     )
-    USING header="true", separator=",", quote="double";
+    USING HEADER="true", SEPARATOR=",", QUOTE="double";
 
     LOAD usersFile TO VERTEX User VALUES (
         $"_id",
         $"name",
         $"userId"
     )
-    USING header="true", separator=",", quote="double";
+    USING HEADER="true", SEPARATOR=",", QUOTE="double";
 
     LOAD genresFile TO VERTEX Genre VALUES (
         $"_id",
         $"name"
     )
-    USING header="true", separator=",", quote="double";
+    USING HEADER="true", SEPARATOR=",", QUOTE="double";
+
+    // FIXME: ACTED_IN edges from an ActorDirector are skipped
+    LOAD actedInFile TO EDGE ACTED_IN VALUES (
+      $"_start" Actor,
+      $"_end",
+      $"role"
+    )
+    USING HEADER="true", SEPARATOR=",", QUOTE="double", VERTEX_MUST_EXIST="true";
+
+    // FIXME: DIRECTOR_OF edges from an ActorDirector are skipped
+    LOAD directedFile TO EDGE DIRECTOR_OF VALUES (
+      $"_start" Director,
+      $"_end",
+      $"role"
+    )
+    USING HEADER="true", SEPARATOR=",", QUOTE="double", VERTEX_MUST_EXIST="true";
     
     LOAD inGenreFile TO EDGE IN_GENRE VALUES (
       $"_start",
       $"_end"
     )
-    USING header="true", separator=",", quote="double";
+    USING HEADER="true", SEPARATOR=",", QUOTE="double", VERTEX_MUST_EXIST="true";
+    
+    LOAD ratedFile TO EDGE RATED VALUES (
+      $"_start",
+      $"_end",
+      $"rating",
+      $"timestamp"
+    )
+    USING HEADER="true", SEPARATOR=",", QUOTE="double", VERTEX_MUST_EXIST="true";
 }
 END
 
