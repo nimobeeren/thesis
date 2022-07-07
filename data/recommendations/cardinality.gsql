@@ -1,0 +1,38 @@
+USE GRAPH Recommendations
+
+INTERPRET QUERY () SYNTAX v2 {
+    // Find the actors who acted in 0 movies
+    SumAccum<int> @numActedIn;
+    tmp =
+        SELECT actor
+        FROM Actor|ActorDirector:actor -(ACTED_IN>)- Movie:m
+        ACCUM actor.@numActedIn += 1;
+    violatingActors =
+        SELECT actor
+        FROM Actor:actor
+        WHERE actor.@numActedIn == 0;
+
+    // Find the directors who directed 0 movies
+    SumAccum<int> @numDirectorOf;
+    tmp =
+        SELECT director
+        FROM Director|ActorDirector:director -(DIRECTOR_OF>)- Movie:m
+        ACCUM director.@numDirectorOf += 1;
+    violatingDirectors =
+        SELECT director
+        FROM Director:director
+        WHERE director.@numDirectorOf == 0;
+
+    // Find the movies that are in 0 genres
+    SumAccum<int> @numInGenre;
+    tmp =
+        SELECT movie
+        FROM Movie:movie -(IN_GENRE>)- Genre:g
+        ACCUM movie.@numInGenre += 1;
+    violatingMovies =
+        SELECT movie
+        FROM Movie:movie
+        WHERE movie.@numInGenre == 0;
+
+    PRINT violatingActors, violatingDirectors, violatingMovies;
+}
