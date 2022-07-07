@@ -1,5 +1,6 @@
 USE GRAPH Recommendations
 
+// Finds the nodes that violate an edge cardinality constraint
 INTERPRET QUERY () SYNTAX v2 {
     // Find the actors who acted in 0 movies
     SumAccum<int> @numActedIn;
