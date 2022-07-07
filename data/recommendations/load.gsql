@@ -1,23 +1,28 @@
-CREATE GRAPH Recommendations (Movie, Actor, Director, ActorDirector, User, Genre, ACTED_IN, DIRECTOR_OF, IN_GENRE, RATED)
+CREATE GRAPH Recommendations (
+  Movie,
+  Actor,
+  Director,
+  ActorDirector,
+  User,
+  Genre,
+  ACTED_IN,
+  DIRECTOR_OF,
+  IN_GENRE,
+  RATED
+)
 
 USE GRAPH Recommendations
 
-BEGIN
-CREATE LOADING JOB load_recommendations FOR GRAPH Recommendations {
-    // Vertices
+// We need to load vertices and edges in a separate jobs, otherwise the vertices
+// don't exist yet and VERTEX_MUST_EXIST=true will prevent edges from being created
+
+CREATE LOADING JOB load_recommendations_vertices FOR GRAPH Recommendations {
     DEFINE FILENAME moviesFile="/home/tigergraph/mydata/recommendations/movies-tg.csv";
     DEFINE FILENAME actorsFile="/home/tigergraph/mydata/recommendations/actors.csv";
     DEFINE FILENAME directorsFile="/home/tigergraph/mydata/recommendations/directors.csv";
     DEFINE FILENAME actorDirectorsFile="/home/tigergraph/mydata/recommendations/actorDirectors.csv";
     DEFINE FILENAME usersFile="/home/tigergraph/mydata/recommendations/users.csv";
     DEFINE FILENAME genresFile="/home/tigergraph/mydata/recommendations/genres.csv";
-    // Edges
-    DEFINE FILENAME actedInFile="/home/tigergraph/mydata/recommendations/actedIn.csv";
-    DEFINE FILENAME actorDirectorActedInFile="/home/tigergraph/mydata/recommendations/actorDirectorActedIn.csv";
-    DEFINE FILENAME actorDirectorDirectedFile="/home/tigergraph/mydata/recommendations/actorDirectorDirected.csv";
-    DEFINE FILENAME directedFile="/home/tigergraph/mydata/recommendations/directed.csv";
-    DEFINE FILENAME inGenreFile="/home/tigergraph/mydata/recommendations/inGenre.csv";
-    DEFINE FILENAME ratedFile="/home/tigergraph/mydata/recommendations/rated.csv";
 
     LOAD moviesFile TO VERTEX Movie VALUES (
         $"_id",
@@ -94,6 +99,17 @@ CREATE LOADING JOB load_recommendations FOR GRAPH Recommendations {
         $"name"
     )
     USING HEADER="true", SEPARATOR=",", QUOTE="double";
+}
+
+RUN LOADING JOB load_recommendations_vertices
+
+CREATE LOADING JOB load_recommendations_edges FOR GRAPH Recommendations {
+    DEFINE FILENAME actedInFile="/home/tigergraph/mydata/recommendations/actedIn.csv";
+    DEFINE FILENAME actorDirectorActedInFile="/home/tigergraph/mydata/recommendations/actorDirectorActedIn.csv";
+    DEFINE FILENAME actorDirectorDirectedFile="/home/tigergraph/mydata/recommendations/actorDirectorDirected.csv";
+    DEFINE FILENAME directedFile="/home/tigergraph/mydata/recommendations/directed.csv";
+    DEFINE FILENAME inGenreFile="/home/tigergraph/mydata/recommendations/inGenre.csv";
+    DEFINE FILENAME ratedFile="/home/tigergraph/mydata/recommendations/rated.csv";
 
     // Only includes ACTED_IN edges starting from an Actor
     LOAD actedInFile TO EDGE ACTED_IN VALUES (
@@ -117,7 +133,7 @@ CREATE LOADING JOB load_recommendations FOR GRAPH Recommendations {
       $"_end",
       $"role"
     )
-    USING HEADER="true", SEPARATOR=",", QUOTE="double", VERTEX_MUST_EXIST="true";// DIRECTOR_OF edges from an ActorDirector are skipped
+    USING HEADER="true", SEPARATOR=",", QUOTE="double", VERTEX_MUST_EXIST="true";
 
     // Only includes DIRECTOR_OF edges starting from a Director
     LOAD directedFile TO EDGE DIRECTOR_OF VALUES (
@@ -141,6 +157,5 @@ CREATE LOADING JOB load_recommendations FOR GRAPH Recommendations {
     )
     USING HEADER="true", SEPARATOR=",", QUOTE="double", VERTEX_MUST_EXIST="true";
 }
-END
 
-RUN LOADING JOB load_recommendations
+RUN LOADING JOB load_recommendations_edges

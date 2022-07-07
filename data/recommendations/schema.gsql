@@ -1,6 +1,5 @@
 DROP ALL
 
-BEGIN
 CREATE VERTEX Movie (
     PRIMARY_ID id STRING,
     budget INT,
@@ -20,9 +19,7 @@ CREATE VERTEX Movie (
     url STRING,
     year INT
 )
-END
 
-BEGIN
 CREATE VERTEX Actor (
     PRIMARY_ID id STRING,
     bio STRING,
@@ -35,9 +32,7 @@ CREATE VERTEX Actor (
     tmdbId STRING,
     url STRING
 )
-END
 
-BEGIN
 CREATE VERTEX Director (
     PRIMARY_ID id STRING,
     bio STRING,
@@ -50,9 +45,7 @@ CREATE VERTEX Director (
     tmdbId STRING,
     url STRING
 )
-END
 
-BEGIN
 CREATE VERTEX ActorDirector (
     PRIMARY_ID id STRING,
     bio STRING,
@@ -65,50 +58,38 @@ CREATE VERTEX ActorDirector (
     tmdbId STRING,
     url STRING
 )
-END
 
-BEGIN
 CREATE VERTEX User (
     PRIMARY_ID id STRING,
     name STRING,
     userId STRING
 )
-END
 
-BEGIN
 CREATE VERTEX Genre (
     PRIMARY_ID id STRING,
     name STRING
 )
-END
 
-BEGIN
 CREATE DIRECTED EDGE ACTED_IN (
     FROM Actor|ActorDirector,
     TO Movie,
     role STRING
 )
 WITH REVERSE_EDGE="ACTED_IN_REVERSE"
-END
 
-BEGIN
 CREATE DIRECTED EDGE DIRECTOR_OF (
     FROM Director|ActorDirector,
     TO Movie,
     role STRING
 )
 WITH REVERSE_EDGE="DIRECTOR_OF_REVERSE"
-END
 
-BEGIN
 CREATE DIRECTED EDGE IN_GENRE (
     FROM Movie,
     TO Genre
 )
 WITH REVERSE_EDGE="IN_GENRE_REVERSE"
-END
 
-BEGIN
 CREATE DIRECTED EDGE RATED (
     FROM User,
     TO Movie,
@@ -116,4 +97,3 @@ CREATE DIRECTED EDGE RATED (
     timestamp INT  
 )
 WITH REVERSE_EDGE="RATED_REVERSE"
-END
