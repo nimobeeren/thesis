@@ -96,7 +96,7 @@ CREATE LOADING JOB load_recommendations_vertices FOR GRAPH Recommendations {
 
     LOAD genresFile TO VERTEX Genre VALUES (
         $"_id",
-        $"name"
+        $"genre"
     )
     USING HEADER="true", SEPARATOR=",", QUOTE="double";
 }
