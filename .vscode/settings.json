@@ -1,3 +1,4 @@
 {
-  "window.titleSeparator": " 🎓️ "
+  "window.titleSeparator": " 🎓️ ",
+  "java.configuration.updateBuildConfiguration": "automatic"
 }
