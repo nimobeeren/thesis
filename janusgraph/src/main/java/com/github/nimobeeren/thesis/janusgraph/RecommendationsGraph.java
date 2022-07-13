@@ -9,10 +9,13 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
+import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.janusgraph.core.Cardinality;
 import org.janusgraph.core.JanusGraph;
+import org.janusgraph.core.JanusGraphTransaction;
 import org.janusgraph.core.JanusGraphVertex;
 import org.janusgraph.core.Multiplicity;
+import org.janusgraph.core.PropertyKey;
 import org.janusgraph.core.schema.JanusGraphManagement;
 
 public class RecommendationsGraph {
@@ -47,7 +50,7 @@ public class RecommendationsGraph {
     mgmt.makeVertexLabel("Genre").make();
 
     // Movie properties
-    mgmt.makePropertyKey("_id").dataType(Long.class).make();
+    PropertyKey idKey = mgmt.makePropertyKey("_id").dataType(Long.class).make();
     mgmt.makePropertyKey("budget").dataType(Long.class).make();
     mgmt.makePropertyKey("countries").dataType(String.class).cardinality(Cardinality.LIST).make();
     mgmt.makePropertyKey("imdbId").dataType(String.class).make();
@@ -91,18 +94,19 @@ public class RecommendationsGraph {
     mgmt.makePropertyKey("rating").dataType(Float.class).make();
     mgmt.makePropertyKey("timestamp").dataType(Long.class).make();
 
+    // Indexes
+    mgmt.buildIndex("byId", Vertex.class).addKey(idKey).buildCompositeIndex();
+
     mgmt.commit();
 
-    // TODO: edge types (with multiplicities)
-    // TODO: enable batch loading for transaction:
-    // https://docs.janusgraph.org/interactions/transactions/#transaction-configuration
-
     /* DATA LOADING */
+
+    JanusGraphTransaction tx = graph.buildTransaction().disableBatchLoading().start();
 
     Iterable<CSVRecord> movies = parseFile("movies.csv");
 
     for (CSVRecord movieRecord : movies) {
-      JanusGraphVertex movieVertex = graph.addVertex("Movie");
+      JanusGraphVertex movieVertex = tx.addVertex("Movie");
       movieVertex.property("_id", movieRecord.get("_id"));
       movieVertex.property("budget", movieRecord.get("budget"));
       if (movieRecord.get("countries") != null) {
@@ -135,7 +139,7 @@ public class RecommendationsGraph {
     Iterable<CSVRecord> actors = parseFile("actors.csv");
 
     for (CSVRecord actorRecord : actors) {
-      JanusGraphVertex actorVertex = graph.addVertex("Actor");
+      JanusGraphVertex actorVertex = tx.addVertex("Actor");
       actorVertex.property("_id", actorRecord.get("_id"));
       actorVertex.property("bio", actorRecord.get("bio"));
       if (actorRecord.get("born") != null) {
@@ -155,7 +159,7 @@ public class RecommendationsGraph {
     Iterable<CSVRecord> directors = parseFile("directors.csv");
 
     for (CSVRecord directorRecord : directors) {
-      JanusGraphVertex directorVertex = graph.addVertex("Director");
+      JanusGraphVertex directorVertex = tx.addVertex("Director");
       directorVertex.property("_id", directorRecord.get("_id"));
       directorVertex.property("bio", directorRecord.get("bio"));
       if (directorRecord.get("born") != null) {
@@ -175,7 +179,7 @@ public class RecommendationsGraph {
     Iterable<CSVRecord> actorDirectors = parseFile("actorDirectors.csv");
 
     for (CSVRecord actorDirectorRecord : actorDirectors) {
-      JanusGraphVertex actorDirectorVertex = graph.addVertex("ActorDirector");
+      JanusGraphVertex actorDirectorVertex = tx.addVertex("ActorDirector");
       actorDirectorVertex.property("_id", actorDirectorRecord.get("_id"));
       actorDirectorVertex.property("bio", actorDirectorRecord.get("bio"));
       if (actorDirectorRecord.get("born") != null) {
@@ -197,7 +201,7 @@ public class RecommendationsGraph {
     Iterable<CSVRecord> users = parseFile("users.csv");
 
     for (CSVRecord userRecord : users) {
-      JanusGraphVertex userVertex = graph.addVertex("User");
+      JanusGraphVertex userVertex = tx.addVertex("User");
       userVertex.property("_id", userRecord.get("_id"));
       userVertex.property("name", userRecord.get("name"));
       userVertex.property("userId", userRecord.get("userId"));
@@ -206,11 +210,13 @@ public class RecommendationsGraph {
     Iterable<CSVRecord> genres = parseFile("genres.csv");
 
     for (CSVRecord genreRecord : genres) {
-      JanusGraphVertex genreVertex = graph.addVertex("Genre");
+      JanusGraphVertex genreVertex = tx.addVertex("Genre");
       genreVertex.property("_id", genreRecord.get("_id"));
       genreVertex.property("genre", genreRecord.get("genre"));
     }
 
-    graph.tx().commit();
+    // TODO: load edges
+
+    tx.commit();
   }
 }
