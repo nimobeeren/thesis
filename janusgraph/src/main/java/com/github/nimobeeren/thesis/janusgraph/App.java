@@ -2,12 +2,14 @@ package com.github.nimobeeren.thesis.janusgraph;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.text.ParseException;
 import org.janusgraph.core.JanusGraph;
 import org.janusgraph.core.JanusGraphFactory;
 import org.janusgraph.diskstorage.BackendException;
 
 public class App {
-  public static void main(String[] args) throws FileNotFoundException, IOException, BackendException {
+  public static void main(String[] args)
+      throws FileNotFoundException, IOException, BackendException, ParseException {
     JanusGraphFactory.Builder config = JanusGraphFactory.build();
     config.set("storage.backend", "berkeleyje");
     config.set("storage.directory", "/var/lib/janusgraph/data");
