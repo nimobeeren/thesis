@@ -16,6 +16,7 @@ public class App {
     config.set("schema.default", "none"); // disable automatic schema generation in favor of
                                           // explicit schema
     config.set("schema.constraints", "true"); // enable property and edge connection constraints
+    config.set("graph.set-vertex-id", "true");
     JanusGraph graph = config.open();
 
     System.out.println("Dropping graph...");

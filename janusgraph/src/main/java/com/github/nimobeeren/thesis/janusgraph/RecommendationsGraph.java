@@ -7,8 +7,10 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Iterator;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
+import org.apache.tinkerpop.gremlin.structure.Edge;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.janusgraph.core.Cardinality;
 import org.janusgraph.core.EdgeLabel;
@@ -19,6 +21,8 @@ import org.janusgraph.core.Multiplicity;
 import org.janusgraph.core.PropertyKey;
 import org.janusgraph.core.VertexLabel;
 import org.janusgraph.core.schema.JanusGraphManagement;
+import org.janusgraph.graphdb.database.StandardJanusGraph;
+import org.janusgraph.graphdb.idmanagement.IDManager;
 
 public class RecommendationsGraph {
 
@@ -37,6 +41,16 @@ public class RecommendationsGraph {
     return parser.parse(new FileReader(new File(dirPath, fileName)));
   }
 
+  private Long parseId(IDManager idManager, String idString) throws ParseException {
+    Long longId = Long.parseLong(idString);
+    if (longId == 0) {
+      // HACK: IDs must be positive, so try this instead
+      return idManager.toVertexId(999999999l);
+    } else {
+      return idManager.toVertexId(longId);
+    }
+  }
+
   public void load(JanusGraph graph) throws FileNotFoundException, IOException, ParseException {
 
     /* SCHEMA */
@@ -52,7 +66,6 @@ public class RecommendationsGraph {
     VertexLabel Genre = mgmt.makeVertexLabel("Genre").make();
 
     // Property keys with datatypes and cardinalities
-    PropertyKey idKey = mgmt.makePropertyKey("_id").dataType(Long.class).make();
     PropertyKey budgetKey = mgmt.makePropertyKey("budget").dataType(Long.class).make();
     PropertyKey countriesKey = mgmt.makePropertyKey("countries").dataType(String.class)
         .cardinality(Cardinality.LIST).make();
@@ -83,17 +96,17 @@ public class RecommendationsGraph {
     PropertyKey timestampKey = mgmt.makePropertyKey("timestamp").dataType(Long.class).make();
 
     // Vertex properties
-    mgmt.addProperties(Movie, idKey, budgetKey, countriesKey, imdbIdKey, imdbRatingKey,
+    mgmt.addProperties(Movie, budgetKey, countriesKey, imdbIdKey, imdbRatingKey,
         imdbVotesKey, languagesKey, movieIdKey, plotKey, posterKey, releasedKey, revenueKey,
         runtimeKey, titleKey, tmdbIdKey, urlKey, yearKey);
-    mgmt.addProperties(Actor, idKey, bioKey, bornKey, bornInKey, diedKey, imdbIdKey, nameKey, posterKey,
-        tmdbIdKey, urlKey);
-    mgmt.addProperties(Director, idKey, bioKey, bornKey, bornInKey, diedKey, imdbIdKey, nameKey, posterKey,
-        tmdbIdKey, urlKey);
-    mgmt.addProperties(ActorDirector, idKey, bioKey, bornKey, bornInKey, diedKey, imdbIdKey, nameKey,
+    mgmt.addProperties(Actor, bioKey, bornKey, bornInKey, diedKey, imdbIdKey, nameKey,
         posterKey, tmdbIdKey, urlKey);
-    mgmt.addProperties(User, idKey, nameKey, userIdKey);
-    mgmt.addProperties(Genre, idKey, genreKey);
+    mgmt.addProperties(Director, bioKey, bornKey, bornInKey, diedKey, imdbIdKey, nameKey,
+        posterKey, tmdbIdKey, urlKey);
+    mgmt.addProperties(ActorDirector, bioKey, bornKey, bornInKey, diedKey, imdbIdKey,
+        nameKey, posterKey, tmdbIdKey, urlKey);
+    mgmt.addProperties(User, nameKey, userIdKey);
+    mgmt.addProperties(Genre, genreKey);
 
     // Edge labels and connections
     EdgeLabel ACTED_IN = mgmt.makeEdgeLabel("ACTED_IN").multiplicity(Multiplicity.SIMPLE).make();
@@ -112,20 +125,28 @@ public class RecommendationsGraph {
     mgmt.addProperties(DIRECTED, roleKey);
     mgmt.addProperties(RATED, ratingKey, timestampKey);
 
-    // Indexes
-    mgmt.buildIndex("byId", Vertex.class).addKey(idKey).buildCompositeIndex();
-
     mgmt.commit();
 
     /* DATA LOADING */
 
-    JanusGraphTransaction tx = graph.buildTransaction().disableBatchLoading().start();
+    /* VERTICES */
+
+    JanusGraphTransaction tx = graph.buildTransaction().enableBatchLoading().start();
+    IDManager idManager = ((StandardJanusGraph) graph).getIDManager();
+
+    // Refresh the vertex labels because the parent transaction was closed
+    Movie = tx.getVertexLabel("Movie");
+    Actor = tx.getVertexLabel("Actor");
+    Director = tx.getVertexLabel("Director");
+    ActorDirector = tx.getVertexLabel("ActorDirector");
+    User = tx.getVertexLabel("User");
+    Genre = tx.getVertexLabel("Genre");
 
     Iterable<CSVRecord> movies = parseFile("movies.csv");
 
     for (CSVRecord movieRecord : movies) {
-      JanusGraphVertex movieVertex = tx.addVertex("Movie");
-      movieVertex.property("_id", movieRecord.get("_id"));
+      Long vertexId = parseId(idManager, movieRecord.get("_id"));
+      JanusGraphVertex movieVertex = tx.addVertex(vertexId, Movie);
       movieVertex.property("budget", movieRecord.get("budget"));
       if (movieRecord.get("countries") != null) {
         for (String country : movieRecord.get("countries").replaceAll("[\\[\\]\"]", "")
@@ -157,8 +178,8 @@ public class RecommendationsGraph {
     Iterable<CSVRecord> actors = parseFile("actors.csv");
 
     for (CSVRecord actorRecord : actors) {
-      JanusGraphVertex actorVertex = tx.addVertex("Actor");
-      actorVertex.property("_id", actorRecord.get("_id"));
+      Long vertexId = parseId(idManager, actorRecord.get("_id"));
+      JanusGraphVertex actorVertex = tx.addVertex(vertexId, Actor);
       actorVertex.property("bio", actorRecord.get("bio"));
       if (actorRecord.get("born") != null) {
         actorVertex.property("born", this.dateFormat.parse(actorRecord.get("born")));
@@ -177,8 +198,8 @@ public class RecommendationsGraph {
     Iterable<CSVRecord> directors = parseFile("directors.csv");
 
     for (CSVRecord directorRecord : directors) {
-      JanusGraphVertex directorVertex = tx.addVertex("Director");
-      directorVertex.property("_id", directorRecord.get("_id"));
+      Long vertexId = parseId(idManager, directorRecord.get("_id"));
+      JanusGraphVertex directorVertex = tx.addVertex(vertexId, Director);
       directorVertex.property("bio", directorRecord.get("bio"));
       if (directorRecord.get("born") != null) {
         directorVertex.property("born", this.dateFormat.parse(directorRecord.get("born")));
@@ -197,8 +218,8 @@ public class RecommendationsGraph {
     Iterable<CSVRecord> actorDirectors = parseFile("actorDirectors.csv");
 
     for (CSVRecord actorDirectorRecord : actorDirectors) {
-      JanusGraphVertex actorDirectorVertex = tx.addVertex("ActorDirector");
-      actorDirectorVertex.property("_id", actorDirectorRecord.get("_id"));
+      Long vertexId = parseId(idManager, actorDirectorRecord.get("_id"));
+      JanusGraphVertex actorDirectorVertex = tx.addVertex(vertexId, ActorDirector);
       actorDirectorVertex.property("bio", actorDirectorRecord.get("bio"));
       if (actorDirectorRecord.get("born") != null) {
         actorDirectorVertex.property("born",
@@ -219,8 +240,8 @@ public class RecommendationsGraph {
     Iterable<CSVRecord> users = parseFile("users.csv");
 
     for (CSVRecord userRecord : users) {
-      JanusGraphVertex userVertex = tx.addVertex("User");
-      userVertex.property("_id", userRecord.get("_id"));
+      Long vertexId = parseId(idManager, userRecord.get("_id"));
+      JanusGraphVertex userVertex = tx.addVertex(vertexId, User);
       userVertex.property("name", userRecord.get("name"));
       userVertex.property("userId", userRecord.get("userId"));
     }
@@ -228,12 +249,60 @@ public class RecommendationsGraph {
     Iterable<CSVRecord> genres = parseFile("genres.csv");
 
     for (CSVRecord genreRecord : genres) {
-      JanusGraphVertex genreVertex = tx.addVertex("Genre");
-      genreVertex.property("_id", genreRecord.get("_id"));
+      Long vertexId = parseId(idManager, genreRecord.get("_id"));
+      JanusGraphVertex genreVertex = tx.addVertex(vertexId, Genre);
       genreVertex.property("genre", genreRecord.get("genre"));
     }
 
-    // TODO: load edges
+    /* EDGES */
+
+    Iterable<CSVRecord> actedIn = parseFile("actedIn.csv");
+
+    for (CSVRecord actedInRecord : actedIn) {
+      Long startId = parseId(idManager, actedInRecord.get("_start"));
+      Long endId = parseId(idManager, actedInRecord.get("_end"));
+      Iterator<Vertex> vertices = tx.vertices(startId, endId);
+      Vertex start = vertices.next();
+      Vertex end = vertices.next();
+      Edge edge = start.addEdge("ACTED_IN", end);
+      edge.property("role", actedInRecord.get("role"));
+    }
+
+    Iterable<CSVRecord> directed = parseFile("directed.csv");
+
+    for (CSVRecord directedRecord : directed) {
+      Long startId = parseId(idManager, directedRecord.get("_start"));
+      Long endId = parseId(idManager, directedRecord.get("_end"));
+      Iterator<Vertex> vertices = tx.vertices(startId, endId);
+      Vertex start = vertices.next();
+      Vertex end = vertices.next();
+      Edge edge = start.addEdge("DIRECTED", end);
+      edge.property("role", directedRecord.get("role"));
+    }
+
+    Iterable<CSVRecord> inGenre = parseFile("inGenre.csv");
+
+    for (CSVRecord inGenreRecord : inGenre) {
+      Long startId = parseId(idManager, inGenreRecord.get("_start"));
+      Long endId = parseId(idManager, inGenreRecord.get("_end"));
+      Iterator<Vertex> vertices = tx.vertices(startId, endId);
+      Vertex start = vertices.next();
+      Vertex end = vertices.next();
+      start.addEdge("IN_GENRE", end);
+    }
+
+    Iterable<CSVRecord> rated = parseFile("rated.csv");
+
+    for (CSVRecord ratedRecord : rated) {
+      Long startId = parseId(idManager, ratedRecord.get("_start"));
+      Long endId = parseId(idManager, ratedRecord.get("_end"));
+      Iterator<Vertex> vertices = tx.vertices(startId, endId);
+      Vertex start = vertices.next();
+      Vertex end = vertices.next();
+      Edge edge = start.addEdge("RATED", end);
+      edge.property("rating", ratedRecord.get("rating"));
+      edge.property("timestamp", ratedRecord.get("timestamp"));
+    }
 
     tx.commit();
   }
