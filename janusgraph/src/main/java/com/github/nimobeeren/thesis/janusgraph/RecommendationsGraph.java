@@ -44,7 +44,7 @@ public class RecommendationsGraph {
   private Long parseId(IDManager idManager, String idString) throws ParseException {
     Long longId = Long.parseLong(idString);
     if (longId == 0) {
-      // HACK: IDs must be positive, so try this instead
+      // HACK: IDs must be positive, so let's try this instead and hope no vertex has that ID
       return idManager.toVertexId(999999999l);
     } else {
       return idManager.toVertexId(longId);
@@ -52,9 +52,11 @@ public class RecommendationsGraph {
   }
 
   public void load(JanusGraph graph) throws FileNotFoundException, IOException, ParseException {
+    loadSchema(graph);
+    loadData(graph);
+  }
 
-    /* SCHEMA */
-
+  public void loadSchema(JanusGraph graph) {
     JanusGraphManagement mgmt = graph.openManagement();
 
     // Vertex labels
@@ -96,15 +98,15 @@ public class RecommendationsGraph {
     PropertyKey timestampKey = mgmt.makePropertyKey("timestamp").dataType(Long.class).make();
 
     // Vertex properties
-    mgmt.addProperties(Movie, budgetKey, countriesKey, imdbIdKey, imdbRatingKey,
-        imdbVotesKey, languagesKey, movieIdKey, plotKey, posterKey, releasedKey, revenueKey,
-        runtimeKey, titleKey, tmdbIdKey, urlKey, yearKey);
-    mgmt.addProperties(Actor, bioKey, bornKey, bornInKey, diedKey, imdbIdKey, nameKey,
+    mgmt.addProperties(Movie, budgetKey, countriesKey, imdbIdKey, imdbRatingKey, imdbVotesKey,
+        languagesKey, movieIdKey, plotKey, posterKey, releasedKey, revenueKey, runtimeKey, titleKey,
+        tmdbIdKey, urlKey, yearKey);
+    mgmt.addProperties(Actor, bioKey, bornKey, bornInKey, diedKey, imdbIdKey, nameKey, posterKey,
+        tmdbIdKey, urlKey);
+    mgmt.addProperties(Director, bioKey, bornKey, bornInKey, diedKey, imdbIdKey, nameKey, posterKey,
+        tmdbIdKey, urlKey);
+    mgmt.addProperties(ActorDirector, bioKey, bornKey, bornInKey, diedKey, imdbIdKey, nameKey,
         posterKey, tmdbIdKey, urlKey);
-    mgmt.addProperties(Director, bioKey, bornKey, bornInKey, diedKey, imdbIdKey, nameKey,
-        posterKey, tmdbIdKey, urlKey);
-    mgmt.addProperties(ActorDirector, bioKey, bornKey, bornInKey, diedKey, imdbIdKey,
-        nameKey, posterKey, tmdbIdKey, urlKey);
     mgmt.addProperties(User, nameKey, userIdKey);
     mgmt.addProperties(Genre, genreKey);
 
@@ -126,21 +128,20 @@ public class RecommendationsGraph {
     mgmt.addProperties(RATED, ratingKey, timestampKey);
 
     mgmt.commit();
+  }
 
-    /* DATA LOADING */
-
-    /* VERTICES */
-
+  public void loadData(JanusGraph graph) throws FileNotFoundException, IOException, ParseException {
     JanusGraphTransaction tx = graph.buildTransaction().enableBatchLoading().start();
     IDManager idManager = ((StandardJanusGraph) graph).getIDManager();
 
-    // Refresh the vertex labels because the parent transaction was closed
-    Movie = tx.getVertexLabel("Movie");
-    Actor = tx.getVertexLabel("Actor");
-    Director = tx.getVertexLabel("Director");
-    ActorDirector = tx.getVertexLabel("ActorDirector");
-    User = tx.getVertexLabel("User");
-    Genre = tx.getVertexLabel("Genre");
+    /* VERTICES */
+
+    VertexLabel Movie = tx.getVertexLabel("Movie");
+    VertexLabel Actor = tx.getVertexLabel("Actor");
+    VertexLabel Director = tx.getVertexLabel("Director");
+    VertexLabel ActorDirector = tx.getVertexLabel("ActorDirector");
+    VertexLabel User = tx.getVertexLabel("User");
+    VertexLabel Genre = tx.getVertexLabel("Genre");
 
     Iterable<CSVRecord> movies = parseFile("movies.csv");
 
