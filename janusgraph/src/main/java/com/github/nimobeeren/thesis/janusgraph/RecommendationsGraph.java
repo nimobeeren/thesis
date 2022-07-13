@@ -11,11 +11,13 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.janusgraph.core.Cardinality;
+import org.janusgraph.core.EdgeLabel;
 import org.janusgraph.core.JanusGraph;
 import org.janusgraph.core.JanusGraphTransaction;
 import org.janusgraph.core.JanusGraphVertex;
 import org.janusgraph.core.Multiplicity;
 import org.janusgraph.core.PropertyKey;
+import org.janusgraph.core.VertexLabel;
 import org.janusgraph.core.schema.JanusGraphManagement;
 
 public class RecommendationsGraph {
@@ -42,57 +44,73 @@ public class RecommendationsGraph {
     JanusGraphManagement mgmt = graph.openManagement();
 
     // Vertex labels
-    mgmt.makeVertexLabel("Movie").make();
-    mgmt.makeVertexLabel("Actor").make();
-    mgmt.makeVertexLabel("Director").make();
-    mgmt.makeVertexLabel("ActorDirector").make();
-    mgmt.makeVertexLabel("User").make();
-    mgmt.makeVertexLabel("Genre").make();
+    VertexLabel Movie = mgmt.makeVertexLabel("Movie").make();
+    VertexLabel Actor = mgmt.makeVertexLabel("Actor").make();
+    VertexLabel Director = mgmt.makeVertexLabel("Director").make();
+    VertexLabel ActorDirector = mgmt.makeVertexLabel("ActorDirector").make();
+    VertexLabel User = mgmt.makeVertexLabel("User").make();
+    VertexLabel Genre = mgmt.makeVertexLabel("Genre").make();
 
-    // Movie properties
+    // Property keys with datatypes and cardinalities
     PropertyKey idKey = mgmt.makePropertyKey("_id").dataType(Long.class).make();
-    mgmt.makePropertyKey("budget").dataType(Long.class).make();
-    mgmt.makePropertyKey("countries").dataType(String.class).cardinality(Cardinality.LIST).make();
-    mgmt.makePropertyKey("imdbId").dataType(String.class).make();
-    mgmt.makePropertyKey("imdbRating").dataType(Float.class).make();
-    mgmt.makePropertyKey("imdbVotes").dataType(Long.class).make();
-    mgmt.makePropertyKey("languages").dataType(String.class).cardinality(Cardinality.LIST).make();
-    mgmt.makePropertyKey("movieId").dataType(String.class).make();
-    mgmt.makePropertyKey("plot").dataType(String.class).make();
-    mgmt.makePropertyKey("poster").dataType(String.class).make();
-    mgmt.makePropertyKey("released").dataType(String.class).make();
-    mgmt.makePropertyKey("revenue").dataType(Long.class).make();
-    mgmt.makePropertyKey("runtime").dataType(Short.class).make();
-    mgmt.makePropertyKey("title").dataType(String.class).make();
-    mgmt.makePropertyKey("tmdbId").dataType(String.class).make();
-    mgmt.makePropertyKey("url").dataType(String.class).make();
-    mgmt.makePropertyKey("year").dataType(Short.class).make();
+    PropertyKey budgetKey = mgmt.makePropertyKey("budget").dataType(Long.class).make();
+    PropertyKey countriesKey = mgmt.makePropertyKey("countries").dataType(String.class)
+        .cardinality(Cardinality.LIST).make();
+    PropertyKey imdbIdKey = mgmt.makePropertyKey("imdbId").dataType(String.class).make();
+    PropertyKey imdbRatingKey = mgmt.makePropertyKey("imdbRating").dataType(Float.class).make();
+    PropertyKey imdbVotesKey = mgmt.makePropertyKey("imdbVotes").dataType(Long.class).make();
+    PropertyKey languagesKey = mgmt.makePropertyKey("languages").dataType(String.class)
+        .cardinality(Cardinality.LIST).make();
+    PropertyKey movieIdKey = mgmt.makePropertyKey("movieId").dataType(String.class).make();
+    PropertyKey plotKey = mgmt.makePropertyKey("plot").dataType(String.class).make();
+    PropertyKey posterKey = mgmt.makePropertyKey("poster").dataType(String.class).make();
+    PropertyKey releasedKey = mgmt.makePropertyKey("released").dataType(String.class).make();
+    PropertyKey revenueKey = mgmt.makePropertyKey("revenue").dataType(Long.class).make();
+    PropertyKey runtimeKey = mgmt.makePropertyKey("runtime").dataType(Short.class).make();
+    PropertyKey titleKey = mgmt.makePropertyKey("title").dataType(String.class).make();
+    PropertyKey tmdbIdKey = mgmt.makePropertyKey("tmdbId").dataType(String.class).make();
+    PropertyKey urlKey = mgmt.makePropertyKey("url").dataType(String.class).make();
+    PropertyKey yearKey = mgmt.makePropertyKey("year").dataType(Short.class).make();
+    PropertyKey bioKey = mgmt.makePropertyKey("bio").dataType(String.class).make();
+    PropertyKey bornKey = mgmt.makePropertyKey("born").dataType(Date.class).make();
+    PropertyKey bornInKey = mgmt.makePropertyKey("bornIn").dataType(String.class).make();
+    PropertyKey diedKey = mgmt.makePropertyKey("died").dataType(Date.class).make();
+    PropertyKey nameKey = mgmt.makePropertyKey("name").dataType(String.class).make();
+    PropertyKey userIdKey = mgmt.makePropertyKey("userId").dataType(String.class).make();
+    PropertyKey genreKey = mgmt.makePropertyKey("genre").dataType(String.class).make();
+    PropertyKey roleKey = mgmt.makePropertyKey("role").dataType(String.class).make();
+    PropertyKey ratingKey = mgmt.makePropertyKey("rating").dataType(Float.class).make();
+    PropertyKey timestampKey = mgmt.makePropertyKey("timestamp").dataType(Long.class).make();
 
-    // Actor/Director properties that are not already defined
-    mgmt.makePropertyKey("bio").dataType(String.class).make();
-    mgmt.makePropertyKey("born").dataType(Date.class).make();
-    mgmt.makePropertyKey("bornIn").dataType(String.class).make();
-    mgmt.makePropertyKey("died").dataType(Date.class).make();
-    mgmt.makePropertyKey("name").dataType(String.class).make();
+    // Vertex properties
+    mgmt.addProperties(Movie, idKey, budgetKey, countriesKey, imdbIdKey, imdbRatingKey,
+        imdbVotesKey, languagesKey, movieIdKey, plotKey, posterKey, releasedKey, revenueKey,
+        runtimeKey, titleKey, tmdbIdKey, urlKey, yearKey);
+    mgmt.addProperties(Actor, idKey, bioKey, bornKey, bornInKey, diedKey, imdbIdKey, nameKey, posterKey,
+        tmdbIdKey, urlKey);
+    mgmt.addProperties(Director, idKey, bioKey, bornKey, bornInKey, diedKey, imdbIdKey, nameKey, posterKey,
+        tmdbIdKey, urlKey);
+    mgmt.addProperties(ActorDirector, idKey, bioKey, bornKey, bornInKey, diedKey, imdbIdKey, nameKey,
+        posterKey, tmdbIdKey, urlKey);
+    mgmt.addProperties(User, idKey, nameKey, userIdKey);
+    mgmt.addProperties(Genre, idKey, genreKey);
 
-    // User properties that are not already defined
-    mgmt.makePropertyKey("userId").dataType(String.class).make();
+    // Edge labels and connections
+    EdgeLabel ACTED_IN = mgmt.makeEdgeLabel("ACTED_IN").multiplicity(Multiplicity.SIMPLE).make();
+    mgmt.addConnection(ACTED_IN, Actor, Movie);
+    mgmt.addConnection(ACTED_IN, ActorDirector, Movie);
+    EdgeLabel DIRECTED = mgmt.makeEdgeLabel("DIRECTED").multiplicity(Multiplicity.SIMPLE).make();
+    mgmt.addConnection(DIRECTED, Director, Movie);
+    mgmt.addConnection(DIRECTED, ActorDirector, Movie);
+    EdgeLabel RATED = mgmt.makeEdgeLabel("RATED").multiplicity(Multiplicity.SIMPLE).make();
+    mgmt.addConnection(RATED, User, Movie);
+    EdgeLabel IN_GENRE = mgmt.makeEdgeLabel("IN_GENRE").multiplicity(Multiplicity.SIMPLE).make();
+    mgmt.addConnection(IN_GENRE, Movie, Genre);
 
-    // Genre properties that are not already defined
-    mgmt.makePropertyKey("genre").dataType(String.class).make();
-
-    // Edge labels
-    mgmt.makeEdgeLabel("ACTED_IN").multiplicity(Multiplicity.SIMPLE).make();
-    mgmt.makeEdgeLabel("DIRECTED").multiplicity(Multiplicity.SIMPLE).make();
-    mgmt.makeEdgeLabel("RATED").multiplicity(Multiplicity.SIMPLE).make();
-    mgmt.makeEdgeLabel("IN_GENRE").multiplicity(Multiplicity.SIMPLE).make();
-
-    // ACTED_IN/DIRECTED properties
-    mgmt.makePropertyKey("role").dataType(String.class).make();
-
-    // RATED properties
-    mgmt.makePropertyKey("rating").dataType(Float.class).make();
-    mgmt.makePropertyKey("timestamp").dataType(Long.class).make();
+    // Edge properties
+    mgmt.addProperties(ACTED_IN, roleKey);
+    mgmt.addProperties(DIRECTED, roleKey);
+    mgmt.addProperties(RATED, ratingKey, timestampKey);
 
     // Indexes
     mgmt.buildIndex("byId", Vertex.class).addKey(idKey).buildCompositeIndex();

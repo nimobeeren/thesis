@@ -13,7 +13,9 @@ public class App {
     JanusGraphFactory.Builder config = JanusGraphFactory.build();
     config.set("storage.backend", "berkeleyje");
     config.set("storage.directory", "/var/lib/janusgraph/data");
-    config.set("schema.default", "none");
+    config.set("schema.default", "none"); // disable automatic schema generation in favor of
+                                          // explicit schema
+    config.set("schema.constraints", "true"); // enable property and edge connection constraints
     JanusGraph graph = config.open();
 
     System.out.println("Dropping graph...");
