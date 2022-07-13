@@ -14,16 +14,17 @@ public class App {
     config.set("schema.default", "none");
     JanusGraph graph = config.open();
 
+    System.out.println("Dropping graph...");
     JanusGraphFactory.drop(graph);
-    System.out.println("Dropped graph");
 
+    System.out.println("Opening graph...");
     graph = config.open();
-    System.out.println("Opened graph");
 
+    System.out.println("Loading graph...");
     RecommendationsGraph recommendations = new RecommendationsGraph(args[0]);
     recommendations.load(graph);
-    System.out.println("Loaded graph");
 
+    System.out.println("Done");
     System.exit(0);
   }
 }
