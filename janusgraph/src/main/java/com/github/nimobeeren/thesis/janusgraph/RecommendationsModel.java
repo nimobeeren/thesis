@@ -3,7 +3,6 @@ package com.github.nimobeeren.thesis.janusgraph;
 import static org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__.hasLabel;
 import static org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__.hasNot;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.text.ParseException;
@@ -29,22 +28,13 @@ import org.janusgraph.graphdb.idmanagement.IDManager;
 
 public class RecommendationsModel {
 
-  private String dirPath;
-  private CSVFormat parser;
-  private SimpleDateFormat dateFormat;
-
-  public RecommendationsModel(String dirPath) {
-    this.dirPath = dirPath;
-    this.parser =
+  Iterable<CSVRecord> parseFile(File dir, String fileName) throws IOException {
+    CSVFormat parser =
         CSVFormat.Builder.create().setHeader().setSkipHeaderRecord(true).setNullString("").build();
-    this.dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+    return parser.parse(new FileReader(new File(dir, fileName)));
   }
 
-  private Iterable<CSVRecord> parseFile(String fileName) throws FileNotFoundException, IOException {
-    return parser.parse(new FileReader(new File(dirPath, fileName)));
-  }
-
-  private Long parseId(IDManager idManager, String idString) throws ParseException {
+  Long parseId(IDManager idManager, String idString) throws ParseException {
     Long longId = Long.parseLong(idString);
     if (longId == 0) {
       // HACK: IDs must be positive, so let's try this instead and hope no vertex has that ID
@@ -54,9 +44,9 @@ public class RecommendationsModel {
     }
   }
 
-  public void load(JanusGraph graph) throws FileNotFoundException, IOException, ParseException {
+  public void load(JanusGraph graph, File dataDir) throws IOException, ParseException {
     loadSchema(graph);
-    loadData(graph);
+    loadData(graph, dataDir);
   }
 
   public void loadSchema(JanusGraph graph) {
@@ -133,9 +123,10 @@ public class RecommendationsModel {
     mgmt.commit();
   }
 
-  public void loadData(JanusGraph graph) throws FileNotFoundException, IOException, ParseException {
+  public void loadData(JanusGraph graph, File dataDir) throws IOException, ParseException {
     JanusGraphTransaction tx = graph.buildTransaction().enableBatchLoading().start();
     IDManager idManager = ((StandardJanusGraph) graph).getIDManager();
+    SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
     /* VERTICES */
 
@@ -146,7 +137,7 @@ public class RecommendationsModel {
     VertexLabel User = tx.getVertexLabel("User");
     VertexLabel Genre = tx.getVertexLabel("Genre");
 
-    Iterable<CSVRecord> movies = parseFile("movies.csv");
+    Iterable<CSVRecord> movies = parseFile(dataDir, "movies.csv");
 
     for (CSVRecord movieRecord : movies) {
       Long vertexId = parseId(idManager, movieRecord.get("_id"));
@@ -179,18 +170,18 @@ public class RecommendationsModel {
       movieVertex.property("year", movieRecord.get("year"));
     }
 
-    Iterable<CSVRecord> actors = parseFile("actors.csv");
+    Iterable<CSVRecord> actors = parseFile(dataDir, "actors.csv");
 
     for (CSVRecord actorRecord : actors) {
       Long vertexId = parseId(idManager, actorRecord.get("_id"));
       JanusGraphVertex actorVertex = tx.addVertex(vertexId, Actor);
       actorVertex.property("bio", actorRecord.get("bio"));
       if (actorRecord.get("born") != null) {
-        actorVertex.property("born", this.dateFormat.parse(actorRecord.get("born")));
+        actorVertex.property("born", dateFormat.parse(actorRecord.get("born")));
       }
       actorVertex.property("bornIn", actorRecord.get("bornIn"));
       if (actorRecord.get("died") != null) {
-        actorVertex.property("died", this.dateFormat.parse(actorRecord.get("died")));
+        actorVertex.property("died", dateFormat.parse(actorRecord.get("died")));
       }
       actorVertex.property("imdbId", actorRecord.get("imdbId"));
       actorVertex.property("name", actorRecord.get("name"));
@@ -199,18 +190,18 @@ public class RecommendationsModel {
       actorVertex.property("url", actorRecord.get("url"));
     }
 
-    Iterable<CSVRecord> directors = parseFile("directors.csv");
+    Iterable<CSVRecord> directors = parseFile(dataDir, "directors.csv");
 
     for (CSVRecord directorRecord : directors) {
       Long vertexId = parseId(idManager, directorRecord.get("_id"));
       JanusGraphVertex directorVertex = tx.addVertex(vertexId, Director);
       directorVertex.property("bio", directorRecord.get("bio"));
       if (directorRecord.get("born") != null) {
-        directorVertex.property("born", this.dateFormat.parse(directorRecord.get("born")));
+        directorVertex.property("born", dateFormat.parse(directorRecord.get("born")));
       }
       directorVertex.property("bornIn", directorRecord.get("bornIn"));
       if (directorRecord.get("died") != null) {
-        directorVertex.property("died", this.dateFormat.parse(directorRecord.get("died")));
+        directorVertex.property("died", dateFormat.parse(directorRecord.get("died")));
       }
       directorVertex.property("imdbId", directorRecord.get("imdbId"));
       directorVertex.property("name", directorRecord.get("name"));
@@ -219,20 +210,18 @@ public class RecommendationsModel {
       directorVertex.property("url", directorRecord.get("url"));
     }
 
-    Iterable<CSVRecord> actorDirectors = parseFile("actorDirectors.csv");
+    Iterable<CSVRecord> actorDirectors = parseFile(dataDir, "actorDirectors.csv");
 
     for (CSVRecord actorDirectorRecord : actorDirectors) {
       Long vertexId = parseId(idManager, actorDirectorRecord.get("_id"));
       JanusGraphVertex actorDirectorVertex = tx.addVertex(vertexId, ActorDirector);
       actorDirectorVertex.property("bio", actorDirectorRecord.get("bio"));
       if (actorDirectorRecord.get("born") != null) {
-        actorDirectorVertex.property("born",
-            this.dateFormat.parse(actorDirectorRecord.get("born")));
+        actorDirectorVertex.property("born", dateFormat.parse(actorDirectorRecord.get("born")));
       }
       actorDirectorVertex.property("bornIn", actorDirectorRecord.get("bornIn"));
       if (actorDirectorRecord.get("died") != null) {
-        actorDirectorVertex.property("died",
-            this.dateFormat.parse(actorDirectorRecord.get("died")));
+        actorDirectorVertex.property("died", dateFormat.parse(actorDirectorRecord.get("died")));
       }
       actorDirectorVertex.property("imdbId", actorDirectorRecord.get("imdbId"));
       actorDirectorVertex.property("name", actorDirectorRecord.get("name"));
@@ -241,7 +230,7 @@ public class RecommendationsModel {
       actorDirectorVertex.property("url", actorDirectorRecord.get("url"));
     }
 
-    Iterable<CSVRecord> users = parseFile("users.csv");
+    Iterable<CSVRecord> users = parseFile(dataDir, "users.csv");
 
     for (CSVRecord userRecord : users) {
       Long vertexId = parseId(idManager, userRecord.get("_id"));
@@ -250,7 +239,7 @@ public class RecommendationsModel {
       userVertex.property("userId", userRecord.get("userId"));
     }
 
-    Iterable<CSVRecord> genres = parseFile("genres.csv");
+    Iterable<CSVRecord> genres = parseFile(dataDir, "genres.csv");
 
     for (CSVRecord genreRecord : genres) {
       Long vertexId = parseId(idManager, genreRecord.get("_id"));
@@ -260,7 +249,7 @@ public class RecommendationsModel {
 
     /* EDGES */
 
-    Iterable<CSVRecord> actedIn = parseFile("actedIn.csv");
+    Iterable<CSVRecord> actedIn = parseFile(dataDir, "actedIn.csv");
 
     for (CSVRecord actedInRecord : actedIn) {
       Long startId = parseId(idManager, actedInRecord.get("_start"));
@@ -272,7 +261,7 @@ public class RecommendationsModel {
       edge.property("role", actedInRecord.get("role"));
     }
 
-    Iterable<CSVRecord> directed = parseFile("directed.csv");
+    Iterable<CSVRecord> directed = parseFile(dataDir, "directed.csv");
 
     for (CSVRecord directedRecord : directed) {
       Long startId = parseId(idManager, directedRecord.get("_start"));
@@ -284,7 +273,7 @@ public class RecommendationsModel {
       edge.property("role", directedRecord.get("role"));
     }
 
-    Iterable<CSVRecord> inGenre = parseFile("inGenre.csv");
+    Iterable<CSVRecord> inGenre = parseFile(dataDir, "inGenre.csv");
 
     for (CSVRecord inGenreRecord : inGenre) {
       Long startId = parseId(idManager, inGenreRecord.get("_start"));
@@ -295,7 +284,7 @@ public class RecommendationsModel {
       start.addEdge("IN_GENRE", end);
     }
 
-    Iterable<CSVRecord> rated = parseFile("rated.csv");
+    Iterable<CSVRecord> rated = parseFile(dataDir, "rated.csv");
 
     for (CSVRecord ratedRecord : rated) {
       Long startId = parseId(idManager, ratedRecord.get("_start"));

@@ -12,7 +12,7 @@ import picocli.CommandLine.Parameters;
     version = "janusgraph-schema 0.1", subcommands = CommandLine.HelpCommand.class)
 public class JanusGraphSchema {
 
-  private JanusGraphFactory.Builder graphConfig;
+  JanusGraphFactory.Builder graphConfig;
 
   public JanusGraphSchema() {
     this.graphConfig = JanusGraphFactory.build();
@@ -29,6 +29,7 @@ public class JanusGraphSchema {
   void load(@Parameters(paramLabel = "dataDir",
       description = "Path to a directory containing all CSV files needed for data loading") File dataDir,
       @Option(names = {"-D", "--drop"}) boolean shouldDrop) throws Exception {
+
     System.out.println("Opening graph...");
     JanusGraph graph = graphConfig.open();
 
@@ -39,8 +40,8 @@ public class JanusGraphSchema {
     }
 
     System.out.println("Loading graph...");
-    RecommendationsModel recommendations = new RecommendationsModel(dataDir.toPath().toString());
-    recommendations.load(graph);
+    RecommendationsModel recommendations = new RecommendationsModel();
+    recommendations.load(graph, dataDir);
 
     System.out.println("Done");
   }
@@ -50,9 +51,8 @@ public class JanusGraphSchema {
     System.out.println("Opening graph...");
     JanusGraph graph = graphConfig.open();
 
-    // FIXME: requires dataDir argument even if we're not loading data
     System.out.println("Validating...");
-    RecommendationsModel recommendations = new RecommendationsModel(null);
+    RecommendationsModel recommendations = new RecommendationsModel();
     boolean isValid = recommendations.validate(graph);
     if (isValid) {
       System.out.println("Graph conforms to schema ✅");
