@@ -8,8 +8,8 @@ import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
 
-@Command(name = "janusgraph-schema", mixinStandardHelpOptions = true,
-    version = "janusgraph-schema 0.1", subcommands = CommandLine.HelpCommand.class)
+@Command(name = "janusgraph-schema", mixinStandardHelpOptions = true, version = "0.1",
+    subcommands = CommandLine.HelpCommand.class)
 public class JanusGraphSchema {
 
   JanusGraphFactory.Builder graphConfig;
@@ -25,7 +25,7 @@ public class JanusGraphSchema {
     this.graphConfig.set("graph.set-vertex-id", "true");
   }
 
-  @Command(name = "load")
+  @Command
   void load(@Parameters(paramLabel = "dataDir",
       description = "Path to a directory containing all CSV files needed for data loading") File dataDir,
       @Option(names = {"-D", "--drop"}) boolean shouldDrop) throws Exception {
@@ -46,14 +46,17 @@ public class JanusGraphSchema {
     System.out.println("Done");
   }
 
-  @Command(name = "validate")
+  @Command
   void validate() {
     System.out.println("Opening graph...");
     JanusGraph graph = graphConfig.open();
 
     System.out.println("Validating...");
     RecommendationsModel recommendations = new RecommendationsModel();
+    long startTime = System.currentTimeMillis();
     boolean isValid = recommendations.validate(graph);
+    long endTime = System.currentTimeMillis();
+    System.out.println(String.format("Took %d ms", endTime - startTime));
     if (isValid) {
       System.out.println("Graph conforms to schema ✅");
     } else {
