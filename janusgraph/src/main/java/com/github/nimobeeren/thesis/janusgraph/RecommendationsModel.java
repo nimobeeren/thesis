@@ -2,6 +2,7 @@ package com.github.nimobeeren.thesis.janusgraph;
 
 import static org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__.hasLabel;
 import static org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__.hasNot;
+import static org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__.out;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
@@ -303,6 +304,11 @@ public class RecommendationsModel {
   public boolean validate(JanusGraph graph) {
     GraphTraversalSource g = graph.traversal();
 
+    // Objects can't have labels that are not allowed (because automatic schema is disabled)
+    // Property values can't have the wrong datatype (because of PropertyKey.dataType)
+    // Objects can't have properties that are not allowed (because of addProperties)
+    // Edges can't connect the wrong types of nodes (because of addConnection)
+
     // Check for missing mandatory properties
     if (g.V().hasLabel("Movie").or(hasNot("imdbId"), hasNot("movieId"), hasNot("title")).hasNext())
       return false;
@@ -314,6 +320,14 @@ public class RecommendationsModel {
     if (g.V().hasLabel("Genre").hasNot("genre").hasNext())
       return false;
     if (g.E().hasLabel("RATED").or(hasNot("rating"), hasNot("timestamp")).hasNext())
+      return false;
+
+    // Check for missing mandatory edges
+    if (g.V().or(hasLabel("Actor"), hasLabel("ActorDirector")).not(out("ACTED_IN")).hasNext())
+      return false;
+    if (g.V().or(hasLabel("Director"), hasLabel("ActorDirector")).not(out("DIRECTED")).hasNext())
+      return false;
+    if (g.V().hasLabel("Movie").not(out("IN_GENRE")).hasNext())
       return false;
 
     return true;
