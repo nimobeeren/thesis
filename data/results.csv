@@ -2,3 +2,6 @@ database,dataset,time
 janusgraph,recommendations,5598
 janusgraph,recommendations,5975
 janusgraph,recommendations,5851
+tigergraph,recommendations,62
+tigergraph,recommendations,81
+tigergraph,recommendations,59
