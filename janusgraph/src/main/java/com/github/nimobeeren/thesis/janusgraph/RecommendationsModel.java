@@ -1,6 +1,5 @@
 package com.github.nimobeeren.thesis.janusgraph;
 
-import static org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__.hasLabel;
 import static org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__.hasNot;
 import static org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__.out;
 import java.io.File;
@@ -12,6 +11,7 @@ import java.util.Date;
 import java.util.Iterator;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
+import org.apache.tinkerpop.gremlin.process.traversal.P;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
 import org.apache.tinkerpop.gremlin.structure.Edge;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
@@ -312,7 +312,7 @@ public class RecommendationsModel {
     // Check for missing mandatory properties
     if (g.V().hasLabel("Movie").or(hasNot("imdbId"), hasNot("movieId"), hasNot("title")).hasNext())
       return false;
-    if (g.V().or(hasLabel("Actor"), hasLabel("Director"), hasLabel("ActorDirector"))
+    if (g.V().hasLabel(P.within("Actor", "Director", "ActorDirector"))
         .or(hasNot("name"), hasNot("tmdbId"), hasNot("url")).hasNext())
       return false;
     if (g.V().hasLabel("User").or(hasNot("name"), hasNot("userId")).hasNext())
@@ -323,9 +323,9 @@ public class RecommendationsModel {
       return false;
 
     // Check for missing mandatory edges
-    if (g.V().or(hasLabel("Actor"), hasLabel("ActorDirector")).not(out("ACTED_IN")).hasNext())
+    if (g.V().hasLabel(P.within("Actor", "ActorDirector")).not(out("ACTED_IN")).hasNext())
       return false;
-    if (g.V().or(hasLabel("Director"), hasLabel("ActorDirector")).not(out("DIRECTED")).hasNext())
+    if (g.V().hasLabel(P.within("Director", "ActorDirector")).not(out("DIRECTED")).hasNext())
       return false;
     if (g.V().hasLabel("Movie").not(out("IN_GENRE")).hasNext())
       return false;
