@@ -1,5 +1,6 @@
 package com.github.nimobeeren.thesis.janusgraph;
 
+import static org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__.hasLabel;
 import static org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__.hasNot;
 import static org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__.out;
 import java.io.File;
@@ -309,26 +310,28 @@ public class RecommendationsModel {
     // Objects can't have properties that are not allowed (because of addProperties)
     // Edges can't connect the wrong types of nodes (because of addConnection)
 
-    // Check for missing mandatory properties
-    if (g.V().hasLabel("Movie").or(hasNot("imdbId"), hasNot("movieId"), hasNot("title")).hasNext())
-      return false;
-    if (g.V().hasLabel(P.within("Actor", "Director", "ActorDirector"))
-        .or(hasNot("name"), hasNot("tmdbId"), hasNot("url")).hasNext())
-      return false;
-    if (g.V().hasLabel("User").or(hasNot("name"), hasNot("userId")).hasNext())
-      return false;
-    if (g.V().hasLabel("Genre").hasNot("genre").hasNext())
-      return false;
-    if (g.E().hasLabel("RATED").or(hasNot("rating"), hasNot("timestamp")).hasNext())
-      return false;
+    boolean hasViolatingVertices = g.V().or(
+        // Check for missing mandatory properties on vertices
+        hasLabel("Movie").or(hasNot("imdbId"), hasNot("movieId"), hasNot("title")),
+        hasLabel(P.within("Actor", "Director", "ActorDirector")).or(hasNot("name"),
+            hasNot("tmdbId"), hasNot("url")),
+        hasLabel("User").or(hasNot("name"), hasNot("userId")), hasLabel("Genre").hasNot("genre"),
+        // Check for missing mandatory edges
+        hasLabel(P.within("Actor", "ActorDirector")).not(out("ACTED_IN")),
+        hasLabel(P.within("Director", "ActorDirector")).not(out("DIRECTED")),
+        hasLabel("Movie").not(out("IN_GENRE"))).hasNext();
 
-    // Check for missing mandatory edges
-    if (g.V().hasLabel(P.within("Actor", "ActorDirector")).not(out("ACTED_IN")).hasNext())
+    if (hasViolatingVertices) {
       return false;
-    if (g.V().hasLabel(P.within("Director", "ActorDirector")).not(out("DIRECTED")).hasNext())
+    }
+
+    // Check for missing mandatory properties on edges
+    boolean hasViolatingEdges =
+        g.E().hasLabel("RATED").or(hasNot("rating"), hasNot("timestamp")).hasNext();
+
+    if (hasViolatingEdges) {
       return false;
-    if (g.V().hasLabel("Movie").not(out("IN_GENRE")).hasNext())
-      return false;
+    }
 
     return true;
   }
