@@ -27,13 +27,13 @@ import org.janusgraph.core.schema.JanusGraphManagement;
 import org.janusgraph.graphdb.database.StandardJanusGraph;
 import org.janusgraph.graphdb.idmanagement.IDManager;
 
-public class RecommendationsGraph {
+public class RecommendationsModel {
 
   private String dirPath;
   private CSVFormat parser;
   private SimpleDateFormat dateFormat;
 
-  public RecommendationsGraph(String dirPath) {
+  public RecommendationsModel(String dirPath) {
     this.dirPath = dirPath;
     this.parser =
         CSVFormat.Builder.create().setHeader().setSkipHeaderRecord(true).setNullString("").build();
