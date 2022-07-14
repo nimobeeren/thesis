@@ -1,5 +1,7 @@
 package com.github.nimobeeren.thesis.janusgraph;
 
+import static org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__.hasLabel;
+import static org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__.hasNot;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -10,6 +12,7 @@ import java.util.Date;
 import java.util.Iterator;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
+import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
 import org.apache.tinkerpop.gremlin.structure.Edge;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.janusgraph.core.Cardinality;
@@ -306,5 +309,24 @@ public class RecommendationsGraph {
     }
 
     tx.commit();
+  }
+
+  public boolean validate(JanusGraph graph) {
+    GraphTraversalSource g = graph.traversal();
+
+    // Check for missing mandatory properties
+    if (g.V().hasLabel("Movie").or(hasNot("imdbId"), hasNot("movieId"), hasNot("title")).hasNext())
+      return false;
+    if (g.V().or(hasLabel("Actor"), hasLabel("Director"), hasLabel("ActorDirector"))
+        .or(hasNot("name"), hasNot("tmdbId"), hasNot("url")).hasNext())
+      return false;
+    if (g.V().hasLabel("User").or(hasNot("name"), hasNot("userId")).hasNext())
+      return false;
+    if (g.V().hasLabel("Genre").hasNot("genre").hasNext())
+      return false;
+    if (g.E().hasLabel("RATED").or(hasNot("rating"), hasNot("timestamp")).hasNext())
+      return false;
+
+    return true;
   }
 }
