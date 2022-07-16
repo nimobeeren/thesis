@@ -1,8 +1,1 @@
-__pycache__/
-.ipynb_checkpoints
-
 node_modules/
-.env
-
-# Symlinks to actual data files
-data/**/data
