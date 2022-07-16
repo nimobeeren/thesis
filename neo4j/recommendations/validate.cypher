@@ -6,27 +6,31 @@ CALL db.relationshipTypes() YIELD relationshipType AS allTypes
 RETURN all(type IN collect(allTypes) WHERE type IN ["IN_GENRE", "RATED", "ACTED_IN", "DIRECTED"]);
 
 // Find node properties that are not allowed
-WITH ["budget", "countries", "imdbId", "imdbRating", "imdbVotes", "languages", "movieId", "plot", "poster", "released", "revenue", "runtime", "title", "tmdbId", "url", "year"] AS movieAllowedProperties,
-["bio", "born", "bornIn", "died", "imdbId", "name", "poster", "tmdbId", "url"] AS personAllowedProperties,
-["userId", "name"] AS userAllowedProperties,
-["name"] AS genreAllowedProperties
+WITH {
+    Movie: ["budget", "countries", "imdbId", "imdbRating", "imdbVotes", "languages", "movieId", "plot", "poster", "released", "revenue", "runtime", "title", "tmdbId", "url", "year"],
+    Person: ["bio", "born", "bornIn", "died", "imdbId", "name", "poster", "tmdbId", "url"],
+    User: ["userId", "name"],
+    Genre: ["name"]
+} AS allowedNodeProperties
 CALL db.schema.nodeTypeProperties() YIELD nodeLabels, propertyName
-WHERE "Movie" IN nodeLabels AND NOT propertyName IN movieAllowedProperties
-OR "Person" IN nodeLabels AND NOT propertyName IN personAllowedProperties
-OR "User" IN nodeLabels AND NOT propertyName IN userAllowedProperties
-OR "Genre" IN nodeLabels AND NOT propertyName IN genreAllowedProperties
+WHERE "Movie" IN nodeLabels AND NOT propertyName IN allowedNodeProperties.Movie
+OR "Person" IN nodeLabels AND NOT propertyName IN allowedNodeProperties.Person
+OR "User" IN nodeLabels AND NOT propertyName IN allowedNodeProperties.User
+OR "Genre" IN nodeLabels AND NOT propertyName IN allowedNodeProperties.Genre
 RETURN nodeLabels, propertyName;
 
 // Find edge properties that are not allowed
-WITH ["role"] AS actedInAllowedProperties,
-["role"] AS directedAllowedProperties,
-["rating", "timestamp"] AS ratedAllowedProperties,
-[null] AS inGenreAllowedProperties
+WITH {
+    ACTED_IN: ["role"],
+    DIRECTED: ["role"],
+    RATED: ["rating", "timestamp"],
+    IN_GENRE: [null]
+} AS allowedEdgeProperties
 CALL db.schema.relTypeProperties() YIELD relType, propertyName
-WHERE relType = ":`ACTED_IN`" AND NOT propertyName IN actedInAllowedProperties
-OR relType = ":`DIRECTED`" AND NOT propertyName IN directedAllowedProperties
-OR relType = ":`RATED`" AND NOT propertyName IN ratedAllowedProperties
-OR relType = ":`IN_GENRE`" AND NOT propertyName IN inGenreAllowedProperties
+WHERE relType = ":`ACTED_IN`" AND NOT propertyName IN allowedEdgeProperties.ACTED_IN
+OR relType = ":`DIRECTED`" AND NOT propertyName IN allowedEdgeProperties.DIRECTED
+OR relType = ":`RATED`" AND NOT propertyName IN allowedEdgeProperties.RATED
+OR relType = ":`IN_GENRE`" AND NOT propertyName IN allowedEdgeProperties.IN_GENRE
 RETURN relType, propertyName;
 
 // Find node properties with the wrong datatype
