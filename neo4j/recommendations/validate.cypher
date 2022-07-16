@@ -83,40 +83,12 @@ OR relType = ":`RATED`" AND (
 )
 RETURN relType, propertyName, propertyTypes;
 
-// FIXME: this finds that some Actors have DIRECTED eges, which is allowed, but only when they are also Directors
 // Check for edges between wrong types of nodes
-CALL apoc.meta.schema() YIELD value AS schema
-WITH schema,
-{out: ["IN_GENRE"], in: ["ACTED_IN", "DIRECTED", "RATED"]} AS movieAllowedEdges,
-{out: ["ACTED_IN"], in: []} AS actorAllowedEdges,
-{out: ["DIRECTED"], in: []} AS directorAllowedEdges,
-{out: ["RATED"], in: []} AS userAllowedEdges,
-{out: [], in: ["IN_GENRE"]} AS genreAllowedEdges
-RETURN size([
-    relType IN keys(schema.Movie.relationships)
-    WHERE schema.Movie.relationships[relType].direction = "out" AND NOT relType IN movieAllowedEdges.out
-    OR schema.Movie.relationships[relType].direction = "in" AND NOT relType IN movieAllowedEdges.in
-]) > 0
-OR size([
-    relType IN keys(schema.Actor.relationships)
-    WHERE schema.Actor.relationships[relType].direction = "out" AND NOT relType IN actorAllowedEdges.out
-    OR schema.Actor.relationships[relType].direction = "in" AND NOT relType IN actorAllowedEdges.in
-]) > 0
-OR size([
-    relType IN keys(schema.Director.relationships)
-    WHERE schema.Director.relationships[relType].direction = "out" AND NOT relType IN directorAllowedEdges.out
-    OR schema.Director.relationships[relType].direction = "in" AND NOT relType IN directorAllowedEdges.in
-]) > 0
-OR size([
-    relType IN keys(schema.User.relationships)
-    WHERE schema.User.relationships[relType].direction = "out" AND NOT relType IN userAllowedEdges.out
-    OR schema.User.relationships[relType].direction = "in" AND NOT relType IN userAllowedEdges.in
-]) > 0
-OR size([
-    relType IN keys(schema.Genre.relationships)
-    WHERE schema.Genre.relationships[relType].direction = "out" AND NOT relType IN genreAllowedEdges.out
-    OR schema.Genre.relationships[relType].direction = "in" AND NOT relType IN genreAllowedEdges.in
-]) > 0;
+// We can't do this with the schema statistics, because this finds that some Actors have DIRECTED eges, which is allowed, but only when they are also Directors
+MATCH (n)-[e:ACTED_IN]->(m) WHERE NOT "Actor" IN labels(n) OR NOT "Movie" IN labels(m) RETURN e;
+MATCH (n)-[e:DIRECTED]->(m) WHERE NOT "Director" IN labels(n) OR NOT "Movie" IN labels(m) RETURN e;
+MATCH (n)-[e:IN_GENRE]->(m) WHERE NOT "Movie" IN labels(n) OR NOT "Genre" IN labels(m) RETURN e;
+MATCH (n)-[e:RATED]->(m) WHERE NOT "User" IN labels(n) OR NOT "Movie" IN labels(m) RETURN e;
 
 // Check for missing mandatory edges
 MATCH (a:Actor) WHERE NOT (a)-[:ACTED_IN]->(:Movie) RETURN count(a) > 0;
