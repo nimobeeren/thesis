@@ -1,3 +1,9 @@
+// This set of queries can be used to check if the graph conforms to the
+// recommendations schema.
+// Each query returns the graph objects that violate one of the rules.
+// It does not check for things that can be avoided using Neo4j's built-in
+// constraints, such as missing mandatory properties.
+
 // Find all nodes that have a label that is not allowed
 MATCH (n) WHERE NOT all(label IN labels(n) WHERE label IN ["Movie", "Genre", "User", "Actor", "Director", "Person"]) RETURN n;
 // Find all edges that have a label that is not allowed

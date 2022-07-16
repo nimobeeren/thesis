@@ -1,3 +1,10 @@
+// This set of queries can be used to check if the graph conforms to the
+// recommendations schema.
+// Most queries don't return the objects that violate the rules, instead they
+// return an empty result or `true` if the graph conforms.
+// It does not check for things that can be avoided using Neo4j's built-in
+// constraints, such as missing mandatory properties.
+
 // Find node labels that are not allowed
 CALL db.labels() YIELD label AS allLabels
 RETURN all(label IN collect(allLabels) WHERE label IN ["Movie", "Genre", "User", "Actor", "Director", "Person"]);
