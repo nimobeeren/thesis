@@ -56,6 +56,9 @@
 \newcommand{\rsem}{\ensuremath{]\!]}}
 \newcommand{\sem}[1]{\ensuremath{\lsem #1 \rsem}}
 
+% Conformance relation
+\newcommand{\conf}{\sqsubseteq}
+
 % Undefined
 \newcommand{\undefined}{\mathbf{undef}}
 
@@ -228,7 +231,9 @@ The concept of property type is similar to a \emph{value set} in the ER model. V
   \end{itemize}
 \end{definition}
 
-We may informally say that an object $o$ conforms to a schema object $o'$, while it would be more accurate to say that $o$ conforms to the \emph{object type} that is associated with schema object $o'$, i.e $o \in \sem{\omega(o')}$.
+\begin{definition}[Conformance relation]
+  Given a property graph $$G = (N, E, \rho, \lambda, \pi)$$ and a property graph schema $$S = (N', E', \rho', \omega)$$ we define the binary \emph{conformance relation} $$\conf \; = \{(o, o') \mid o \in (N \cup E) \wedge o' \in (N' \cup E') \wedge o \in \sem{\omega(o')}\}$$ In words, we say that an object $o$ conforms to the schema object $o'$ if and only if $o \conf o'$.
+\end{definition}
 
 Note that a property graph schema can be simulated by a property graph if we allow properties to take property types as values, i.e. $\ptypes \subseteq \mathcal{V}$. Then we let $\lambda$ and $\pi$ take the role of $\omega$, in the sense that $\lambda(o) = L$ and $\pi(o) = \rtype$ if $\omega(o) = (L, \rtype)$ for all objects $o$ in the property graph.
 
@@ -259,15 +264,15 @@ Next, we define what it means for a property graph to conform to a schema.
     \item\label{rule:conformance-basic-node}
           Every node $n$ conforms to some schema node $n'$:
           \begin{align*}
-             & \forall n \in N \; \exists n' \in N' : n \in \sem{\omega(n')}
+             & \forall n \in N \; \exists n' \in N' : n \conf n'
           \end{align*}
 
     \item\label{rule:conformance-basic-edge}
           Every edge $e$ conforms to some schema edge $e'$, and the source and target nodes of $e$ conform to the respective endpoints of $e'$:
           \begin{align*}
-             & \forall e \in E \; \exists e' \in E' :                                              \\
-             & \quad e \in \sem{\omega(e')} \wedge \src(\rho(e)) \in \sem{\omega(\src(\rho'(e')))}
-            \wedge \trg(\rho(e)) \in \sem{\omega(\trg(\rho'(e')))}
+             & \forall e \in E \; \exists e' \in E' :\\
+             & \quad e \conf e' \wedge \src(\rho(e)) \conf \src(\rho'(e'))
+            \wedge \trg(\rho(e)) \conf \trg(\rho'(e'))
           \end{align*}
   \end{enumerate}
 \end{definition}
@@ -370,30 +375,31 @@ An example of a property graph schema with cardinality constraints is given in \
     \item\label{rule:conformance-node}
           Every node $n$ conforms to some schema node $n'$:
           \begin{align*}
-             & \forall n \in N \; \exists n' \in N' : n \in \sem{\omega(n')}
+             & \forall n \in N \; \exists n' \in N' : n \conf n'
           \end{align*}
 
     \item\label{rule:conformance-edge}
           Every edge $e$ conforms to some schema edge $e'$, and the source and target nodes of $e$ conform to the respective endpoints of $e'$:
           \begin{align*}
-             & \forall e \in E \; \exists e' \in E' :                                                                                                    \\
-             & \quad e \in \sem{\omega(e')} \wedge \src(\rho(e)) \in \sem{\omega(\src(\rho'(e')))}\wedge \trg(\rho(e)) \in \sem{\omega(\trg(\rho'(e')))}
+            & \forall e \in E \; \exists e' \in E' :\\
+            & \quad e \conf e' \wedge \src(\rho(e)) \conf \src(\rho'(e'))
+           \wedge \trg(\rho(e)) \conf \trg(\rho'(e'))
           \end{align*}
 
     \item\label{rule:conformance-out}
           If a node $n$ conforms to the source of a schema edge $e'$, it must have the right number of outgoing edges of the right type:
           \begin{align*}
-             & \forall n \in N \; \forall e' \in E':                                                                           \\
-             & \quad \big[n \in \sem{\omega(\src(\rho(e')))} \implies \exists^{\src(\eta(e'))} e \in E \cap \sem{\omega(e')} : \\
-             & \quad\quad \src(\rho(e)) = n \wedge \trg(\rho(e)) \in \sem{\omega(\trg(\rho(e')))}\big]
+             & \forall n \in N \; \forall e' \in E' :\\
+             & \quad \big[n \conf \src(\rho(e')) \implies \exists^{\src(\eta(e'))} e \in E : \\
+             & \quad\quad e \conf e' \wedge \src(\rho(e)) = n \wedge \trg(\rho(e)) \conf \trg(\rho(e'))\big]
           \end{align*}
 
     \item\label{rule:conformance-in}
           If a node $n$ conforms to the target of a schema edge $e'$, it must have the right number of incoming edges of the right type:
           \begin{align*}
-             & \forall n \in N \; \forall e' \in E'  :                                                                         \\
-             & \quad \big[n \in \sem{\omega(\trg(\rho(e')))} \implies \exists^{\trg(\eta(e'))} e \in E \cap \sem{\omega(e')} : \\
-             & \quad\quad \src(\rho(e)) \in \sem{\omega(\src(\rho(e')))} \wedge \trg(\rho(e)) = n\big]
+             & \forall n \in N \; \forall e' \in E' :\\
+             & \quad \big[n \conf \trg(\rho(e')) \implies \exists^{\trg(\eta(e'))} e \in E : \\
+             & \quad\quad e \conf e' \wedge \src(\rho(e)) \conf \src(\rho(e')) \wedge \trg(\rho(e)) = n\big]
           \end{align*}
   \end{enumerate}
 \end{definition}
@@ -498,9 +504,9 @@ Our schema formalisms come with a number of limitations. First, it is not possib
 
 % Furthermore, it is not possible to have a single object type that allows two different label sets. Hence, it is not possible to have optional labels, i.e. the object type $\otype = (\{\texttt{Vehicle}, \texttt{Car}\}, \langle \texttt{make} : \texttt{string} \rangle)$ requires that the labels \texttt{Vehicle} and \texttt{Car} are both present, just having \texttt{Car} is not enough. Of course, it is possible to have two schema objects like $\otype_1 = (\{\texttt{Car}\}, \langle \texttt{make} : \texttt{string} \rangle)$ and $\otype_2 = (\{\texttt{Vehicle}, \texttt{Car}\}, \langle \texttt{make} : \texttt{string} \rangle)$. However, then it is not possible to specify that every \texttt{Employee} must have exactly one outgoing \texttt{OWNS} edge to a node conforming to either $\otype_1$ or $\otype_2$.
 
-% In general, it's not possible to say that an object must conform to type 1 OR type 2 (union type). Problem with labels follows from that. But also union of two records is not possible.
+% TODO: In general, it's not possible to say that an object must conform to type 1 OR type 2 (union type). Problem with labels follows from that. But also union of two records is not possible.
 
-% It's also not possible to say that there may only exist one edge between the same two nodes, or to enforce that a node has two edges to different nodes (mutual exclusion?)
+% TODO: It's also not possible to say that there may only exist one edge between the same two nodes, or to enforce that a node has two edges to different nodes (mutual exclusion?)
 
 Furthermore, subtype relations cannot be expressed in general. To see the problem, consider the schema depicted in \autoref{fig:subtyping}. How could we express this using our schema formalism? An attempt is given in \autoref{fig:subtyping-ours}, where properties of the supertype \texttt{Message} are copied and distributed over all its subtypes, and the edge from \texttt{Comment} to \texttt{Message} is accompanied by an edge from \texttt{Comment} to Post and from \texttt{Comment} to itself. While the properties are modeled correctly in this case, it breaks down when we look at the cardinalities.
 
