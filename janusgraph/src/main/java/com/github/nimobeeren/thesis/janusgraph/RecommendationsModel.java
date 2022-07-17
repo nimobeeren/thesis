@@ -8,8 +8,11 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.List;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.tinkerpop.gremlin.process.traversal.P;
@@ -143,32 +146,24 @@ public class RecommendationsModel {
     for (CSVRecord movieRecord : movies) {
       Long vertexId = parseId(idManager, movieRecord.get("_id"));
       JanusGraphVertex movieVertex = tx.addVertex(vertexId, Movie);
-      movieVertex.property("budget", movieRecord.get("budget"));
-      if (movieRecord.get("countries") != null) {
-        for (String country : movieRecord.get("countries").replaceAll("[\\[\\]\"]", "")
-            .split(",")) {
-          movieVertex.property("countries", country);
+      for (PropertyKey propKey : Movie.mappedProperties()) {
+        List<String> values = new ArrayList<String>();
+        String columnValue = movieRecord.get(propKey.name());
+        if (columnValue != null) {
+          if (propKey.cardinality() == Cardinality.LIST) {
+            values.addAll(Arrays.asList(columnValue.replaceAll("[\\[\\]\"]", "").split(",")));
+          } else {
+            values.add(columnValue);
+          }
+          for (String value : values) {
+            if (propKey.dataType() == Date.class) {
+              movieVertex.property(propKey.name(), dateFormat.parse(value));
+            } else {
+              movieVertex.property(propKey.name(), value);
+            }
+          }
         }
       }
-      movieVertex.property("imdbId", movieRecord.get("imdbId"));
-      movieVertex.property("imdbRating", movieRecord.get("imdbRating"));
-      movieVertex.property("imdbVotes", movieRecord.get("imdbVotes"));
-      if (movieRecord.get("languages") != null) {
-        for (String language : movieRecord.get("languages").replaceAll("[\\[\\]\"]", "")
-            .split(",")) {
-          movieVertex.property("languages", language);
-        }
-      }
-      movieVertex.property("movieId", movieRecord.get("movieId"));
-      movieVertex.property("plot", movieRecord.get("plot"));
-      movieVertex.property("poster", movieRecord.get("poster"));
-      movieVertex.property("released", movieRecord.get("released"));
-      movieVertex.property("revenue", movieRecord.get("revenue"));
-      movieVertex.property("runtime", movieRecord.get("runtime"));
-      movieVertex.property("title", movieRecord.get("title"));
-      movieVertex.property("tmdbId", movieRecord.get("tmdbId"));
-      movieVertex.property("url", movieRecord.get("url"));
-      movieVertex.property("year", movieRecord.get("year"));
     }
 
     Iterable<CSVRecord> actors = parseFile(dataDir, "actors.csv");
