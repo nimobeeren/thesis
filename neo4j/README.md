@@ -3,7 +3,7 @@
 - Docker 20 or newer
 - Node.js v14 or newer
 
-## Usage
+## Installation
 
 1. Install Node.js dependencies with `npm install`.
 
@@ -20,7 +20,31 @@ docker run \
     -e NEO4J_AUTH=neo4j/thesis \
     -e NEO4JLABS_PLUGINS=\[\"apoc\"\] \
     -e NEO4J_ACCEPT_LICENSE_AGREEMENT=yes \
-    neo4j:4.4.8-enterprise
+    -it \
+    neo4j:4.4.8-enterprise \
+    bash
 ```
 
-3. Run tests with `npm test`.
+### Re-using the container
+
+If you want to use the container you created with `docker run` after ending the session, you can start it again using:
+
+```bash
+docker start -a neo4j
+```
+
+## Usage
+
+### Data loading
+
+1. Download the [recommendations data in Neo4j dump format](https://github.com/neo4j-graph-examples/recommendations/blob/main/data/recommendations-43.dump) and place it in a directory `~/neo4j/import`.
+
+2. Import the data (in the container). Note that the `--force` flag drops all existing data!
+
+```bash
+bin/neo4j-admin load --from=import/recommendations-43.dump --force
+```
+
+### Schema validation
+
+TODO: add constraints, run queries, run tests?
