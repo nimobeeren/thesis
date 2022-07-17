@@ -29,7 +29,7 @@ cp conf/janusgraph-berkeleyje-server.properties /etc/opt/janusgraph/janusgraph.p
 If you want to use the container you created with `docker run` after ending the session, you can start it again using:
 
 ```bash
-docker start -a janusgraph
+docker start -i janusgraph
 ```
 
 ## Usage

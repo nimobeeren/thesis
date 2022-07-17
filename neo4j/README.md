@@ -30,7 +30,7 @@ docker run \
 If you want to use the container you created with `docker run` after ending the session, you can start it again using:
 
 ```bash
-docker start -a neo4j
+docker start -i neo4j
 ```
 
 ## Usage
