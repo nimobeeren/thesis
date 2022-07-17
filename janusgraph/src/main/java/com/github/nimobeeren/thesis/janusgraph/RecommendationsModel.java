@@ -87,7 +87,6 @@ public class RecommendationsModel {
     PropertyKey diedKey = mgmt.makePropertyKey("died").dataType(Date.class).make();
     PropertyKey nameKey = mgmt.makePropertyKey("name").dataType(String.class).make();
     PropertyKey userIdKey = mgmt.makePropertyKey("userId").dataType(String.class).make();
-    PropertyKey genreKey = mgmt.makePropertyKey("genre").dataType(String.class).make();
     PropertyKey roleKey = mgmt.makePropertyKey("role").dataType(String.class).make();
     PropertyKey ratingKey = mgmt.makePropertyKey("rating").dataType(Float.class).make();
     PropertyKey timestampKey = mgmt.makePropertyKey("timestamp").dataType(Long.class).make();
@@ -103,7 +102,7 @@ public class RecommendationsModel {
     mgmt.addProperties(ActorDirector, bioKey, bornKey, bornInKey, diedKey, imdbIdKey, nameKey,
         posterKey, tmdbIdKey, urlKey);
     mgmt.addProperties(User, nameKey, userIdKey);
-    mgmt.addProperties(Genre, genreKey);
+    mgmt.addProperties(Genre, nameKey);
 
     // Edge labels and connections
     EdgeLabel ACTED_IN = mgmt.makeEdgeLabel("ACTED_IN").multiplicity(Multiplicity.SIMPLE).make();
@@ -246,7 +245,7 @@ public class RecommendationsModel {
     for (CSVRecord genreRecord : genres) {
       Long vertexId = parseId(idManager, genreRecord.get("_id"));
       JanusGraphVertex genreVertex = tx.addVertex(vertexId, Genre);
-      genreVertex.property("genre", genreRecord.get("genre"));
+      genreVertex.property("name", genreRecord.get("name"));
     }
 
     /* EDGES */
@@ -315,7 +314,7 @@ public class RecommendationsModel {
         hasLabel("Movie").or(hasNot("imdbId"), hasNot("movieId"), hasNot("title")),
         hasLabel(P.within("Actor", "Director", "ActorDirector")).or(hasNot("name"),
             hasNot("tmdbId"), hasNot("url")),
-        hasLabel("User").or(hasNot("name"), hasNot("userId")), hasLabel("Genre").hasNot("genre"),
+        hasLabel("User").or(hasNot("name"), hasNot("userId")), hasLabel("Genre").hasNot("name"),
         // Check for missing mandatory edges
         hasLabel(P.within("Actor", "ActorDirector")).not(out("ACTED_IN")),
         hasLabel(P.within("Director", "ActorDirector")).not(out("DIRECTED")),
