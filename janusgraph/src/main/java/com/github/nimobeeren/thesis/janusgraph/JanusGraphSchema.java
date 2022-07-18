@@ -2,6 +2,7 @@ package com.github.nimobeeren.thesis.janusgraph;
 
 import java.io.File;
 import java.util.Set;
+import org.apache.commons.lang.NotImplementedException;
 import org.apache.tinkerpop.gremlin.structure.Element;
 import org.janusgraph.core.JanusGraph;
 import org.janusgraph.core.JanusGraphFactory;
@@ -16,6 +17,10 @@ public class JanusGraphSchema {
 
   JanusGraphFactory.Builder graphConfig;
 
+  enum Dataset {
+    recommendations, snb
+  }
+
   public JanusGraphSchema() {
     this.graphConfig = JanusGraphFactory.build();
     this.graphConfig.set("storage.backend", "berkeleyje");
@@ -28,8 +33,11 @@ public class JanusGraphSchema {
   }
 
   @Command
-  void load(@Parameters(paramLabel = "dataDir",
-      description = "Path to a directory containing all CSV files needed for data loading") File dataDir,
+  void load(
+      @Parameters(paramLabel = "dataset",
+          description = "One of the dataset names: ${COMPLETION-CANDIDATES}") Dataset dataset,
+      @Parameters(paramLabel = "path",
+          description = "Path to a directory containing all required CSV files") File path,
       @Option(names = {"-D", "--drop"},
           description = {"Drop all existing data"}) boolean shouldDrop)
       throws Exception {
@@ -44,35 +52,56 @@ public class JanusGraphSchema {
     }
 
     System.out.println("Loading graph...");
-    RecommendationsModel recommendations = new RecommendationsModel(graph);
-    recommendations.load(dataDir);
+    DataModel model;
+    switch (dataset) {
+      case recommendations:
+        model = new RecommendationsModel(graph);
+        break;
+      case snb:
+        throw new NotImplementedException();
+      default:
+        throw new NotImplementedException();
+    }
+    model.load(path);
 
     System.out.println("Done");
   }
 
   @Command
-  void validate(@Option(names = {"-b", "--boolean"},
-      description = "Only check whether the graph conforms to the schema or not. This is faster than enumerating all the violating elements") boolean validateBoolean) {
+  void validate(
+      @Parameters(paramLabel = "dataset",
+          description = "One of the dataset names: ${COMPLETION-CANDIDATES}") Dataset dataset,
+      @Option(names = {"-b", "--boolean"},
+          description = "Only check whether the graph conforms to the schema or not. This is faster than enumerating all the violating elements") boolean validateBoolean) {
     System.out.println("Opening graph...");
     JanusGraph graph = graphConfig.open();
 
     System.out.println("Validating...");
-    RecommendationsModel recommendations = new RecommendationsModel(graph);
+    DataModel model;
+    switch (dataset) {
+      case recommendations:
+        model = new RecommendationsModel(graph);
+        break;
+      case snb:
+        throw new NotImplementedException();
+      default:
+        throw new NotImplementedException();
+    }
     long startTime = System.currentTimeMillis();
     if (validateBoolean) {
-      boolean isValid = recommendations.validateBoolean();
+      boolean isValid = model.validateBoolean();
       if (isValid) {
         System.out.println("Graph conforms to schema ✅");
       } else {
         System.out.println("Graph does not conform to schema ❌");
       }
     } else {
-      Set<Element> violatingElements = recommendations.validate();
+      Set<Element> violatingElements = model.validate();
       if (violatingElements.size() == 0) {
         System.out.println("All graph elements conform to schema ✅");
       } else {
         System.out.println(
-            String.format("%d elements not conform to schema ❌", violatingElements.size()));
+            String.format("%d elements do not conform to schema ❌", violatingElements.size()));
       }
     }
     long endTime = System.currentTimeMillis();
