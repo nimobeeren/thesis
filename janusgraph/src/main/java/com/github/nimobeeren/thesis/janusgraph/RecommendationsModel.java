@@ -198,73 +198,26 @@ public class RecommendationsModel {
       }
     }
 
-    /* EDGES */
-
-    // for (String edgeLabelName : filePathByEdge.keySet()) {
-    // EdgeLabel edgeLabel = tx.getEdgeLabel(edgeLabelName);
-    // Iterable<CSVRecord> records = parseFile(dataDir, filePathByVertex.get(edgeLabelName));
-    // for (CSVRecord record : records) {
-    // Long startId = parseId(idManager, record.get("_start"));
-    // Long endId = parseId(idManager, record.get("_end"));
-    // Iterator<Vertex> vertices = tx.vertices(startId, endId);
-    // Vertex start = vertices.next();
-    // Vertex end = vertices.next();
-    // Edge edge = start.addEdge(edgeLabelName, end);
-
-    // for (PropertyKey propKey : edgeLabel.mappedProperties()) {
-
-    // }
-
-    // edge.property("role", actedInRecord.get("role"));
-    // }
-    // }
-
-    Iterable<CSVRecord> actedIn = parseFile(dataDir, "actedIn.csv");
-
-    for (CSVRecord actedInRecord : actedIn) {
-      Long startId = parseId(idManager, actedInRecord.get("_start"));
-      Long endId = parseId(idManager, actedInRecord.get("_end"));
-      Iterator<Vertex> vertices = tx.vertices(startId, endId);
-      Vertex start = vertices.next();
-      Vertex end = vertices.next();
-      Edge edge = start.addEdge("ACTED_IN", end);
-      edge.property("role", actedInRecord.get("role"));
-    }
-
-    Iterable<CSVRecord> directed = parseFile(dataDir, "directed.csv");
-
-    for (CSVRecord directedRecord : directed) {
-      Long startId = parseId(idManager, directedRecord.get("_start"));
-      Long endId = parseId(idManager, directedRecord.get("_end"));
-      Iterator<Vertex> vertices = tx.vertices(startId, endId);
-      Vertex start = vertices.next();
-      Vertex end = vertices.next();
-      Edge edge = start.addEdge("DIRECTED", end);
-      edge.property("role", directedRecord.get("role"));
-    }
-
-    Iterable<CSVRecord> inGenre = parseFile(dataDir, "inGenre.csv");
-
-    for (CSVRecord inGenreRecord : inGenre) {
-      Long startId = parseId(idManager, inGenreRecord.get("_start"));
-      Long endId = parseId(idManager, inGenreRecord.get("_end"));
-      Iterator<Vertex> vertices = tx.vertices(startId, endId);
-      Vertex start = vertices.next();
-      Vertex end = vertices.next();
-      start.addEdge("IN_GENRE", end);
-    }
-
-    Iterable<CSVRecord> rated = parseFile(dataDir, "rated.csv");
-
-    for (CSVRecord ratedRecord : rated) {
-      Long startId = parseId(idManager, ratedRecord.get("_start"));
-      Long endId = parseId(idManager, ratedRecord.get("_end"));
-      Iterator<Vertex> vertices = tx.vertices(startId, endId);
-      Vertex start = vertices.next();
-      Vertex end = vertices.next();
-      Edge edge = start.addEdge("RATED", end);
-      edge.property("rating", ratedRecord.get("rating"));
-      edge.property("timestamp", ratedRecord.get("timestamp"));
+    // Loop over all edge labels
+    for (String edgeLabelName : filePathByEdge.keySet()) {
+      EdgeLabel edgeLabel = tx.getEdgeLabel(edgeLabelName);
+      Iterable<CSVRecord> records = parseFile(dataDir, filePathByEdge.get(edgeLabelName));
+      // Loop over all records in the data file for that edge
+      for (CSVRecord record : records) {
+        Long startId = parseId(idManager, record.get("_start"));
+        Long endId = parseId(idManager, record.get("_end"));
+        Iterator<Vertex> vertices = tx.vertices(startId, endId);
+        Vertex start = vertices.next();
+        Vertex end = vertices.next();
+        Edge edge = start.addEdge(edgeLabelName, end);
+        // Loop over all properties that the edge is allowed to have
+        for (PropertyKey propKey : edgeLabel.mappedProperties()) {
+          String rawValue = record.get(propKey.name());
+          for (Object value : parsePropertyValues(propKey, rawValue)) {
+            edge.property(propKey.name(), value);
+          }
+        }
+      }
     }
 
     tx.commit();
