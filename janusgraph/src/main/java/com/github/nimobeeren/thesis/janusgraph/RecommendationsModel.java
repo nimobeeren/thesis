@@ -11,8 +11,10 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.tinkerpop.gremlin.process.traversal.P;
@@ -33,10 +35,40 @@ import org.janusgraph.graphdb.idmanagement.IDManager;
 
 public class RecommendationsModel {
 
+  Map<String, String> filePathByVertex = new HashMap<String, String>();
+  Map<String, String> filePathByEdge = new HashMap<String, String>();
+  SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+
   Iterable<CSVRecord> parseFile(File dir, String fileName) throws IOException {
     CSVFormat parser =
         CSVFormat.Builder.create().setHeader().setSkipHeaderRecord(true).setNullString("").build();
     return parser.parse(new FileReader(new File(dir, fileName)));
+  }
+
+  List<Object> parsePropertyValues(PropertyKey propKey, String rawValue) throws ParseException {
+    if (rawValue == null) {
+      return new ArrayList<Object>();
+    }
+
+    // Split the value into multiple values if needed
+    List<String> splitValues = new ArrayList<String>();
+    if (propKey.cardinality() == Cardinality.LIST) {
+      splitValues.addAll(Arrays.asList(rawValue.replaceAll("[\\[\\]\"]", "").split(",")));
+    } else {
+      splitValues.add(rawValue);
+    }
+
+    // Parse the string values if needed
+    // For anything other than dates, the value is a string which is fine
+    List<Object> values = new ArrayList<Object>(splitValues);
+    if (propKey.dataType() == Date.class) {
+      values = new ArrayList<Object>();
+      for (String splitValue : splitValues) {
+        values.add(dateFormat.parse(splitValue));
+      }
+    }
+
+    return values;
   }
 
   Long parseId(IDManager idManager, String idString) throws ParseException {
@@ -124,126 +156,63 @@ public class RecommendationsModel {
     mgmt.addProperties(DIRECTED, roleKey);
     mgmt.addProperties(RATED, ratingKey, timestampKey);
 
+    // Set file path for all schema elements
+    filePathByVertex.put("Movie", "movies.csv");
+    filePathByVertex.put("Actor", "actors.csv");
+    filePathByVertex.put("Director", "directors.csv");
+    filePathByVertex.put("ActorDirector", "actorDirectors.csv");
+    filePathByVertex.put("User", "users.csv");
+    filePathByVertex.put("Genre", "genres.csv");
+    filePathByEdge.put("ACTED_IN", "actedIn.csv");
+    filePathByEdge.put("DIRECTED", "directed.csv");
+    filePathByEdge.put("RATED", "rated.csv");
+    filePathByEdge.put("IN_GENRE", "inGenre.csv");
+
     mgmt.commit();
   }
 
   public void loadData(JanusGraph graph, File dataDir) throws IOException, ParseException {
     JanusGraphTransaction tx = graph.buildTransaction().enableBatchLoading().start();
     IDManager idManager = ((StandardJanusGraph) graph).getIDManager();
-    SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
-    /* VERTICES */
-
-    VertexLabel Movie = tx.getVertexLabel("Movie");
-    VertexLabel Actor = tx.getVertexLabel("Actor");
-    VertexLabel Director = tx.getVertexLabel("Director");
-    VertexLabel ActorDirector = tx.getVertexLabel("ActorDirector");
-    VertexLabel User = tx.getVertexLabel("User");
-    VertexLabel Genre = tx.getVertexLabel("Genre");
-
-    Iterable<CSVRecord> movies = parseFile(dataDir, "movies.csv");
-
-    for (CSVRecord movieRecord : movies) {
-      Long vertexId = parseId(idManager, movieRecord.get("_id"));
-      JanusGraphVertex movieVertex = tx.addVertex(vertexId, Movie);
-      for (PropertyKey propKey : Movie.mappedProperties()) {
-        List<String> values = new ArrayList<String>();
-        String columnValue = movieRecord.get(propKey.name());
-        if (columnValue != null) {
-          if (propKey.cardinality() == Cardinality.LIST) {
-            values.addAll(Arrays.asList(columnValue.replaceAll("[\\[\\]\"]", "").split(",")));
-          } else {
-            values.add(columnValue);
-          }
-          for (String value : values) {
-            if (propKey.dataType() == Date.class) {
-              movieVertex.property(propKey.name(), dateFormat.parse(value));
-            } else {
-              movieVertex.property(propKey.name(), value);
-            }
+    // Loop over all vertex labels
+    for (String vertexLabelName : filePathByVertex.keySet()) {
+      VertexLabel vertexLabel = tx.getVertexLabel(vertexLabelName);
+      Iterable<CSVRecord> records = parseFile(dataDir, filePathByVertex.get(vertexLabelName));
+      // Loop over all records in the data file for that vertex
+      for (CSVRecord record : records) {
+        Long vertexId = parseId(idManager, record.get("_id"));
+        JanusGraphVertex vertex = tx.addVertex(vertexId, vertexLabel);
+        // Loop over all properties that the vertex is allowed to have
+        for (PropertyKey propKey : vertexLabel.mappedProperties()) {
+          String rawValue = record.get(propKey.name());
+          for (Object value : parsePropertyValues(propKey, rawValue)) {
+            vertex.property(propKey.name(), value);
           }
         }
       }
     }
 
-    Iterable<CSVRecord> actors = parseFile(dataDir, "actors.csv");
-
-    for (CSVRecord actorRecord : actors) {
-      Long vertexId = parseId(idManager, actorRecord.get("_id"));
-      JanusGraphVertex actorVertex = tx.addVertex(vertexId, Actor);
-      actorVertex.property("bio", actorRecord.get("bio"));
-      if (actorRecord.get("born") != null) {
-        actorVertex.property("born", dateFormat.parse(actorRecord.get("born")));
-      }
-      actorVertex.property("bornIn", actorRecord.get("bornIn"));
-      if (actorRecord.get("died") != null) {
-        actorVertex.property("died", dateFormat.parse(actorRecord.get("died")));
-      }
-      actorVertex.property("imdbId", actorRecord.get("imdbId"));
-      actorVertex.property("name", actorRecord.get("name"));
-      actorVertex.property("poster", actorRecord.get("poster"));
-      actorVertex.property("tmdbId", actorRecord.get("tmdbId"));
-      actorVertex.property("url", actorRecord.get("url"));
-    }
-
-    Iterable<CSVRecord> directors = parseFile(dataDir, "directors.csv");
-
-    for (CSVRecord directorRecord : directors) {
-      Long vertexId = parseId(idManager, directorRecord.get("_id"));
-      JanusGraphVertex directorVertex = tx.addVertex(vertexId, Director);
-      directorVertex.property("bio", directorRecord.get("bio"));
-      if (directorRecord.get("born") != null) {
-        directorVertex.property("born", dateFormat.parse(directorRecord.get("born")));
-      }
-      directorVertex.property("bornIn", directorRecord.get("bornIn"));
-      if (directorRecord.get("died") != null) {
-        directorVertex.property("died", dateFormat.parse(directorRecord.get("died")));
-      }
-      directorVertex.property("imdbId", directorRecord.get("imdbId"));
-      directorVertex.property("name", directorRecord.get("name"));
-      directorVertex.property("poster", directorRecord.get("poster"));
-      directorVertex.property("tmdbId", directorRecord.get("tmdbId"));
-      directorVertex.property("url", directorRecord.get("url"));
-    }
-
-    Iterable<CSVRecord> actorDirectors = parseFile(dataDir, "actorDirectors.csv");
-
-    for (CSVRecord actorDirectorRecord : actorDirectors) {
-      Long vertexId = parseId(idManager, actorDirectorRecord.get("_id"));
-      JanusGraphVertex actorDirectorVertex = tx.addVertex(vertexId, ActorDirector);
-      actorDirectorVertex.property("bio", actorDirectorRecord.get("bio"));
-      if (actorDirectorRecord.get("born") != null) {
-        actorDirectorVertex.property("born", dateFormat.parse(actorDirectorRecord.get("born")));
-      }
-      actorDirectorVertex.property("bornIn", actorDirectorRecord.get("bornIn"));
-      if (actorDirectorRecord.get("died") != null) {
-        actorDirectorVertex.property("died", dateFormat.parse(actorDirectorRecord.get("died")));
-      }
-      actorDirectorVertex.property("imdbId", actorDirectorRecord.get("imdbId"));
-      actorDirectorVertex.property("name", actorDirectorRecord.get("name"));
-      actorDirectorVertex.property("poster", actorDirectorRecord.get("poster"));
-      actorDirectorVertex.property("tmdbId", actorDirectorRecord.get("tmdbId"));
-      actorDirectorVertex.property("url", actorDirectorRecord.get("url"));
-    }
-
-    Iterable<CSVRecord> users = parseFile(dataDir, "users.csv");
-
-    for (CSVRecord userRecord : users) {
-      Long vertexId = parseId(idManager, userRecord.get("_id"));
-      JanusGraphVertex userVertex = tx.addVertex(vertexId, User);
-      userVertex.property("name", userRecord.get("name"));
-      userVertex.property("userId", userRecord.get("userId"));
-    }
-
-    Iterable<CSVRecord> genres = parseFile(dataDir, "genres.csv");
-
-    for (CSVRecord genreRecord : genres) {
-      Long vertexId = parseId(idManager, genreRecord.get("_id"));
-      JanusGraphVertex genreVertex = tx.addVertex(vertexId, Genre);
-      genreVertex.property("name", genreRecord.get("name"));
-    }
-
     /* EDGES */
+
+    // for (String edgeLabelName : filePathByEdge.keySet()) {
+    // EdgeLabel edgeLabel = tx.getEdgeLabel(edgeLabelName);
+    // Iterable<CSVRecord> records = parseFile(dataDir, filePathByVertex.get(edgeLabelName));
+    // for (CSVRecord record : records) {
+    // Long startId = parseId(idManager, record.get("_start"));
+    // Long endId = parseId(idManager, record.get("_end"));
+    // Iterator<Vertex> vertices = tx.vertices(startId, endId);
+    // Vertex start = vertices.next();
+    // Vertex end = vertices.next();
+    // Edge edge = start.addEdge(edgeLabelName, end);
+
+    // for (PropertyKey propKey : edgeLabel.mappedProperties()) {
+
+    // }
+
+    // edge.property("role", actedInRecord.get("role"));
+    // }
+    // }
 
     Iterable<CSVRecord> actedIn = parseFile(dataDir, "actedIn.csv");
 
