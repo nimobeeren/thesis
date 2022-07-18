@@ -43,7 +43,7 @@ public abstract class DataModel {
 
     // Split the value into multiple values if needed
     List<String> splitValues = new ArrayList<String>();
-    if (propKey.cardinality() == Cardinality.LIST) {
+    if (propKey.cardinality() == Cardinality.LIST || propKey.cardinality() == Cardinality.SET) {
       splitValues.addAll(Arrays.asList(rawValue.replaceAll("[\\[\\]\"]", "").split(",")));
     } else {
       splitValues.add(rawValue);
