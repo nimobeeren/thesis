@@ -76,7 +76,6 @@ bin/janusgraph-server.sh conf/janusgraph-server.yaml
 
 ```bash
 docker run \
-    --rm \
     --name janusgraph-client \
     --link janusgraph \
     -e GREMLIN_REMOTE_HOSTS=janusgraph \
@@ -92,7 +91,7 @@ docker run \
 // and start a session (to persist variables)
 :remote connect tinkerpop.server conf/remote.yaml session
 // Open the remote console so all following commands are sent to the remote
-:remote console`
+:remote console
 ```
 
 4. Run queries like `g.V().hasLabel("Movie").count()` or do [whatever you want](https://tinkerpop.apache.org/docs/3.6.0/tutorials/the-gremlin-console/).
