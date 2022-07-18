@@ -7,11 +7,14 @@ import java.io.File;
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Set;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.tinkerpop.gremlin.process.traversal.P;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
 import org.apache.tinkerpop.gremlin.structure.Edge;
+import org.apache.tinkerpop.gremlin.structure.Element;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.janusgraph.core.Cardinality;
 import org.janusgraph.core.EdgeLabel;
@@ -116,7 +119,7 @@ public class RecommendationsModel extends DataModel {
     mgmt.commit();
   }
 
-  public boolean validate() {
+  public boolean validateBoolean() {
     GraphTraversalSource g = graph.traversal();
 
     // Objects can't have labels that are not allowed (because automatic schema is disabled)
@@ -149,6 +152,35 @@ public class RecommendationsModel extends DataModel {
 
     return true;
   }
+
+  public Set<Element> validate() {
+    GraphTraversalSource g = graph.traversal();
+
+    // Objects can't have labels that are not allowed (because automatic schema is disabled)
+    // Property values can't have the wrong datatype (because of PropertyKey.dataType)
+    // Objects can't have properties that are not allowed (because of addProperties)
+    // Edges can't connect the wrong types of nodes (because of addConnection)
+
+    Set<Element> violatingElements = new HashSet<Element>();
+
+    violatingElements.addAll(g.V().or(
+        // Check for missing mandatory properties on vertices
+        hasLabel("Movie").or(hasNot("imdbId"), hasNot("movieId"), hasNot("title")),
+        hasLabel(P.within("Actor", "Director", "ActorDirector")).or(hasNot("name"),
+            hasNot("tmdbId"), hasNot("url")),
+        hasLabel("User").or(hasNot("name"), hasNot("userId")), hasLabel("Genre").hasNot("name"),
+        // Check for missing mandatory edges
+        hasLabel(P.within("Actor", "ActorDirector")).not(out("ACTED_IN")),
+        hasLabel(P.within("Director", "ActorDirector")).not(out("DIRECTED")),
+        hasLabel("Movie").not(out("IN_GENRE"))).toSet());
+
+    // Check for missing mandatory properties on edges
+    violatingElements
+        .addAll(g.E().hasLabel("RATED").or(hasNot("rating"), hasNot("timestamp")).toSet());
+
+    return violatingElements;
+  }
+
 
   public void loadData(File dataDir) throws IOException, ParseException {
     JanusGraphTransaction tx = graph.buildTransaction().enableBatchLoading().start();

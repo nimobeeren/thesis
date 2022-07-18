@@ -11,8 +11,10 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
+import org.apache.tinkerpop.gremlin.structure.Element;
 import org.janusgraph.core.Cardinality;
 import org.janusgraph.core.JanusGraph;
 import org.janusgraph.core.PropertyKey;
@@ -77,7 +79,9 @@ public abstract class DataModel {
 
   abstract void loadSchema();
 
-  abstract boolean validate();
+  abstract boolean validateBoolean();
+
+  abstract Set<Element> validate();
 
   abstract void loadData(File dataDir) throws IOException, ParseException;
 }

@@ -1,6 +1,8 @@
 package com.github.nimobeeren.thesis.janusgraph;
 
 import java.io.File;
+import java.util.Set;
+import org.apache.tinkerpop.gremlin.structure.Element;
 import org.janusgraph.core.JanusGraph;
 import org.janusgraph.core.JanusGraphFactory;
 import picocli.CommandLine;
@@ -28,7 +30,9 @@ public class JanusGraphSchema {
   @Command
   void load(@Parameters(paramLabel = "dataDir",
       description = "Path to a directory containing all CSV files needed for data loading") File dataDir,
-      @Option(names = {"-D", "--drop"}) boolean shouldDrop) throws Exception {
+      @Option(names = {"-D", "--drop"},
+          description = {"Drop all existing data"}) boolean shouldDrop)
+      throws Exception {
 
     System.out.println("Opening graph...");
     JanusGraph graph = graphConfig.open();
@@ -47,21 +51,32 @@ public class JanusGraphSchema {
   }
 
   @Command
-  void validate() {
+  void validate(@Option(names = {"-b", "--boolean"},
+      description = "Only check whether the graph conforms to the schema or not. This is faster than enumerating all the violating elements") boolean validateBoolean) {
     System.out.println("Opening graph...");
     JanusGraph graph = graphConfig.open();
 
     System.out.println("Validating...");
     RecommendationsModel recommendations = new RecommendationsModel(graph);
     long startTime = System.currentTimeMillis();
-    boolean isValid = recommendations.validate();
+    if (validateBoolean) {
+      boolean isValid = recommendations.validateBoolean();
+      if (isValid) {
+        System.out.println("Graph conforms to schema ✅");
+      } else {
+        System.out.println("Graph does not conform to schema ❌");
+      }
+    } else {
+      Set<Element> violatingElements = recommendations.validate();
+      if (violatingElements.size() == 0) {
+        System.out.println("All graph elements conform to schema ✅");
+      } else {
+        System.out.println(
+            String.format("%d elements not conform to schema ❌", violatingElements.size()));
+      }
+    }
     long endTime = System.currentTimeMillis();
     System.out.println(String.format("Took %d ms", endTime - startTime));
-    if (isValid) {
-      System.out.println("Graph conforms to schema ✅");
-    } else {
-      System.out.println("Graph does not conform to schema ❌");
-    }
   }
 
   public static void main(String[] args) throws Exception {
