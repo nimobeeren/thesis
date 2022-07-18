@@ -4,18 +4,10 @@ import static org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__.hasLab
 import static org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__.hasNot;
 import static org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__.out;
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.tinkerpop.gremlin.process.traversal.P;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
@@ -33,62 +25,10 @@ import org.janusgraph.core.schema.JanusGraphManagement;
 import org.janusgraph.graphdb.database.StandardJanusGraph;
 import org.janusgraph.graphdb.idmanagement.IDManager;
 
-public class RecommendationsModel {
-
-  JanusGraph graph;
-  Map<String, String> filePathByVertex = new HashMap<String, String>();
-  Map<String, String> filePathByEdge = new HashMap<String, String>();
-  SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+public class RecommendationsModel extends DataModel {
 
   RecommendationsModel(JanusGraph graph) {
-    this.graph = graph;
-  }
-
-  Iterable<CSVRecord> parseFile(File dir, String fileName) throws IOException {
-    CSVFormat parser =
-        CSVFormat.Builder.create().setHeader().setSkipHeaderRecord(true).setNullString("").build();
-    return parser.parse(new FileReader(new File(dir, fileName)));
-  }
-
-  List<Object> parsePropertyValues(PropertyKey propKey, String rawValue) throws ParseException {
-    if (rawValue == null) {
-      return new ArrayList<Object>();
-    }
-
-    // Split the value into multiple values if needed
-    List<String> splitValues = new ArrayList<String>();
-    if (propKey.cardinality() == Cardinality.LIST) {
-      splitValues.addAll(Arrays.asList(rawValue.replaceAll("[\\[\\]\"]", "").split(",")));
-    } else {
-      splitValues.add(rawValue);
-    }
-
-    // Parse the string values if needed
-    // For anything other than dates, the value is a string which is fine
-    List<Object> values = new ArrayList<Object>(splitValues);
-    if (propKey.dataType() == Date.class) {
-      values = new ArrayList<Object>();
-      for (String splitValue : splitValues) {
-        values.add(dateFormat.parse(splitValue));
-      }
-    }
-
-    return values;
-  }
-
-  Long parseId(IDManager idManager, String idString) throws ParseException {
-    Long longId = Long.parseLong(idString);
-    if (longId == 0) {
-      // HACK: IDs must be positive, so let's try this instead and hope no vertex has that ID
-      return idManager.toVertexId(999999999l);
-    } else {
-      return idManager.toVertexId(longId);
-    }
-  }
-
-  public void load(File dataDir) throws IOException, ParseException {
-    loadSchema();
-    loadData(dataDir);
+    super(graph);
   }
 
   public void loadSchema() {
@@ -176,6 +116,40 @@ public class RecommendationsModel {
     mgmt.commit();
   }
 
+  public boolean validate() {
+    GraphTraversalSource g = graph.traversal();
+
+    // Objects can't have labels that are not allowed (because automatic schema is disabled)
+    // Property values can't have the wrong datatype (because of PropertyKey.dataType)
+    // Objects can't have properties that are not allowed (because of addProperties)
+    // Edges can't connect the wrong types of nodes (because of addConnection)
+
+    boolean hasViolatingVertices = g.V().or(
+        // Check for missing mandatory properties on vertices
+        hasLabel("Movie").or(hasNot("imdbId"), hasNot("movieId"), hasNot("title")),
+        hasLabel(P.within("Actor", "Director", "ActorDirector")).or(hasNot("name"),
+            hasNot("tmdbId"), hasNot("url")),
+        hasLabel("User").or(hasNot("name"), hasNot("userId")), hasLabel("Genre").hasNot("name"),
+        // Check for missing mandatory edges
+        hasLabel(P.within("Actor", "ActorDirector")).not(out("ACTED_IN")),
+        hasLabel(P.within("Director", "ActorDirector")).not(out("DIRECTED")),
+        hasLabel("Movie").not(out("IN_GENRE"))).hasNext();
+
+    if (hasViolatingVertices) {
+      return false;
+    }
+
+    // Check for missing mandatory properties on edges
+    boolean hasViolatingEdges =
+        g.E().hasLabel("RATED").or(hasNot("rating"), hasNot("timestamp")).hasNext();
+
+    if (hasViolatingEdges) {
+      return false;
+    }
+
+    return true;
+  }
+
   public void loadData(File dataDir) throws IOException, ParseException {
     JanusGraphTransaction tx = graph.buildTransaction().enableBatchLoading().start();
     IDManager idManager = ((StandardJanusGraph) graph).getIDManager();
@@ -221,39 +195,5 @@ public class RecommendationsModel {
     }
 
     tx.commit();
-  }
-
-  public boolean validate() {
-    GraphTraversalSource g = graph.traversal();
-
-    // Objects can't have labels that are not allowed (because automatic schema is disabled)
-    // Property values can't have the wrong datatype (because of PropertyKey.dataType)
-    // Objects can't have properties that are not allowed (because of addProperties)
-    // Edges can't connect the wrong types of nodes (because of addConnection)
-
-    boolean hasViolatingVertices = g.V().or(
-        // Check for missing mandatory properties on vertices
-        hasLabel("Movie").or(hasNot("imdbId"), hasNot("movieId"), hasNot("title")),
-        hasLabel(P.within("Actor", "Director", "ActorDirector")).or(hasNot("name"),
-            hasNot("tmdbId"), hasNot("url")),
-        hasLabel("User").or(hasNot("name"), hasNot("userId")), hasLabel("Genre").hasNot("name"),
-        // Check for missing mandatory edges
-        hasLabel(P.within("Actor", "ActorDirector")).not(out("ACTED_IN")),
-        hasLabel(P.within("Director", "ActorDirector")).not(out("DIRECTED")),
-        hasLabel("Movie").not(out("IN_GENRE"))).hasNext();
-
-    if (hasViolatingVertices) {
-      return false;
-    }
-
-    // Check for missing mandatory properties on edges
-    boolean hasViolatingEdges =
-        g.E().hasLabel("RATED").or(hasNot("rating"), hasNot("timestamp")).hasNext();
-
-    if (hasViolatingEdges) {
-      return false;
-    }
-
-    return true;
   }
 }
