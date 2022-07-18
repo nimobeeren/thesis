@@ -35,9 +35,14 @@ import org.janusgraph.graphdb.idmanagement.IDManager;
 
 public class RecommendationsModel {
 
+  JanusGraph graph;
   Map<String, String> filePathByVertex = new HashMap<String, String>();
   Map<String, String> filePathByEdge = new HashMap<String, String>();
   SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+
+  RecommendationsModel(JanusGraph graph) {
+    this.graph = graph;
+  }
 
   Iterable<CSVRecord> parseFile(File dir, String fileName) throws IOException {
     CSVFormat parser =
@@ -81,12 +86,12 @@ public class RecommendationsModel {
     }
   }
 
-  public void load(JanusGraph graph, File dataDir) throws IOException, ParseException {
-    loadSchema(graph);
-    loadData(graph, dataDir);
+  public void load(File dataDir) throws IOException, ParseException {
+    loadSchema();
+    loadData(dataDir);
   }
 
-  public void loadSchema(JanusGraph graph) {
+  public void loadSchema() {
     JanusGraphManagement mgmt = graph.openManagement();
 
     // Vertex labels
@@ -171,7 +176,7 @@ public class RecommendationsModel {
     mgmt.commit();
   }
 
-  public void loadData(JanusGraph graph, File dataDir) throws IOException, ParseException {
+  public void loadData(File dataDir) throws IOException, ParseException {
     JanusGraphTransaction tx = graph.buildTransaction().enableBatchLoading().start();
     IDManager idManager = ((StandardJanusGraph) graph).getIDManager();
 
@@ -265,7 +270,7 @@ public class RecommendationsModel {
     tx.commit();
   }
 
-  public boolean validate(JanusGraph graph) {
+  public boolean validate() {
     GraphTraversalSource g = graph.traversal();
 
     // Objects can't have labels that are not allowed (because automatic schema is disabled)

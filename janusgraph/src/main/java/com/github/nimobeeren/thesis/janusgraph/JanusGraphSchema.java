@@ -40,8 +40,8 @@ public class JanusGraphSchema {
     }
 
     System.out.println("Loading graph...");
-    RecommendationsModel recommendations = new RecommendationsModel();
-    recommendations.load(graph, dataDir);
+    RecommendationsModel recommendations = new RecommendationsModel(graph);
+    recommendations.load(dataDir);
 
     System.out.println("Done");
   }
@@ -52,9 +52,9 @@ public class JanusGraphSchema {
     JanusGraph graph = graphConfig.open();
 
     System.out.println("Validating...");
-    RecommendationsModel recommendations = new RecommendationsModel();
+    RecommendationsModel recommendations = new RecommendationsModel(graph);
     long startTime = System.currentTimeMillis();
-    boolean isValid = recommendations.validate(graph);
+    boolean isValid = recommendations.validate();
     long endTime = System.currentTimeMillis();
     System.out.println(String.format("Took %d ms", endTime - startTime));
     if (isValid) {
