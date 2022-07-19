@@ -34,7 +34,7 @@ public class SNBModel extends DataModel {
   // Files containing vertex properties
   Map<String, String> filePathByVertex = new HashMap<String, String>();
   // Files containing edge properties
-  Map<String, String> filePathByEdge = new HashMap<String, String>();
+  Map<String, String[]> filePathByEdge = new HashMap<String, String[]>();
   // Multi-valued properties are stored in separate files
   Map<String, String> filePathByProperty = new HashMap<String, String>();
   SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
@@ -191,7 +191,7 @@ public class SNBModel extends DataModel {
     mgmt.addProperties(STUDY_AT, classYearKey);
     mgmt.addProperties(WORK_AT, workFromKey);
 
-    // Set file path for all schema elements
+    // Set file paths for all nodes
     filePathByVertex.put("Comment", "dynamic/comment_0_0.csv");
     filePathByVertex.put("Post", "dynamic/post_0_0.csv");
     filePathByVertex.put("Organisation", "static/organisation_0_0.csv");
@@ -200,29 +200,33 @@ public class SNBModel extends DataModel {
     filePathByVertex.put("Person", "dynamic/person_0_0.csv");
     filePathByVertex.put("Tag", "static/tag_0_0.csv");
     filePathByVertex.put("TagClass", "static/tagclass_0_0.csv");
-    filePathByEdge.put("CONTAINER_OF", "dynamic/forum_containerOf_post_0_0.csv");
-    filePathByEdge.put("HAS_CREATOR", "dynamic/comment_hasCreator_person_0_0.csv");
-    filePathByEdge.put("HAS_CREATOR", "dynamic/post_hasCreator_person_0_0.csv");
-    filePathByEdge.put("HAS_INTEREST", "dynamic/person_hasInterest_tag_0_0.csv");
-    filePathByEdge.put("HAS_MEMBER", "dynamic/forum_hasMember_person_0_0.csv");
-    filePathByEdge.put("HAS_MODERATOR", "dynamic/forum_hasModerator_person_0_0.csv");
-    filePathByEdge.put("HAS_TAG", "static/comment_hasTag_tag_0_0.csv");
-    filePathByEdge.put("HAS_TAG", "dynamic/forum_hasTag_tag_0_0.csv");
-    filePathByEdge.put("HAS_TAG", "dynamic/post_hasTag_tag_0_0.csv");
-    filePathByEdge.put("HAS_TYPE", "static/tag_hasType_tagclass_0_0.csv");
-    filePathByEdge.put("IS_LOCATED_IN", "static/organisation_isLocatedIn_place_0_0.csv");
-    filePathByEdge.put("IS_LOCATED_IN", "dynamic/comment_isLocatedIn_place_0_0.csv");
-    filePathByEdge.put("IS_LOCATED_IN", "dynamic/person_isLocatedIn_place_0_0.csv");
-    filePathByEdge.put("IS_LOCATED_IN", "dynamic/post_isLocatedIn_place_0_0.csv");
-    filePathByEdge.put("IS_PART_OF", "static/place_isPartOf_place_0_0.csv");
-    filePathByEdge.put("IS_SUBCLASS_OF", "static/tagclass_isSubclassOf_tagclass_0_0.csv");
-    filePathByEdge.put("KNOWS", "dynamic/person_knows_person_0_0.csv");
-    filePathByEdge.put("LIKES", "dynamic/person_likes_comment_0_0.csv");
-    filePathByEdge.put("LIKES", "dynamic/person_likes_post_0_0.csv");
-    filePathByEdge.put("REPLY_OF", "dynamic/comment_replyOf_comment_0_0.csv.csv");
-    filePathByEdge.put("REPLY_OF", "dynamic/comment_replyOf_post_0_0.csv");
-    filePathByEdge.put("STUDY_AT", "dynamic/person_studyAt_organisation_0_0.csv");
-    filePathByEdge.put("WORK_AT", "dynamic/person_workAt_organisation_0_0.csv");
+
+    // Set file paths for all edges
+    filePathByEdge.put("CONTAINER_OF", new String[] {"dynamic/forum_containerOf_post_0_0.csv"});
+    filePathByEdge.put("HAS_CREATOR", new String[] {"dynamic/comment_hasCreator_person_0_0.csv",
+        "dynamic/post_hasCreator_person_0_0.csv"});
+    filePathByEdge.put("HAS_INTEREST", new String[] {"dynamic/person_hasInterest_tag_0_0.csv"});
+    filePathByEdge.put("HAS_MEMBER", new String[] {"dynamic/forum_hasMember_person_0_0.csv"});
+    filePathByEdge.put("HAS_MODERATOR", new String[] {"dynamic/forum_hasModerator_person_0_0.csv"});
+    filePathByEdge.put("HAS_TAG",
+        new String[] {"static/comment_hasTag_tag_0_0.csv", "dynamic/forum_hasTag_tag_0_0.csv",
+            "dynamic/post_hasTag_tag_0_0.csv", "static/tag_hasType_tagclass_0_0.csv"});
+    filePathByEdge.put("IS_LOCATED_IN",
+        new String[] {"static/organisation_isLocatedIn_place_0_0.csv",
+            "dynamic/comment_isLocatedIn_place_0_0.csv", "dynamic/person_isLocatedIn_place_0_0.csv",
+            "dynamic/post_isLocatedIn_place_0_0.csv"});
+    filePathByEdge.put("IS_PART_OF", new String[] {"static/place_isPartOf_place_0_0.csv"});
+    filePathByEdge.put("IS_SUBCLASS_OF",
+        new String[] {"static/tagclass_isSubclassOf_tagclass_0_0.csv"});
+    filePathByEdge.put("KNOWS", new String[] {"dynamic/person_knows_person_0_0.csv"});
+    filePathByEdge.put("LIKES", new String[] {"dynamic/person_likes_comment_0_0.csv"});
+    filePathByEdge.put("LIKES", new String[] {"dynamic/person_likes_post_0_0.csv"});
+    filePathByEdge.put("REPLY_OF", new String[] {"dynamic /comment_replyOf_comment_0_0.csv",
+        "dynamic/comment_replyOf_post_0_0.csv"});
+    filePathByEdge.put("STUDY_AT", new String[] {"dynamic/person_studyAt_organisation_0_0.csv"});
+    filePathByEdge.put("WORK_AT", new String[] {"dynamic/person_workAt_organisation_0_0.csv"});
+
+    // Set file paths for all multi-valued properties
     filePathByProperty.put("speaks", "dynamic/person_speaks_language_0_0.csv");
     filePathByProperty.put("email", "dynamic/person_email_emailaddress_0_0.csv");
 
@@ -258,6 +262,7 @@ public class SNBModel extends DataModel {
 
   public void loadData(File dataDir) throws IOException, ParseException {
     JanusGraphTransaction tx = graph.buildTransaction().enableBatchLoading().start();
+    GraphTraversalSource g = tx.traversal();
 
     for (String genericVertexName : filePathByVertex.keySet()) {
       Iterable<CSVRecord> records = parseFile(dataDir, filePathByVertex.get(genericVertexName));
@@ -286,7 +291,6 @@ public class SNBModel extends DataModel {
     }
 
     // Set multi-valued properties because they are in separate files
-    GraphTraversalSource g = tx.traversal();
     for (String propName : filePathByProperty.keySet()) {
       Iterable<CSVRecord> records = parseFile(dataDir, filePathByProperty.get(propName));
       int numRecordsDone = 0;
@@ -307,6 +311,22 @@ public class SNBModel extends DataModel {
           break;
         }
       }
+    }
+
+    for (String propName : filePathByEdge.keySet()) {
+      String[] files = filePathByEdge.get(propName);
+      for (String file : files) {
+        Iterable<CSVRecord> records = parseFile(dataDir, file);
+        int numRecordsDone = 0;
+        for (CSVRecord record : records) {
+          Map<String, String> map = record.toMap();
+          // LEFT HERE
+          // Maps are unordered, so can't easily determine the direction of the edge
+          // Need to read the header or specify the node labels in advance
+        }
+      }
+      
+
     }
 
     // TODO: deal with same edge label coming from multiple files
