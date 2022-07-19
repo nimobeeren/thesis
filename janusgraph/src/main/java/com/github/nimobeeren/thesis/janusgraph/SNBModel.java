@@ -1,5 +1,7 @@
 package com.github.nimobeeren.thesis.janusgraph;
 
+import static org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__.hasLabel;
+import static org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__.hasNot;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
@@ -12,9 +14,10 @@ import java.util.Set;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.lang.NotImplementedException;
+import org.apache.tinkerpop.gremlin.process.traversal.P;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
-import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__;
 import org.apache.tinkerpop.gremlin.structure.Element;
+import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.janusgraph.core.Cardinality;
 import org.janusgraph.core.EdgeLabel;
 import org.janusgraph.core.JanusGraph;
@@ -27,9 +30,13 @@ import org.janusgraph.core.schema.JanusGraphManagement;
 
 public class SNBModel extends DataModel {
 
+  // Files containing vertex properties
   Map<String, String> filePathByVertex = new HashMap<String, String>();
+  // Files containing edge properties
   Map<String, String> filePathByEdge = new HashMap<String, String>();
-  SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+  // Multi-valued properties are stored in separate files
+  Map<String, String> filePathByProperty = new HashMap<String, String>();
+  SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
   CSVFormat csvFormat;
 
   SNBModel(JanusGraph graph) {
@@ -97,9 +104,10 @@ public class SNBModel extends DataModel {
 
     // Vertex properties
     // Message
-    mgmt.addProperties(Comment, idKey, browserUsedKey, locationIPKey, contentKey, lengthKey);
-    mgmt.addProperties(Post, idKey, browserUsedKey, locationIPKey, contentKey, lengthKey,
+    mgmt.addProperties(Comment, idKey, browserUsedKey, creationDateKey, locationIPKey, contentKey, lengthKey);
+    mgmt.addProperties(Post, idKey, browserUsedKey, creationDateKey, locationIPKey, contentKey, lengthKey,
         languageKey, imageFileKey);
+    // Organisation
     mgmt.addProperties(Company, idKey, nameKey, urlKey);
     mgmt.addProperties(University, idKey, nameKey, urlKey);
     // Place
@@ -108,8 +116,8 @@ public class SNBModel extends DataModel {
     mgmt.addProperties(Continent, idKey, nameKey, urlKey);
     // Others
     mgmt.addProperties(Forum, idKey, creationDateKey, titleKey);
-    mgmt.addProperties(Person, idKey, creationDateKey, firstNameKey, lastNameKey, genderKey,
-        birthdayKey, emailKey, speaksKey, browserUsedKey, locationIPKey);
+    mgmt.addProperties(Person, idKey, firstNameKey, lastNameKey, genderKey,
+        birthdayKey, emailKey, speaksKey, browserUsedKey, locationIPKey, creationDateKey);
     mgmt.addProperties(Tag, idKey, nameKey, urlKey);
     mgmt.addProperties(TagClass, idKey, nameKey, urlKey);
 
@@ -164,6 +172,9 @@ public class SNBModel extends DataModel {
     EdgeLabel WORK_AT = mgmt.makeEdgeLabel("WORK_AT").multiplicity(Multiplicity.MULTI).make();
     mgmt.addConnection(WORK_AT, Person, Company);
 
+    // Build an index for ID key, because edges/multi-valued properties need this very often
+    mgmt.buildIndex("byId", Vertex.class).addKey(idKey).buildCompositeIndex();
+
     // Edge properties
     mgmt.addProperties(HAS_MEMBER, creationDateKey);
     mgmt.addProperties(KNOWS, creationDateKey);
@@ -203,6 +214,8 @@ public class SNBModel extends DataModel {
     filePathByEdge.put("REPLY_OF", "dynamic/comment_replyOf_post_0_0.csv");
     filePathByEdge.put("STUDY_AT", "dynamic/person_studyAt_organisation_0_0.csv");
     filePathByEdge.put("WORK_AT", "dynamic/person_workAt_organisation_0_0.csv");
+    filePathByProperty.put("speaks", "dynamic/person_speaks_language_0_0.csv");
+    filePathByProperty.put("email", "dynamic/person_email_emailaddress_0_0.csv");
 
     mgmt.commit();
   }
@@ -211,22 +224,22 @@ public class SNBModel extends DataModel {
     GraphTraversalSource g = graph.traversal();
 
     // Check for missing mandatory properties on vertices
-    return g.V().or(
+    return !g.V().or(
         // All vertices have an id property
-        __.hasNot("id"),
+        hasNot("id"),
         // Forum
-        __.hasLabel("Forum").or(__.hasNot("title"), __.hasNot("creationDate")),
+        hasLabel("Forum").or(hasNot("title"), hasNot("creationDate")),
         // Message
-        __.or(__.hasLabel("Comment"), __.hasLabel("Post")).or(__.hasNot("browserUsed"),
-            __.hasNot("creationDate"), __.hasNot("locationIP"), __.hasNot("length")),
+        hasLabel(P.within("Comment", "Post")).or(hasNot("browserUsed"), hasNot("creationDate"),
+            hasNot("locationIP"), hasNot("length")),
         // Organization/Place/Tag/TagClass
-        __.or(__.hasLabel("Company"), __.hasLabel("University"), __.hasLabel("City"),
-            __.hasLabel("Country"), __.hasLabel("Continent"), __.hasLabel("Tag"),
-            __.hasLabel("TagClass")).or(__.hasNot("name"), __.hasNot("url")),
+        hasLabel(
+            P.within("Company", "University", "City", "Country", "Continent", "Tag", "TagClass"))
+                .or(hasNot("name"), hasNot("url")),
         // Person
-        __.hasLabel("Person").or(__.hasNot("firstName"), __.hasNot("lastName"), __.hasNot("gender"),
-            __.hasNot("birthday"), __.hasNot("email"), __.hasNot("speaks"),
-            __.hasNot("browserUsed"), __.hasNot("locationIP"), __.hasNot("creationDate")))
+        hasLabel("Person").or(hasNot("firstName"), hasNot("lastName"), hasNot("gender"),
+            hasNot("birthday"), hasNot("email"), hasNot("speaks"), hasNot("browserUsed"),
+            hasNot("locationIP"), hasNot("creationDate")))
         .hasNext();
   }
 
@@ -250,8 +263,11 @@ public class SNBModel extends DataModel {
         JanusGraphVertex vertex = tx.addVertex(vertexLabel.name());
         // Loop over all properties that the vertex is allowed to have
         for (PropertyKey propKey : vertexLabel.mappedProperties()) {
-          String rawValue = record.get(propKey.name());
-          vertex.property(propKey.name(), parsePropertyValue(propKey, rawValue));
+          // Skip the multi-valued properties, we will add them later
+          if (!(propKey.name().equals("speaks") || propKey.name().equals("email"))) {
+            String rawValue = record.get(propKey.name());
+            vertex.property(propKey.name(), parsePropertyValue(propKey, rawValue));
+          }
         }
       }
     }
