@@ -485,6 +485,7 @@ It may be desirable to allow a record to have properties with any name or any va
 % TODO: suggest richer constraint language
 % TODO: can we allow edge to any other node?
 % TODO: multigraph can cause unexpected results, e.g. node can conform to minimum cardinality by having multiple edges to the same node (is this desirable? in some situations it might be, e.g. chemistry)
+% TODO: multiple schema nodes with same label: could model mutually exclusive properties?
 
 Our schema formalisms come with a number of limitations. First, it is not possible to specify constraints over a graph pattern larger than two neighboring nodes and the edge between them. For example, say we want to allow a person to drive a car, but only when they have a driver's license. \autoref{fig:drivers-license} depicts a schema that models these entities and their relations this using three nodes and two edges. Unfortunately, it is not possible to prevent a person from driving a car without having a driver's license. This illustrates the limited scope of the constraints that we can specify.
 
