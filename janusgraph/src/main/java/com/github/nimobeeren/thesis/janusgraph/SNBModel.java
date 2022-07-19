@@ -36,7 +36,8 @@ public class SNBModel extends DataModel {
   Map<String, String> filePathByEdge = new HashMap<String, String>();
   // Multi-valued properties are stored in separate files
   Map<String, String> filePathByProperty = new HashMap<String, String>();
-  SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
+  SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+  SimpleDateFormat dateTimeFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
   CSVFormat csvFormat;
 
   SNBModel(JanusGraph graph) {
@@ -55,7 +56,10 @@ public class SNBModel extends DataModel {
     }
 
     if (propKey.dataType() == Date.class) {
-      return dateFormat.parse(rawValue);
+      if (propKey.name().equals("birthday")) {
+        return dateFormat.parse(rawValue);
+      }
+      return dateTimeFormat.parse(rawValue);
     }
 
     return rawValue;
@@ -104,9 +108,10 @@ public class SNBModel extends DataModel {
 
     // Vertex properties
     // Message
-    mgmt.addProperties(Comment, idKey, browserUsedKey, creationDateKey, locationIPKey, contentKey, lengthKey);
-    mgmt.addProperties(Post, idKey, browserUsedKey, creationDateKey, locationIPKey, contentKey, lengthKey,
-        languageKey, imageFileKey);
+    mgmt.addProperties(Comment, idKey, browserUsedKey, creationDateKey, locationIPKey, contentKey,
+        lengthKey);
+    mgmt.addProperties(Post, idKey, browserUsedKey, creationDateKey, locationIPKey, contentKey,
+        lengthKey, languageKey, imageFileKey);
     // Organisation
     mgmt.addProperties(Company, idKey, nameKey, urlKey);
     mgmt.addProperties(University, idKey, nameKey, urlKey);
@@ -116,8 +121,8 @@ public class SNBModel extends DataModel {
     mgmt.addProperties(Continent, idKey, nameKey, urlKey);
     // Others
     mgmt.addProperties(Forum, idKey, creationDateKey, titleKey);
-    mgmt.addProperties(Person, idKey, firstNameKey, lastNameKey, genderKey,
-        birthdayKey, emailKey, speaksKey, browserUsedKey, locationIPKey, creationDateKey);
+    mgmt.addProperties(Person, idKey, firstNameKey, lastNameKey, genderKey, birthdayKey, emailKey,
+        speaksKey, browserUsedKey, locationIPKey, creationDateKey);
     mgmt.addProperties(Tag, idKey, nameKey, urlKey);
     mgmt.addProperties(TagClass, idKey, nameKey, urlKey);
 
@@ -188,7 +193,7 @@ public class SNBModel extends DataModel {
     filePathByVertex.put("Organisation", "static/organisation_0_0.csv");
     filePathByVertex.put("Place", "static/place_0_0.csv");
     filePathByVertex.put("Forum", "dynamic/forum_0_0.csv");
-    // filePathByVertex.put("Person", "dynamic/person_0_0.csv");
+    filePathByVertex.put("Person", "dynamic/person_0_0.csv");
     filePathByVertex.put("Tag", "static/tag_0_0.csv");
     filePathByVertex.put("TagClass", "static/tagclass_0_0.csv");
     filePathByEdge.put("CONTAINER_OF", "dynamic/forum_containerOf_post_0_0.csv");
@@ -272,7 +277,20 @@ public class SNBModel extends DataModel {
       }
     }
 
-    // TODO: deal with set properties being separate files (email/speaks)
+    // Set multi-valued properties because they are in separate files
+    GraphTraversalSource g = tx.traversal();
+    for (String propName : filePathByProperty.keySet()) {
+      Iterable<CSVRecord> records = parseFile(dataDir, filePathByProperty.get(propName));
+      for (CSVRecord record : records) {
+        // Multi-valued properites only exist on the Person vertices, so we can hardcode this
+        Vertex vertex = g.V().has("Person", "id", record.get("Person.id")).next();
+        if (propName.equals("email")) {
+          vertex.property(propName, record.get("email"));
+        } else {
+          vertex.property(propName, record.get("language"));
+        }
+      }
+    }
 
     // TODO: deal with same edge label coming from multiple files
 
