@@ -73,7 +73,7 @@ public class SNBModel extends DataModel {
     // Property keys with datatypes and cardinalities
     PropertyKey idKey = mgmt.makePropertyKey("id").dataType(Long.class).make();
     PropertyKey creationDateKey = mgmt.makePropertyKey("creationDate").dataType(Date.class).make();
-    PropertyKey locationIpKey = mgmt.makePropertyKey("locationIp").dataType(String.class).make();
+    PropertyKey locationIPKey = mgmt.makePropertyKey("locationIP").dataType(String.class).make();
     PropertyKey browserUsedKey = mgmt.makePropertyKey("browserUsed").dataType(String.class).make();
     PropertyKey contentKey = mgmt.makePropertyKey("content").dataType(String.class).make();
     PropertyKey lengthKey = mgmt.makePropertyKey("length").dataType(Integer.class).make();
@@ -97,10 +97,9 @@ public class SNBModel extends DataModel {
 
     // Vertex properties
     // Message
-    mgmt.addProperties(Comment, idKey, browserUsedKey, locationIpKey, contentKey, lengthKey);
-    mgmt.addProperties(Post, idKey, browserUsedKey, locationIpKey, contentKey, lengthKey,
-        languageKey, imageFileKey); // Not modeled: language and imageFile are mutually exclusive
-    // Organization
+    mgmt.addProperties(Comment, idKey, browserUsedKey, locationIPKey, contentKey, lengthKey);
+    mgmt.addProperties(Post, idKey, browserUsedKey, locationIPKey, contentKey, lengthKey,
+        languageKey, imageFileKey);
     mgmt.addProperties(Company, idKey, nameKey, urlKey);
     mgmt.addProperties(University, idKey, nameKey, urlKey);
     // Place
@@ -110,7 +109,7 @@ public class SNBModel extends DataModel {
     // Others
     mgmt.addProperties(Forum, idKey, creationDateKey, titleKey);
     mgmt.addProperties(Person, idKey, creationDateKey, firstNameKey, lastNameKey, genderKey,
-        birthdayKey, emailKey, speaksKey, browserUsedKey, locationIpKey);
+        birthdayKey, emailKey, speaksKey, browserUsedKey, locationIPKey);
     mgmt.addProperties(Tag, idKey, nameKey, urlKey);
     mgmt.addProperties(TagClass, idKey, nameKey, urlKey);
 
@@ -173,14 +172,14 @@ public class SNBModel extends DataModel {
     mgmt.addProperties(WORK_AT, workFromKey);
 
     // Set file path for all schema elements
-    // filePathByVertex.put("Comment", "dynamic/comment_0_0.csv");
-    // filePathByVertex.put("Post", "dynamic/post_0_0.csv");
-    // filePathByVertex.put("Organisation", "static/organisation_0_0.csv");
-    // filePathByVertex.put("Place", "static/place_0_0.csv");
-    // filePathByVertex.put("Forum", "dynamic/forum_0_0.csv");
+    filePathByVertex.put("Comment", "dynamic/comment_0_0.csv");
+    filePathByVertex.put("Post", "dynamic/post_0_0.csv");
+    filePathByVertex.put("Organisation", "static/organisation_0_0.csv");
+    filePathByVertex.put("Place", "static/place_0_0.csv");
+    filePathByVertex.put("Forum", "dynamic/forum_0_0.csv");
     // filePathByVertex.put("Person", "dynamic/person_0_0.csv");
     filePathByVertex.put("Tag", "static/tag_0_0.csv");
-    // filePathByVertex.put("TagClass", "static/tagclass_0_0.csv");
+    filePathByVertex.put("TagClass", "static/tagclass_0_0.csv");
     filePathByEdge.put("CONTAINER_OF", "dynamic/forum_containerOf_post_0_0.csv");
     filePathByEdge.put("HAS_CREATOR", "dynamic/comment_hasCreator_person_0_0.csv");
     filePathByEdge.put("HAS_CREATOR", "dynamic/post_hasCreator_person_0_0.csv");
@@ -212,7 +211,23 @@ public class SNBModel extends DataModel {
     GraphTraversalSource g = graph.traversal();
 
     // Check for missing mandatory properties on vertices
-    return g.V().hasLabel("Tag").or(__.hasNot("id"), __.hasNot("name"), __.hasNot("url")).hasNext();
+    return g.V().or(
+        // All vertices have an id property
+        __.hasNot("id"),
+        // Forum
+        __.hasLabel("Forum").or(__.hasNot("title"), __.hasNot("creationDate")),
+        // Message
+        __.or(__.hasLabel("Comment"), __.hasLabel("Post")).or(__.hasNot("browserUsed"),
+            __.hasNot("creationDate"), __.hasNot("locationIP"), __.hasNot("length")),
+        // Organization/Place/Tag/TagClass
+        __.or(__.hasLabel("Company"), __.hasLabel("University"), __.hasLabel("City"),
+            __.hasLabel("Country"), __.hasLabel("Continent"), __.hasLabel("Tag"),
+            __.hasLabel("TagClass")).or(__.hasNot("name"), __.hasNot("url")),
+        // Person
+        __.hasLabel("Person").or(__.hasNot("firstName"), __.hasNot("lastName"), __.hasNot("gender"),
+            __.hasNot("birthday"), __.hasNot("email"), __.hasNot("speaks"),
+            __.hasNot("browserUsed"), __.hasNot("locationIP"), __.hasNot("creationDate")))
+        .hasNext();
   }
 
   Set<Element> validate() {

@@ -66,9 +66,12 @@ public class JanusGraphSchema {
       default:
         throw new NotImplementedException();
     }
+    long startTime = System.currentTimeMillis();
     model.load(path);
+    long endTime = System.currentTimeMillis();
 
     System.out.println("Done");
+    System.out.println(String.format("Took %d ms", endTime - startTime));
   }
 
   @Command
@@ -87,7 +90,8 @@ public class JanusGraphSchema {
         model = new RecommendationsModel(graph);
         break;
       case snb:
-        throw new NotImplementedException();
+        model = new SNBModel(graph);
+        break;
       default:
         throw new NotImplementedException();
     }
