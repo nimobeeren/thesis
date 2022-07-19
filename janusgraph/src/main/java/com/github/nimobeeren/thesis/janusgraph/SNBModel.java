@@ -15,6 +15,7 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.lang.NotImplementedException;
 import org.apache.tinkerpop.gremlin.process.traversal.P;
+import org.apache.tinkerpop.gremlin.process.traversal.Traversal;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
 import org.apache.tinkerpop.gremlin.structure.Element;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
@@ -39,6 +40,9 @@ public class SNBModel extends DataModel {
   SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
   SimpleDateFormat dateTimeFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
   CSVFormat csvFormat;
+
+  // Limit amount of data to read during development
+  long MAX_RECORDS_PER_FILE = 1000;
 
   SNBModel(JanusGraph graph) {
     super(graph);
@@ -257,6 +261,7 @@ public class SNBModel extends DataModel {
 
     for (String genericVertexName : filePathByVertex.keySet()) {
       Iterable<CSVRecord> records = parseFile(dataDir, filePathByVertex.get(genericVertexName));
+      int numRecordsDone = 0;
       for (CSVRecord record : records) {
         // Get the vertex label, which may be dependent on a value in the record
         VertexLabel vertexLabel;
@@ -274,6 +279,9 @@ public class SNBModel extends DataModel {
             vertex.property(propKey.name(), parsePropertyValue(propKey, rawValue));
           }
         }
+        if (++numRecordsDone >= MAX_RECORDS_PER_FILE) {
+          break;
+        }
       }
     }
 
@@ -281,13 +289,22 @@ public class SNBModel extends DataModel {
     GraphTraversalSource g = tx.traversal();
     for (String propName : filePathByProperty.keySet()) {
       Iterable<CSVRecord> records = parseFile(dataDir, filePathByProperty.get(propName));
+      int numRecordsDone = 0;
       for (CSVRecord record : records) {
         // Multi-valued properites only exist on the Person vertices, so we can hardcode this
-        Vertex vertex = g.V().has("Person", "id", record.get("Person.id")).next();
+        Traversal<Vertex, Vertex> traversal = g.V().has("Person", "id", record.get("Person.id"));
+        if (!traversal.hasNext()) {
+          // Silently skip if vertex can't be found
+          continue;
+        }
+        Vertex vertex = traversal.next();
         if (propName.equals("email")) {
           vertex.property(propName, record.get("email"));
         } else {
           vertex.property(propName, record.get("language"));
+        }
+        if (++numRecordsDone >= MAX_RECORDS_PER_FILE) {
+          break;
         }
       }
     }
