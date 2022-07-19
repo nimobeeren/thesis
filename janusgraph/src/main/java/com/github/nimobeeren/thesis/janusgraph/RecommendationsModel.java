@@ -4,12 +4,20 @@ import static org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__.hasLab
 import static org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__.hasNot;
 import static org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__.out;
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.tinkerpop.gremlin.process.traversal.P;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
@@ -30,8 +38,57 @@ import org.janusgraph.graphdb.idmanagement.IDManager;
 
 public class RecommendationsModel extends DataModel {
 
+  Map<String, String> filePathByVertex = new HashMap<String, String>();
+  Map<String, String> filePathByEdge = new HashMap<String, String>();
+  SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+  CSVFormat csvFormat;
+  IDManager idManager;
+
   RecommendationsModel(JanusGraph graph) {
     super(graph);
+    this.csvFormat =
+        CSVFormat.Builder.create().setHeader().setSkipHeaderRecord(true).setNullString("").build();
+    this.idManager = ((StandardJanusGraph) graph).getIDManager();
+  }
+
+  Iterable<CSVRecord> parseFile(File dir, String fileName) throws IOException {
+    return csvFormat.parse(new FileReader(new File(dir, fileName)));
+  }
+
+  Long parseId(String idString) throws ParseException {
+    Long longId = Long.parseLong(idString);
+    if (longId == 0) {
+      // HACK: IDs must be positive, so let's try this instead and hope no vertex has that ID
+      return idManager.toVertexId(999999999l);
+    } else {
+      return idManager.toVertexId(longId);
+    }
+  }
+
+  List<Object> parsePropertyValues(PropertyKey propKey, String rawValue) throws ParseException {
+    if (rawValue == null) {
+      return new ArrayList<Object>();
+    }
+
+    // Split the value into multiple values if needed
+    List<String> splitValues = new ArrayList<String>();
+    if (propKey.cardinality() == Cardinality.LIST || propKey.cardinality() == Cardinality.SET) {
+      splitValues.addAll(Arrays.asList(rawValue.replaceAll("[\\[\\]\"]", "").split(",")));
+    } else {
+      splitValues.add(rawValue);
+    }
+
+    // Parse the string values if needed
+    // For anything other than dates, the value is a string which is fine
+    List<Object> values = new ArrayList<Object>(splitValues);
+    if (propKey.dataType() == Date.class) {
+      values = new ArrayList<Object>();
+      for (String splitValue : splitValues) {
+        values.add(dateFormat.parse(splitValue));
+      }
+    }
+
+    return values;
   }
 
   public void loadSchema() {

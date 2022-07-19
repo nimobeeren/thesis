@@ -29,7 +29,6 @@ public class JanusGraphSchema {
                                                     // of explicit schema
     this.graphConfig.set("schema.constraints", "true"); // enable property and edge connection
                                                         // constraints
-    this.graphConfig.set("graph.set-vertex-id", "true");
   }
 
   @Command
@@ -43,6 +42,10 @@ public class JanusGraphSchema {
       throws Exception {
 
     System.out.println("Opening graph...");
+    if (dataset == Dataset.recommendations) {
+      // Enable manual setting of IDs, because this dataset contains globally unique IDs
+      graphConfig.set("graph.set-vertex-id", "true");
+    }
     JanusGraph graph = graphConfig.open();
 
     if (shouldDrop) {
@@ -58,7 +61,8 @@ public class JanusGraphSchema {
         model = new RecommendationsModel(graph);
         break;
       case snb:
-        throw new NotImplementedException();
+        model = new SNBModel(graph);
+        break;
       default:
         throw new NotImplementedException();
     }

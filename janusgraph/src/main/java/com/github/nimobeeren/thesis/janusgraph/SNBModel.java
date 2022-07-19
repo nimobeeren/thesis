@@ -1,23 +1,57 @@
 package com.github.nimobeeren.thesis.janusgraph;
 
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.lang.NotImplementedException;
+import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
+import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__;
 import org.apache.tinkerpop.gremlin.structure.Element;
 import org.janusgraph.core.Cardinality;
 import org.janusgraph.core.EdgeLabel;
 import org.janusgraph.core.JanusGraph;
+import org.janusgraph.core.JanusGraphTransaction;
+import org.janusgraph.core.JanusGraphVertex;
 import org.janusgraph.core.Multiplicity;
 import org.janusgraph.core.PropertyKey;
 import org.janusgraph.core.VertexLabel;
 import org.janusgraph.core.schema.JanusGraphManagement;
 
 public class SNBModel extends DataModel {
+
+  Map<String, String> filePathByVertex = new HashMap<String, String>();
+  Map<String, String> filePathByEdge = new HashMap<String, String>();
+  SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+  CSVFormat csvFormat;
+
   SNBModel(JanusGraph graph) {
     super(graph);
+    this.csvFormat = CSVFormat.Builder.create().setHeader().setSkipHeaderRecord(true)
+        .setDelimiter('|').setNullString("").build();
+  }
+
+  Iterable<CSVRecord> parseFile(File dir, String fileName) throws IOException {
+    return csvFormat.parse(new FileReader(new File(dir, fileName)));
+  }
+
+  Object parsePropertyValue(PropertyKey propKey, String rawValue) throws ParseException {
+    if (rawValue == null) {
+      return rawValue;
+    }
+
+    if (propKey.dataType() == Date.class) {
+      return dateFormat.parse(rawValue);
+    }
+
+    return rawValue;
   }
 
   public void loadSchema() {
@@ -37,6 +71,7 @@ public class SNBModel extends DataModel {
     VertexLabel TagClass = mgmt.makeVertexLabel("TagClass").make();
 
     // Property keys with datatypes and cardinalities
+    PropertyKey idKey = mgmt.makePropertyKey("id").dataType(Long.class).make();
     PropertyKey creationDateKey = mgmt.makePropertyKey("creationDate").dataType(Date.class).make();
     PropertyKey locationIpKey = mgmt.makePropertyKey("locationIp").dataType(String.class).make();
     PropertyKey browserUsedKey = mgmt.makePropertyKey("browserUsed").dataType(String.class).make();
@@ -62,22 +97,22 @@ public class SNBModel extends DataModel {
 
     // Vertex properties
     // Message
-    mgmt.addProperties(Comment, browserUsedKey, locationIpKey, contentKey, lengthKey);
-    mgmt.addProperties(Post, browserUsedKey, locationIpKey, contentKey, lengthKey, languageKey,
-        imageFileKey); // Not modeled: language and imageFile are mutually exclusive
+    mgmt.addProperties(Comment, idKey, browserUsedKey, locationIpKey, contentKey, lengthKey);
+    mgmt.addProperties(Post, idKey, browserUsedKey, locationIpKey, contentKey, lengthKey,
+        languageKey, imageFileKey); // Not modeled: language and imageFile are mutually exclusive
     // Organization
-    mgmt.addProperties(Company, nameKey, urlKey);
-    mgmt.addProperties(University, nameKey, urlKey);
+    mgmt.addProperties(Company, idKey, nameKey, urlKey);
+    mgmt.addProperties(University, idKey, nameKey, urlKey);
     // Place
-    mgmt.addProperties(City, nameKey, urlKey);
-    mgmt.addProperties(Country, nameKey, urlKey);
-    mgmt.addProperties(Continent, nameKey, urlKey);
+    mgmt.addProperties(City, idKey, nameKey, urlKey);
+    mgmt.addProperties(Country, idKey, nameKey, urlKey);
+    mgmt.addProperties(Continent, idKey, nameKey, urlKey);
     // Others
-    mgmt.addProperties(Forum, creationDateKey, titleKey);
-    mgmt.addProperties(Person, creationDateKey, firstNameKey, lastNameKey, genderKey, birthdayKey,
-        emailKey, speaksKey, browserUsedKey, locationIpKey);
-    mgmt.addProperties(Tag, nameKey, urlKey);
-    mgmt.addProperties(TagClass, nameKey, urlKey);
+    mgmt.addProperties(Forum, idKey, creationDateKey, titleKey);
+    mgmt.addProperties(Person, idKey, creationDateKey, firstNameKey, lastNameKey, genderKey,
+        birthdayKey, emailKey, speaksKey, browserUsedKey, locationIpKey);
+    mgmt.addProperties(Tag, idKey, nameKey, urlKey);
+    mgmt.addProperties(TagClass, idKey, nameKey, urlKey);
 
     // Edge labels and connections
     EdgeLabel CONTAINER_OF =
@@ -138,17 +173,14 @@ public class SNBModel extends DataModel {
     mgmt.addProperties(WORK_AT, workFromKey);
 
     // Set file path for all schema elements
-    filePathByVertex.put("Comment", "dynamic/comment_0_0.csv");
-    filePathByVertex.put("Post", "dynamic/post_0_0.csv");
-    filePathByVertex.put("Company", "static/organisation_0_0.csv");
-    filePathByVertex.put("University", "static/organisation_0_0.csv");
-    filePathByVertex.put("City", "static/place_0_0.csv");
-    filePathByVertex.put("Country", "static/place_0_0.csv");
-    filePathByVertex.put("Continent", "static/place_0_0.csv");
-    filePathByVertex.put("Forum", "dynamic/forum_0_0.csv");
-    filePathByVertex.put("Person", "dynamic/person_0_0.csv");
+    // filePathByVertex.put("Comment", "dynamic/comment_0_0.csv");
+    // filePathByVertex.put("Post", "dynamic/post_0_0.csv");
+    // filePathByVertex.put("Organisation", "static/organisation_0_0.csv");
+    // filePathByVertex.put("Place", "static/place_0_0.csv");
+    // filePathByVertex.put("Forum", "dynamic/forum_0_0.csv");
+    // filePathByVertex.put("Person", "dynamic/person_0_0.csv");
     filePathByVertex.put("Tag", "static/tag_0_0.csv");
-    filePathByVertex.put("TagClass", "static/tagclass_0_0.csv");
+    // filePathByVertex.put("TagClass", "static/tagclass_0_0.csv");
     filePathByEdge.put("CONTAINER_OF", "dynamic/forum_containerOf_post_0_0.csv");
     filePathByEdge.put("HAS_CREATOR", "dynamic/comment_hasCreator_person_0_0.csv");
     filePathByEdge.put("HAS_CREATOR", "dynamic/post_hasCreator_person_0_0.csv");
@@ -177,7 +209,10 @@ public class SNBModel extends DataModel {
   }
 
   boolean validateBoolean() {
-    throw new NotImplementedException();
+    GraphTraversalSource g = graph.traversal();
+
+    // Check for missing mandatory properties on vertices
+    return g.V().hasLabel("Tag").or(__.hasNot("id"), __.hasNot("name"), __.hasNot("url")).hasNext();
   }
 
   Set<Element> validate() {
@@ -185,9 +220,31 @@ public class SNBModel extends DataModel {
   }
 
   public void loadData(File dataDir) throws IOException, ParseException {
-    // TODO: deal with different vertex labels coming from same file (place/organisation)
-    // TODO: deal with same edge label ccoming from multiple files
+    JanusGraphTransaction tx = graph.buildTransaction().enableBatchLoading().start();
+
+    for (String genericVertexName : filePathByVertex.keySet()) {
+      Iterable<CSVRecord> records = parseFile(dataDir, filePathByVertex.get(genericVertexName));
+      for (CSVRecord record : records) {
+        // Get the vertex label, which may be dependent on a value in the record
+        VertexLabel vertexLabel;
+        if (genericVertexName == "Organisation" || genericVertexName == "Place") {
+          vertexLabel = tx.getVertexLabel(Util.capitalize(record.get("type")));
+        } else {
+          vertexLabel = tx.getVertexLabel(genericVertexName);
+        }
+        JanusGraphVertex vertex = tx.addVertex(vertexLabel.name());
+        // Loop over all properties that the vertex is allowed to have
+        for (PropertyKey propKey : vertexLabel.mappedProperties()) {
+          String rawValue = record.get(propKey.name());
+          vertex.property(propKey.name(), parsePropertyValue(propKey, rawValue));
+        }
+      }
+    }
+
     // TODO: deal with set properties being separate files (email/speaks)
-    throw new NotImplementedException();
+
+    // TODO: deal with same edge label coming from multiple files
+
+    tx.commit();
   }
 }
