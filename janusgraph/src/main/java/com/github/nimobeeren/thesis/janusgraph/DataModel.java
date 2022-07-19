@@ -18,6 +18,7 @@ import org.apache.tinkerpop.gremlin.structure.Element;
 import org.janusgraph.core.Cardinality;
 import org.janusgraph.core.JanusGraph;
 import org.janusgraph.core.PropertyKey;
+import org.janusgraph.graphdb.database.StandardJanusGraph;
 import org.janusgraph.graphdb.idmanagement.IDManager;
 
 public abstract class DataModel {
@@ -25,9 +26,11 @@ public abstract class DataModel {
   Map<String, String> filePathByVertex = new HashMap<String, String>();
   Map<String, String> filePathByEdge = new HashMap<String, String>();
   SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+  IDManager idManager;
 
   DataModel(JanusGraph graph) {
     this.graph = graph;
+    this.idManager = ((StandardJanusGraph) graph).getIDManager();
   }
 
   Iterable<CSVRecord> parseFile(File dir, String fileName) throws IOException {
@@ -62,7 +65,7 @@ public abstract class DataModel {
     return values;
   }
 
-  Long parseId(IDManager idManager, String idString) throws ParseException {
+  Long parseId(String idString) throws ParseException {
     Long longId = Long.parseLong(idString);
     if (longId == 0) {
       // HACK: IDs must be positive, so let's try this instead and hope no vertex has that ID

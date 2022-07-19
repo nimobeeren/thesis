@@ -184,7 +184,6 @@ public class RecommendationsModel extends DataModel {
 
   public void loadData(File dataDir) throws IOException, ParseException {
     JanusGraphTransaction tx = graph.buildTransaction().enableBatchLoading().start();
-    IDManager idManager = ((StandardJanusGraph) graph).getIDManager();
 
     // Loop over all vertex labels
     for (String vertexLabelName : filePathByVertex.keySet()) {
@@ -192,7 +191,7 @@ public class RecommendationsModel extends DataModel {
       Iterable<CSVRecord> records = parseFile(dataDir, filePathByVertex.get(vertexLabelName));
       // Loop over all records in the data file for that vertex
       for (CSVRecord record : records) {
-        Long vertexId = parseId(idManager, record.get("_id"));
+        Long vertexId = parseId(record.get("_id"));
         JanusGraphVertex vertex = tx.addVertex(vertexId, vertexLabel);
         // Loop over all properties that the vertex is allowed to have
         for (PropertyKey propKey : vertexLabel.mappedProperties()) {
@@ -210,8 +209,8 @@ public class RecommendationsModel extends DataModel {
       Iterable<CSVRecord> records = parseFile(dataDir, filePathByEdge.get(edgeLabelName));
       // Loop over all records in the data file for that edge
       for (CSVRecord record : records) {
-        Long startId = parseId(idManager, record.get("_start"));
-        Long endId = parseId(idManager, record.get("_end"));
+        Long startId = parseId(record.get("_start"));
+        Long endId = parseId(record.get("_end"));
         Iterator<Vertex> vertices = tx.vertices(startId, endId);
         Vertex start = vertices.next();
         Vertex end = vertices.next();
