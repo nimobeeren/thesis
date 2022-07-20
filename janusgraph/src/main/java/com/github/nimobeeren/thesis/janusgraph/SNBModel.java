@@ -2,6 +2,8 @@ package com.github.nimobeeren.thesis.janusgraph;
 
 import static org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__.hasLabel;
 import static org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__.hasNot;
+import static org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__.inE;
+import static org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__.outE;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -236,8 +238,8 @@ public class SNBModel extends DataModel {
   boolean validateBoolean() {
     GraphTraversalSource g = graph.traversal();
 
-    // Check for missing mandatory properties on vertices
     boolean hasViolatingNodes = g.V().or(
+        // Check for missing mandatory properties on vertices
         // All vertices have an id property
         hasNot("id"),
         // Forum
@@ -252,8 +254,28 @@ public class SNBModel extends DataModel {
         // Person
         hasLabel("Person").or(hasNot("firstName"), hasNot("lastName"), hasNot("gender"),
             hasNot("birthday"), hasNot("email"), hasNot("speaks"), hasNot("browserUsed"),
-            hasNot("locationIP"), hasNot("creationDate")))
-        .hasNext();
+            hasNot("locationIP"), hasNot("creationDate")),
+
+        // Check for missing mandatory edges
+        // ()-[CONTAINER_OF]->Post
+        hasLabel("Post").not(inE("CONTAINER_OF")),
+        // (Message)-[HAS_CREATOR]->()
+        hasLabel(P.within("Post", "Comment")).not(outE("HAS_CREATOR")),
+        // (Person)-[HAS_INTEREST]->()
+        hasLabel("Person").not(outE("HAS_INTEREST")),
+        // (Forum)-[HAS_MEMBER]->()
+        // hasLabel("Forum").not(outE("HAS_MEMBER")) // this constraint seems to be violated in data
+        // (Forum)-[HAS_TAG]->()
+        hasLabel("Forum").not(outE("HAS_TAG")),
+        // (Tag)-[HAS_TYPE]->()
+        hasLabel("Tag").not(outE("HAS_TYPE")),
+        // (Organisation|Message|Person)-[IS_LOCATED_IN]->()
+        hasLabel(P.within("Company", "Univeristy", "Post", "Comment", "Person"))
+            .not(outE("IS_LOCATED_IN")),
+        // (City|Country)-[IS_PART_OF]->()
+        hasLabel(P.within("City", "Country")).not(outE("IS_PART_OF")),
+        // ()-[IS_PART_OF]->(Country|Continent)
+        hasLabel(P.within("Country", "Continent")).not(inE("IS_PART_OF"))).hasNext();
 
     if (hasViolatingNodes) {
       return false;

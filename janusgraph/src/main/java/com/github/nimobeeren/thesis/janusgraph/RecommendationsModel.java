@@ -2,7 +2,7 @@ package com.github.nimobeeren.thesis.janusgraph;
 
 import static org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__.hasLabel;
 import static org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__.hasNot;
-import static org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__.out;
+import static org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__.outE;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
@@ -191,9 +191,9 @@ public class RecommendationsModel extends DataModel {
             hasNot("tmdbId"), hasNot("url")),
         hasLabel("User").or(hasNot("name"), hasNot("userId")), hasLabel("Genre").hasNot("name"),
         // Check for missing mandatory edges
-        hasLabel(P.within("Actor", "ActorDirector")).not(out("ACTED_IN")),
-        hasLabel(P.within("Director", "ActorDirector")).not(out("DIRECTED")),
-        hasLabel("Movie").not(out("IN_GENRE"))).hasNext();
+        hasLabel(P.within("Actor", "ActorDirector")).not(outE("ACTED_IN")),
+        hasLabel(P.within("Director", "ActorDirector")).not(outE("DIRECTED")),
+        hasLabel("Movie").not(outE("IN_GENRE"))).hasNext();
 
     if (hasViolatingVertices) {
       return false;
@@ -227,9 +227,9 @@ public class RecommendationsModel extends DataModel {
             hasNot("tmdbId"), hasNot("url")),
         hasLabel("User").or(hasNot("name"), hasNot("userId")), hasLabel("Genre").hasNot("name"),
         // Check for missing mandatory edges
-        hasLabel(P.within("Actor", "ActorDirector")).not(out("ACTED_IN")),
-        hasLabel(P.within("Director", "ActorDirector")).not(out("DIRECTED")),
-        hasLabel("Movie").not(out("IN_GENRE"))).toSet());
+        hasLabel(P.within("Actor", "ActorDirector")).not(outE("ACTED_IN")),
+        hasLabel(P.within("Director", "ActorDirector")).not(outE("DIRECTED")),
+        hasLabel("Movie").not(outE("IN_GENRE"))).toSet());
 
     // Check for missing mandatory properties on edges
     violatingElements
