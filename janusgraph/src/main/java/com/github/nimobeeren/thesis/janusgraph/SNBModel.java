@@ -3,13 +3,17 @@ package com.github.nimobeeren.thesis.janusgraph;
 import static org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__.hasLabel;
 import static org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.__.hasNot;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Set;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
@@ -17,6 +21,7 @@ import org.apache.commons.lang.NotImplementedException;
 import org.apache.tinkerpop.gremlin.process.traversal.P;
 import org.apache.tinkerpop.gremlin.process.traversal.Traversal;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
+import org.apache.tinkerpop.gremlin.structure.Edge;
 import org.apache.tinkerpop.gremlin.structure.Element;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.janusgraph.core.Cardinality;
@@ -34,24 +39,18 @@ public class SNBModel extends DataModel {
   // Files containing vertex properties
   Map<String, String> filePathByVertex = new HashMap<String, String>();
   // Files containing edge properties
-  Map<String, String[]> filePathByEdge = new HashMap<String, String[]>();
+  Map<String, String[]> filePathsByEdge = new HashMap<String, String[]>();
   // Multi-valued properties are stored in separate files
   Map<String, String> filePathByProperty = new HashMap<String, String>();
   SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
   SimpleDateFormat dateTimeFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
-  CSVFormat csvFormat;
 
   // Limit amount of data to read during development
-  long MAX_RECORDS_PER_FILE = 1000;
+  long MAX_RECORDS_PER_FILE = Long.MAX_VALUE;
+  long COMMIT_EVERY_N_RECORDS = 10000;
 
   SNBModel(JanusGraph graph) {
     super(graph);
-    this.csvFormat = CSVFormat.Builder.create().setHeader().setSkipHeaderRecord(true)
-        .setDelimiter('|').setNullString("").build();
-  }
-
-  Iterable<CSVRecord> parseFile(File dir, String fileName) throws IOException {
-    return csvFormat.parse(new FileReader(new File(dir, fileName)));
   }
 
   Object parsePropertyValue(PropertyKey propKey, String rawValue) throws ParseException {
@@ -202,29 +201,30 @@ public class SNBModel extends DataModel {
     filePathByVertex.put("TagClass", "static/tagclass_0_0.csv");
 
     // Set file paths for all edges
-    filePathByEdge.put("CONTAINER_OF", new String[] {"dynamic/forum_containerOf_post_0_0.csv"});
-    filePathByEdge.put("HAS_CREATOR", new String[] {"dynamic/comment_hasCreator_person_0_0.csv",
+    filePathsByEdge.put("CONTAINER_OF", new String[] {"dynamic/forum_containerOf_post_0_0.csv"});
+    filePathsByEdge.put("HAS_CREATOR", new String[] {"dynamic/comment_hasCreator_person_0_0.csv",
         "dynamic/post_hasCreator_person_0_0.csv"});
-    filePathByEdge.put("HAS_INTEREST", new String[] {"dynamic/person_hasInterest_tag_0_0.csv"});
-    filePathByEdge.put("HAS_MEMBER", new String[] {"dynamic/forum_hasMember_person_0_0.csv"});
-    filePathByEdge.put("HAS_MODERATOR", new String[] {"dynamic/forum_hasModerator_person_0_0.csv"});
-    filePathByEdge.put("HAS_TAG",
-        new String[] {"static/comment_hasTag_tag_0_0.csv", "dynamic/forum_hasTag_tag_0_0.csv",
-            "dynamic/post_hasTag_tag_0_0.csv", "static/tag_hasType_tagclass_0_0.csv"});
-    filePathByEdge.put("IS_LOCATED_IN",
+    filePathsByEdge.put("HAS_INTEREST", new String[] {"dynamic/person_hasInterest_tag_0_0.csv"});
+    filePathsByEdge.put("HAS_MEMBER", new String[] {"dynamic/forum_hasMember_person_0_0.csv"});
+    filePathsByEdge.put("HAS_MODERATOR",
+        new String[] {"dynamic/forum_hasModerator_person_0_0.csv"});
+    filePathsByEdge.put("HAS_TAG", new String[] {"dynamic/comment_hasTag_tag_0_0.csv",
+        "dynamic/forum_hasTag_tag_0_0.csv", "dynamic/post_hasTag_tag_0_0.csv"});
+    filePathsByEdge.put("HAS_TYPE", new String[] {"static/tag_hasType_tagclass_0_0.csv"});
+    filePathsByEdge.put("IS_LOCATED_IN",
         new String[] {"static/organisation_isLocatedIn_place_0_0.csv",
             "dynamic/comment_isLocatedIn_place_0_0.csv", "dynamic/person_isLocatedIn_place_0_0.csv",
             "dynamic/post_isLocatedIn_place_0_0.csv"});
-    filePathByEdge.put("IS_PART_OF", new String[] {"static/place_isPartOf_place_0_0.csv"});
-    filePathByEdge.put("IS_SUBCLASS_OF",
+    filePathsByEdge.put("IS_PART_OF", new String[] {"static/place_isPartOf_place_0_0.csv"});
+    filePathsByEdge.put("IS_SUBCLASS_OF",
         new String[] {"static/tagclass_isSubclassOf_tagclass_0_0.csv"});
-    filePathByEdge.put("KNOWS", new String[] {"dynamic/person_knows_person_0_0.csv"});
-    filePathByEdge.put("LIKES", new String[] {"dynamic/person_likes_comment_0_0.csv"});
-    filePathByEdge.put("LIKES", new String[] {"dynamic/person_likes_post_0_0.csv"});
-    filePathByEdge.put("REPLY_OF", new String[] {"dynamic /comment_replyOf_comment_0_0.csv",
+    filePathsByEdge.put("KNOWS", new String[] {"dynamic/person_knows_person_0_0.csv"});
+    filePathsByEdge.put("LIKES",
+        new String[] {"dynamic/person_likes_comment_0_0.csv", "dynamic/person_likes_post_0_0.csv"});
+    filePathsByEdge.put("REPLY_OF", new String[] {"dynamic/comment_replyOf_comment_0_0.csv",
         "dynamic/comment_replyOf_post_0_0.csv"});
-    filePathByEdge.put("STUDY_AT", new String[] {"dynamic/person_studyAt_organisation_0_0.csv"});
-    filePathByEdge.put("WORK_AT", new String[] {"dynamic/person_workAt_organisation_0_0.csv"});
+    filePathsByEdge.put("STUDY_AT", new String[] {"dynamic/person_studyAt_organisation_0_0.csv"});
+    filePathsByEdge.put("WORK_AT", new String[] {"dynamic/person_workAt_organisation_0_0.csv"});
 
     // Set file paths for all multi-valued properties
     filePathByProperty.put("speaks", "dynamic/person_speaks_language_0_0.csv");
@@ -260,22 +260,47 @@ public class SNBModel extends DataModel {
     throw new NotImplementedException();
   }
 
-  public void loadData(File dataDir) throws IOException, ParseException {
-    JanusGraphTransaction tx = graph.buildTransaction().enableBatchLoading().start();
-    GraphTraversalSource g = tx.traversal();
+  public void loadData(File dataDir) throws Exception {
+    // Ensure all data files exist
+    Set<String> filePaths = new HashSet<String>();
+    filePaths.addAll(filePathByVertex.values());
+    for (String[] paths : filePathsByEdge.values()) {
+      filePaths.addAll(Arrays.asList(paths));
+    }
+    filePaths.addAll(filePathByProperty.values());
+    for (String filePath : filePaths) {
+      if (!new File(dataDir, filePath).isFile()) {
+        throw new FileNotFoundException(String.format("Missing data file: %s", filePath));
+      }
+    }
 
+    JanusGraphTransaction tx = graph.newTransaction();
+
+    CSVFormat vertexCSVFormat = CSVFormat.Builder.create().setHeader().setSkipHeaderRecord(true)
+        .setDelimiter('|').setNullString("").build();
+    CSVFormat edgeCSVFormat = CSVFormat.Builder.create().setSkipHeaderRecord(false)
+        .setDelimiter('|').setNullString("").build();
+
+    // Create vertices
     for (String genericVertexName : filePathByVertex.keySet()) {
-      Iterable<CSVRecord> records = parseFile(dataDir, filePathByVertex.get(genericVertexName));
-      int numRecordsDone = 0;
+      System.out.print(String.format("%s ... ", genericVertexName));
+
+      Iterable<CSVRecord> records = vertexCSVFormat
+          .parse(new FileReader(new File(dataDir, filePathByVertex.get(genericVertexName))));
+
+      // Iterate over all data records
+      int numRecordsLoaded = 0;
       for (CSVRecord record : records) {
         // Get the vertex label, which may be dependent on a value in the record
         VertexLabel vertexLabel;
-        if (genericVertexName == "Organisation" || genericVertexName == "Place") {
+        if (genericVertexName.equals("Organisation") || genericVertexName.equals("Place")) {
           vertexLabel = tx.getVertexLabel(Util.capitalize(record.get("type")));
         } else {
           vertexLabel = tx.getVertexLabel(genericVertexName);
         }
+
         JanusGraphVertex vertex = tx.addVertex(vertexLabel.name());
+
         // Loop over all properties that the vertex is allowed to have
         for (PropertyKey propKey : vertexLabel.mappedProperties()) {
           // Skip the multi-valued properties, we will add them later
@@ -284,53 +309,156 @@ public class SNBModel extends DataModel {
             vertex.property(propKey.name(), parsePropertyValue(propKey, rawValue));
           }
         }
-        if (++numRecordsDone >= MAX_RECORDS_PER_FILE) {
+
+        if (numRecordsLoaded % COMMIT_EVERY_N_RECORDS == 0) {
+          tx.commit();
+          tx.close();
+          tx = graph.newTransaction();
+        }
+        if (++numRecordsLoaded >= MAX_RECORDS_PER_FILE) {
           break;
         }
       }
+
+      System.out.println("✅");
     }
+
+    tx.commit();
+    tx.close();
+    tx = graph.newTransaction();
+    GraphTraversalSource g = tx.traversal();
 
     // Set multi-valued properties because they are in separate files
     for (String propName : filePathByProperty.keySet()) {
-      Iterable<CSVRecord> records = parseFile(dataDir, filePathByProperty.get(propName));
-      int numRecordsDone = 0;
+      System.out.print(String.format("Person.%s ... ", propName));
+
+      Iterable<CSVRecord> records = vertexCSVFormat
+          .parse(new FileReader(new File(dataDir, filePathByProperty.get(propName))));
+
+      // Iterate over all data records
+      int numRecordsLoaded = 0;
       for (CSVRecord record : records) {
+        // Find the vertex for which to set the property
         // Multi-valued properites only exist on the Person vertices, so we can hardcode this
-        Traversal<Vertex, Vertex> traversal = g.V().has("Person", "id", record.get("Person.id"));
+        String vertexId = record.get("Person.id");
+        Traversal<Vertex, Vertex> traversal = g.V().has("Person", "id", vertexId);
         if (!traversal.hasNext()) {
+          throw new NoSuchElementException(
+              String.format("Could not find Person with id %s", vertexId));
           // Silently skip if vertex can't be found
-          continue;
+          // continue;
         }
         Vertex vertex = traversal.next();
+
         if (propName.equals("email")) {
           vertex.property(propName, record.get("email"));
         } else {
           vertex.property(propName, record.get("language"));
         }
-        if (++numRecordsDone >= MAX_RECORDS_PER_FILE) {
+
+        if (numRecordsLoaded % COMMIT_EVERY_N_RECORDS == 0) {
+          g.close();
+          tx.commit();
+          tx.close();
+          tx = graph.newTransaction();
+          g = tx.traversal();
+        }
+        if (++numRecordsLoaded >= MAX_RECORDS_PER_FILE) {
           break;
         }
       }
+
+      System.out.println("✅");
     }
-
-    for (String propName : filePathByEdge.keySet()) {
-      String[] files = filePathByEdge.get(propName);
-      for (String file : files) {
-        Iterable<CSVRecord> records = parseFile(dataDir, file);
-        int numRecordsDone = 0;
-        for (CSVRecord record : records) {
-          Map<String, String> map = record.toMap();
-          // LEFT HERE
-          // Maps are unordered, so can't easily determine the direction of the edge
-          // Need to read the header or specify the node labels in advance
-        }
-      }
-      
-
-    }
-
-    // TODO: deal with same edge label coming from multiple files
 
     tx.commit();
+    tx.close();
+    tx = graph.newTransaction();
+    g = tx.traversal();
+
+    // Create edges
+    for (String edgeLabelName : filePathsByEdge.keySet()) {
+      System.out.print(String.format("%s ... ", edgeLabelName));
+
+      String[] files = filePathsByEdge.get(edgeLabelName);
+      EdgeLabel edgeLabel = tx.getEdgeLabel(edgeLabelName);
+
+      for (String file : files) {
+        Iterable<CSVRecord> records = edgeCSVFormat.parse(new FileReader(new File(dataDir, file)));
+
+        // Read the header record to get the source and target label
+        Iterator<CSVRecord> recordIt = records.iterator();
+        Iterator<String> headerRecordIt = recordIt.next().iterator();
+        String sourceLabel = headerRecordIt.next().split("\\.")[0];
+        String targetLabel = headerRecordIt.next().split("\\.")[0];
+
+        // Iterate over all data records
+        int numRecordsLoaded = 0;
+        while (recordIt.hasNext()) {
+          CSVRecord record = recordIt.next();
+
+          String sourceId = record.get(0);
+          String targetId = record.get(1);
+
+          Vertex source, target;
+          try {
+            if (sourceLabel.equals("Organisation")) {
+              source = g.V().hasLabel(P.within("Company", "University")).has("id", sourceId).next();
+            } else if (sourceLabel.equals("Place")) {
+              source = g.V().hasLabel(P.within("City", "Country", "Continent")).has("id", sourceId)
+                  .next();
+            } else {
+              source = g.V().hasLabel(sourceLabel).has("id", sourceId).next();
+            }
+          } catch (NoSuchElementException e) {
+            throw new NoSuchElementException(
+              String.format("Could not find %s with id %s", sourceLabel, sourceId));
+            // Silently skip edges if source is missing
+            // continue;
+          }
+          try {
+            if (targetLabel.equals("Organisation")) {
+              target = g.V().hasLabel(P.within("Company", "University")).has("id", targetId).next();
+            } else if (targetLabel.equals("Place")) {
+              target = g.V().hasLabel(P.within("City", "Country", "Continent")).has("id", targetId)
+                  .next();
+            } else {
+              target = g.V().hasLabel(targetLabel).has("id", targetId).next();
+            }
+          } catch (NoSuchElementException e) {
+            throw new NoSuchElementException(
+              String.format("Could not find %s with id %s", targetLabel, targetId));
+            // Silently skip edges if target is missing
+            // continue;
+          }
+
+          Edge edge = source.addEdge(edgeLabelName, target);
+
+          // HACK: assume edge has at most one property, and it is always in column 2
+          Iterator<PropertyKey> propIt = edgeLabel.mappedProperties().iterator();
+          if (propIt.hasNext()) {
+            PropertyKey propKey = propIt.next();
+            String rawValue = record.get(2);
+            edge.property(propKey.name(), parsePropertyValue(propKey, rawValue));
+          }
+
+          if (numRecordsLoaded % COMMIT_EVERY_N_RECORDS == 0) {
+            g.close();
+            tx.commit();
+            tx.close();
+            tx = graph.newTransaction();
+            g = tx.traversal();
+          }
+          if (++numRecordsLoaded >= MAX_RECORDS_PER_FILE) {
+            break;
+          }
+        }
+      }
+
+      System.out.println("✅");
+    }
+
+    tx.commit();
+    tx.close();
   }
 }

@@ -47,7 +47,7 @@ mvn package
 2. Run the app (in the container) with the `load` command and passnig the path to the directory containing the CSV files. Note that the `--drop` flag drops all existing data!
 
 ```bash
-java -jar thesis/janusgraph/target/janusgraph-schema-0.1.jar load mydata/recommendations --drop
+java -jar thesis/janusgraph/target/janusgraph-schema-0.1.jar load (snb|recommendations) mydata/directory --drop
 ```
 
 ### Schema validation

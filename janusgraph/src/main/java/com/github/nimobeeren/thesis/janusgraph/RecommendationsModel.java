@@ -246,10 +246,12 @@ public class RecommendationsModel extends DataModel {
     for (String vertexLabelName : filePathByVertex.keySet()) {
       VertexLabel vertexLabel = tx.getVertexLabel(vertexLabelName);
       Iterable<CSVRecord> records = parseFile(dataDir, filePathByVertex.get(vertexLabelName));
+
       // Loop over all records in the data file for that vertex
       for (CSVRecord record : records) {
         Long vertexId = parseId(record.get("_id"));
         JanusGraphVertex vertex = tx.addVertex(vertexId, vertexLabel);
+
         // Loop over all properties that the vertex is allowed to have
         for (PropertyKey propKey : vertexLabel.mappedProperties()) {
           String rawValue = record.get(propKey.name());
@@ -264,6 +266,7 @@ public class RecommendationsModel extends DataModel {
     for (String edgeLabelName : filePathByEdge.keySet()) {
       EdgeLabel edgeLabel = tx.getEdgeLabel(edgeLabelName);
       Iterable<CSVRecord> records = parseFile(dataDir, filePathByEdge.get(edgeLabelName));
+
       // Loop over all records in the data file for that edge
       for (CSVRecord record : records) {
         Long startId = parseId(record.get("_start"));
@@ -271,7 +274,9 @@ public class RecommendationsModel extends DataModel {
         Iterator<Vertex> vertices = tx.vertices(startId, endId);
         Vertex start = vertices.next();
         Vertex end = vertices.next();
+
         Edge edge = start.addEdge(edgeLabelName, end);
+
         // Loop over all properties that the edge is allowed to have
         for (PropertyKey propKey : edgeLabel.mappedProperties()) {
           String rawValue = record.get(propKey.name());
