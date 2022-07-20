@@ -237,7 +237,7 @@ public class SNBModel extends DataModel {
     GraphTraversalSource g = graph.traversal();
 
     // Check for missing mandatory properties on vertices
-    return !g.V().or(
+    boolean hasViolatingNodes = g.V().or(
         // All vertices have an id property
         hasNot("id"),
         // Forum
@@ -254,6 +254,25 @@ public class SNBModel extends DataModel {
             hasNot("birthday"), hasNot("email"), hasNot("speaks"), hasNot("browserUsed"),
             hasNot("locationIP"), hasNot("creationDate")))
         .hasNext();
+
+    if (hasViolatingNodes) {
+      return false;
+    }
+
+    // Check for missing mandatory properties on edges
+    boolean hasViolatingEdges = g.E().or(
+        // HAS_MEMBER/KNOWS/LIKES
+        hasLabel(P.within("HAS_MEMBER", "KNOWS", "LIKES")).hasNot("creationDate"),
+        // STUDY_AT
+        hasLabel("STUDY_AT").hasNot("classYear"),
+        // WORK_AT
+        hasLabel("WORK_AT").hasNot("workFrom")).hasNext();
+
+    if (hasViolatingEdges) {
+      return false;
+    }
+
+    return true;
   }
 
   Set<Element> validate() {
@@ -412,7 +431,7 @@ public class SNBModel extends DataModel {
             }
           } catch (NoSuchElementException e) {
             throw new NoSuchElementException(
-              String.format("Could not find %s with id %s", sourceLabel, sourceId));
+                String.format("Could not find %s with id %s", sourceLabel, sourceId));
             // Silently skip edges if source is missing
             // continue;
           }
@@ -427,7 +446,7 @@ public class SNBModel extends DataModel {
             }
           } catch (NoSuchElementException e) {
             throw new NoSuchElementException(
-              String.format("Could not find %s with id %s", targetLabel, targetId));
+                String.format("Could not find %s with id %s", targetLabel, targetId));
             // Silently skip edges if target is missing
             // continue;
           }
