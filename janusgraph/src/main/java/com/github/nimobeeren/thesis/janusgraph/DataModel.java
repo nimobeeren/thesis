@@ -1,8 +1,12 @@
 package com.github.nimobeeren.thesis.janusgraph;
 
 import java.io.File;
+import java.util.HashSet;
 import java.util.Set;
+import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversal;
+import org.apache.tinkerpop.gremlin.structure.Edge;
 import org.apache.tinkerpop.gremlin.structure.Element;
+import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.janusgraph.core.JanusGraph;
 
 public abstract class DataModel {
@@ -19,9 +23,20 @@ public abstract class DataModel {
 
   abstract void loadSchema();
 
-  abstract boolean validateBoolean();
+  abstract GraphTraversal<Vertex, Vertex> findViolatingVertices();
 
-  abstract Set<Element> validate();
+  abstract GraphTraversal<Edge, Edge> findViolatingEdges();
+
+  Set<Element> validate() {
+    Set<Element> violatingElements = new HashSet<Element>();
+    violatingElements.addAll(findViolatingVertices().toSet());
+    violatingElements.addAll(findViolatingEdges().toSet());
+    return violatingElements;
+  }
+
+  boolean validateBoolean() {
+    return !(findViolatingVertices().hasNext() || findViolatingEdges().hasNext());
+  }
 
   abstract void loadData(File dataDir) throws Exception;
 }

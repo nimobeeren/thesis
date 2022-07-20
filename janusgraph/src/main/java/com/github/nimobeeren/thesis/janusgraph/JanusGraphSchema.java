@@ -83,6 +83,12 @@ public class JanusGraphSchema {
     System.out.println("Opening graph...");
     JanusGraph graph = graphConfig.open();
 
+    // Objects can't have labels that are not allowed (because automatic schema is disabled)
+    // Property values can't have the wrong datatype (because of PropertyKey.dataType)
+    // Objects can't have properties that are not allowed (because of addProperties)
+    // Edges can't connect the wrong types of nodes (because of addConnection)
+    // The rest is checked in DataModel.validate()
+
     System.out.println("Validating...");
     DataModel model;
     switch (dataset) {

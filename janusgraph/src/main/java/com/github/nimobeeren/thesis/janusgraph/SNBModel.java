@@ -19,12 +19,11 @@ import java.util.NoSuchElementException;
 import java.util.Set;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
-import org.apache.commons.lang.NotImplementedException;
 import org.apache.tinkerpop.gremlin.process.traversal.P;
 import org.apache.tinkerpop.gremlin.process.traversal.Traversal;
+import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversal;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
 import org.apache.tinkerpop.gremlin.structure.Edge;
-import org.apache.tinkerpop.gremlin.structure.Element;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.janusgraph.core.Cardinality;
 import org.janusgraph.core.EdgeLabel;
@@ -235,10 +234,10 @@ public class SNBModel extends DataModel {
     mgmt.commit();
   }
 
-  boolean validateBoolean() {
+  GraphTraversal<Vertex, Vertex> findViolatingVertices() {
     GraphTraversalSource g = graph.traversal();
 
-    boolean hasViolatingNodes = g.V().or(
+    return g.V().or(
         // Check for missing mandatory properties on vertices
         // All vertices have an id property
         hasNot("id"),
@@ -275,30 +274,20 @@ public class SNBModel extends DataModel {
         // (City|Country)-[IS_PART_OF]->()
         hasLabel(P.within("City", "Country")).not(outE("IS_PART_OF")),
         // ()-[IS_PART_OF]->(Country|Continent)
-        hasLabel(P.within("Country", "Continent")).not(inE("IS_PART_OF"))).hasNext();
+        hasLabel(P.within("Country", "Continent")).not(inE("IS_PART_OF")));
+  }
 
-    if (hasViolatingNodes) {
-      return false;
-    }
+  GraphTraversal<Edge, Edge> findViolatingEdges() {
+    GraphTraversalSource g = graph.traversal();
 
     // Check for missing mandatory properties on edges
-    boolean hasViolatingEdges = g.E().or(
+    return g.E().or(
         // HAS_MEMBER/KNOWS/LIKES
         hasLabel(P.within("HAS_MEMBER", "KNOWS", "LIKES")).hasNot("creationDate"),
         // STUDY_AT
         hasLabel("STUDY_AT").hasNot("classYear"),
         // WORK_AT
-        hasLabel("WORK_AT").hasNot("workFrom")).hasNext();
-
-    if (hasViolatingEdges) {
-      return false;
-    }
-
-    return true;
-  }
-
-  Set<Element> validate() {
-    throw new NotImplementedException();
+        hasLabel("WORK_AT").hasNot("workFrom"));
   }
 
   public void loadData(File dataDir) throws Exception {

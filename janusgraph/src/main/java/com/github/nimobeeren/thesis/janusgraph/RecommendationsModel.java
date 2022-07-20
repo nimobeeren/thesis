@@ -12,17 +12,15 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.tinkerpop.gremlin.process.traversal.P;
+import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversal;
 import org.apache.tinkerpop.gremlin.process.traversal.dsl.graph.GraphTraversalSource;
 import org.apache.tinkerpop.gremlin.structure.Edge;
-import org.apache.tinkerpop.gremlin.structure.Element;
 import org.apache.tinkerpop.gremlin.structure.Vertex;
 import org.janusgraph.core.Cardinality;
 import org.janusgraph.core.EdgeLabel;
@@ -176,15 +174,10 @@ public class RecommendationsModel extends DataModel {
     mgmt.commit();
   }
 
-  public boolean validateBoolean() {
+  GraphTraversal<Vertex, Vertex> findViolatingVertices() {
     GraphTraversalSource g = graph.traversal();
 
-    // Objects can't have labels that are not allowed (because automatic schema is disabled)
-    // Property values can't have the wrong datatype (because of PropertyKey.dataType)
-    // Objects can't have properties that are not allowed (because of addProperties)
-    // Edges can't connect the wrong types of nodes (because of addConnection)
-
-    boolean hasViolatingVertices = g.V().or(
+    return g.V().or(
         // Check for missing mandatory properties on vertices
         hasLabel("Movie").or(hasNot("imdbId"), hasNot("movieId"), hasNot("title")),
         hasLabel(P.within("Actor", "Director", "ActorDirector")).or(hasNot("name"),
@@ -193,51 +186,15 @@ public class RecommendationsModel extends DataModel {
         // Check for missing mandatory edges
         hasLabel(P.within("Actor", "ActorDirector")).not(outE("ACTED_IN")),
         hasLabel(P.within("Director", "ActorDirector")).not(outE("DIRECTED")),
-        hasLabel("Movie").not(outE("IN_GENRE"))).hasNext();
-
-    if (hasViolatingVertices) {
-      return false;
-    }
-
-    // Check for missing mandatory properties on edges
-    boolean hasViolatingEdges =
-        g.E().hasLabel("RATED").or(hasNot("rating"), hasNot("timestamp")).hasNext();
-
-    if (hasViolatingEdges) {
-      return false;
-    }
-
-    return true;
+        hasLabel("Movie").not(outE("IN_GENRE")));
   }
 
-  public Set<Element> validate() {
+  GraphTraversal<Edge, Edge> findViolatingEdges() {
     GraphTraversalSource g = graph.traversal();
 
-    // Objects can't have labels that are not allowed (because automatic schema is disabled)
-    // Property values can't have the wrong datatype (because of PropertyKey.dataType)
-    // Objects can't have properties that are not allowed (because of addProperties)
-    // Edges can't connect the wrong types of nodes (because of addConnection)
-
-    Set<Element> violatingElements = new HashSet<Element>();
-
-    violatingElements.addAll(g.V().or(
-        // Check for missing mandatory properties on vertices
-        hasLabel("Movie").or(hasNot("imdbId"), hasNot("movieId"), hasNot("title")),
-        hasLabel(P.within("Actor", "Director", "ActorDirector")).or(hasNot("name"),
-            hasNot("tmdbId"), hasNot("url")),
-        hasLabel("User").or(hasNot("name"), hasNot("userId")), hasLabel("Genre").hasNot("name"),
-        // Check for missing mandatory edges
-        hasLabel(P.within("Actor", "ActorDirector")).not(outE("ACTED_IN")),
-        hasLabel(P.within("Director", "ActorDirector")).not(outE("DIRECTED")),
-        hasLabel("Movie").not(outE("IN_GENRE"))).toSet());
-
     // Check for missing mandatory properties on edges
-    violatingElements
-        .addAll(g.E().hasLabel("RATED").or(hasNot("rating"), hasNot("timestamp")).toSet());
-
-    return violatingElements;
+    return g.E().hasLabel("RATED").or(hasNot("rating"), hasNot("timestamp"));
   }
-
 
   public void loadData(File dataDir) throws IOException, ParseException {
     JanusGraphTransaction tx = graph.buildTransaction().enableBatchLoading().start();
