@@ -34,12 +34,54 @@ docker start -i neo4j
 
 ### Data loading
 
+### Recommendations
+
 1. Download the [recommendations data in Neo4j dump format](https://github.com/neo4j-graph-examples/recommendations/blob/main/data/recommendations-43.dump) and place it in a directory `~/neo4j/import`.
 
 2. Import the data (in the container). Note that the `--force` flag drops all existing data!
 
 ```bash
 bin/neo4j-admin load --from=import/recommendations-43.dump --force
+```
+
+### SNB
+
+```bash
+bin/neo4j-admin import \
+  --force \
+  --id-type=INTEGER \
+  --delimiter="|" \
+  --nodes=Organisation=import/static/organisation_0_0.csv \
+  --nodes=Place=import/static/place_0_0.csv \
+  --nodes=Tag=import/static/tag_0_0.csv \
+  --nodes=TagClass=import/static/tagclass_0_0.csv \
+  --nodes=Comment=import/dynamic/comment_0_0.csv \
+  --nodes=Forum=import/dynamic/forum_0_0.csv \
+  --nodes=Person=import/dynamic/person_0_0.csv \
+  --nodes=Post=import/dynamic/post_0_0.csv \
+  --relationships=IS_LOCATED_IN=import/static/organisation_isLocatedIn_place_0_0.csv \
+  --relationships=IS_PART_OF=import/static/place_isPartOf_place_0_0.csv \
+  --relationships=HAS_TYPE=import/static/tag_hasType_tagclass_0_0.csv \
+  --relationships=IS_SUBCLASS_OF=import/static/tagclass_isSubclassOf_tagclass_0_0.csv \
+  --relationships=HAS_CREATOR=import/dynamic/comment_hasCreator_person_0_0.csv \
+  --relationships=HAS_TAG=import/dynamic/comment_hasTag_tag_0_0.csv \
+  --relationships=IS_LOCATED_IN=import/dynamic/comment_isLocatedIn_place_0_0.csv \
+  --relationships=REPLY_OF=import/dynamic/comment_replyOf_comment_0_0.csv \
+  --relationships=REPLY_OF=import/dynamic/comment_replyOf_post_0_0.csv \
+  --relationships=CONTAINER_OF=import/dynamic/forum_containerOf_post_0_0.csv \
+  --relationships=HAS_MEMBER=import/dynamic/forum_hasMember_person_0_0.csv \
+  --relationships=HAS_MODERATOR=import/dynamic/forum_hasModerator_person_0_0.csv \
+  --relationships=HAS_TAG=import/dynamic/forum_hasTag_tag_0_0.csv \
+  --relationships=HAS_INTEREST=import/dynamic/person_hasInterest_tag_0_0.csv \
+  --relationships=IS_LOCATED_IN=import/dynamic/person_isLocatedIn_place_0_0.csv \
+  --relationships=KNOWS=import/dynamic/person_knows_person_0_0.csv \
+  --relationships=LIKES=import/dynamic/person_likes_comment_0_0.csv \
+  --relationships=LIKES=import/dynamic/person_likes_post_0_0.csv \
+  --relationships=STUDY_AT=import/dynamic/person_studyAt_organisation_0_0.csv \
+  --relationships=WORK_AT=import/dynamic/person_workAt_organisation_0_0.csv \
+  --relationships=HAS_CREATOR=import/dynamic/post_hasCreator_person_0_0.csv \
+  --relationships=HAS_TAG=import/dynamic/post_hasTag_tag_0_0.csv \
+  --relationships=IS_LOCATED_IN=import/dynamic/post_isLocatedIn_place_0_0.csv
 ```
 
 ### Schema validation

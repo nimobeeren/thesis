@@ -2,7 +2,8 @@
 
 ## Prerequisites
 
-- Node.js v14 or newer
+- Docker 20 or newer
+- Node.js 14 or newer
 
 ## Installation
 
