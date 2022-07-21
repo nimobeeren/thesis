@@ -1,10 +1,14 @@
+# Neo4j Generic Schema Validation
+
 ## Prerequisites
 
-- Docker 20 or newer
+- Node.js v14 or newer
 
 ## Installation
 
-Run a Docker container with Neo4j:
+1. Install dependencies with `npm install`
+
+2. Run a Docker container with Neo4j:
 
 ```bash
 docker run \
@@ -32,16 +36,4 @@ docker start -i neo4j
 
 ## Usage
 
-### Data loading
-
-1. Download the [recommendations data in Neo4j dump format](https://github.com/neo4j-graph-examples/recommendations/blob/main/data/recommendations-43.dump) and place it in a directory `~/neo4j/import`.
-
-2. Import the data (in the container). Note that the `--force` flag drops all existing data!
-
-```bash
-bin/neo4j-admin load --from=import/recommendations-43.dump --force
-```
-
-### Schema validation
-
-TODO: add constraints, run queries, run tests?
+Run tests with `npm test` (locally). The app connects to the running Neo4j instance using the crednentials in the `.env` file.
