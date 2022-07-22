@@ -96,6 +96,8 @@ bin/neo4j-admin import \
   --relationships=IS_LOCATED_IN=import/dynamic/post_isLocatedIn_place_0_0.csv
 ```
 
+5. Run the queries in `snb/load-properties.cypher` to load the multi-valued properties.
+
 ### Schema validation
 
 TODO: add constraints, run queries, run tests?
