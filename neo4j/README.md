@@ -46,6 +46,18 @@ bin/neo4j-admin load --from=import/recommendations-43.dump --force
 
 ### SNB
 
+1. Download the Social Network Benchmark dataset file `social_network-csv_basic-sf$SCALE_FACTOR.tar.zst` (where `$SCALE_FACTOR` is `0.1`, `0.3`, `1` etc.) from [this repository](https://github.com/ldbc/data-sets-surf-repository) and extract the CSV files using the instructions.
+
+2. Run the prepare script, passing it the directory where the extracted CSV files are stored. This will modify the CSV files in place!
+
+```bash
+snb/prepare.sh path/to/directory
+```
+
+3. Copy the files to the Neo4j import directory that was specified when creating the container.
+
+4. In the Docker container, run the `neo4j-admin` script to import the data. This will drop any existing data in the database!
+
 ```bash
 bin/neo4j-admin import \
   --force \
@@ -55,10 +67,10 @@ bin/neo4j-admin import \
   --nodes=Place=import/static/place_0_0.csv \
   --nodes=Tag=import/static/tag_0_0.csv \
   --nodes=TagClass=import/static/tagclass_0_0.csv \
-  --nodes=Comment=import/dynamic/comment_0_0.csv \
+  --nodes=Message:Comment=import/dynamic/comment_0_0.csv \
   --nodes=Forum=import/dynamic/forum_0_0.csv \
   --nodes=Person=import/dynamic/person_0_0.csv \
-  --nodes=Post=import/dynamic/post_0_0.csv \
+  --nodes=Message:Post=import/dynamic/post_0_0.csv \
   --relationships=IS_LOCATED_IN=import/static/organisation_isLocatedIn_place_0_0.csv \
   --relationships=IS_PART_OF=import/static/place_isPartOf_place_0_0.csv \
   --relationships=HAS_TYPE=import/static/tag_hasType_tagclass_0_0.csv \
