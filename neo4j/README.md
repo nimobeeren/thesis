@@ -100,4 +100,6 @@ bin/neo4j-admin import \
 
 ### Schema validation
 
-TODO: add constraints, run queries, run tests?
+1. Run all queries in `dataset/constraints.cypher`. This will not ensure that any existing data satisfies the constraints, but does prevent mutations that violate a constraint.
+
+2. Run all queries in `dataset/validate.cypher` to find all violating graph elements or `dataset/validate-boolean.cypher` to get a boolean to determine if the entire graph conforms to the schema or not.
