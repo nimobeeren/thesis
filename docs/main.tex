@@ -76,7 +76,7 @@ Graph databases have been steadily growing in popularity in recent years, receiv
 
 However, this freedom comes at a cost. Without a schema, we miss out on opportunities for query optimization \citep{chakravarthy1990logic, buneman1997adding, meier2013semantic}, we risk degradation of data integrity, and we lack a formally verifiable source of documentation. By bringing back schemas to the graph world, the flexibility of graph databases can be combined with the robustness of relational databases.
 
-The \emph{property graph model} is the predominant data model among graph database systems today. It provides an intuitive way of modeling entities as nodes, and their relationships as edges. Both nodes and edges are associated with labels, and they hold data in the form of key--value pairs known as \emph{properties}. We can imagine local constraints, such as mandatory properties on nodes or edges, as well as constraints on the structure of the graph, such as mandatory edges between nodes. To the best of our knowledge, there exists no published work that addresses the specification and validation of all these types of constraints using a single schema formalism.
+The \emph{property graph model} is the predominant data model among graph database systems today. It provides an intuitive way of modeling entities as nodes, and their relationships as edges. Both nodes and edges are associated with labels, and they hold data in the form of key--value pairs known as \emph{properties}. We can imagine local constraints, such as mandatory properties on nodes or edges, as well as constraints on the structure of the graph, such as mandatory edges between nodes. To the best of our knowledge, there exists no published work that addresses the specification and validation of all these kinds of constraints using a single schema formalism.
 
 Our overarching goal is to develop an end-to-end framework for property graph schema specification and validation. To this end, we propose a schema formalism capable of expressing local and structural constraints, we provide a prototypical implementation for schema validation in the form of graph queries, and we investigate the practical feasibility of this approach on current graph database systems and realistic datasets.
 
@@ -96,7 +96,7 @@ Some approaches to graph schema have been discussed in the literature. While the
 
 \citet{colazzo2015typing} introduce another schema formalism for edge-labeled data graphs. They define a schema as a set of pairs $(r_{in}, r_{out})$, where $r_{in}$ and $r_{out}$ are regular expressions. The semantics is that every node must match a schema element $(r_{in}, r_{out})$, meaning that the node's incoming edges match $r_{in}$ and its outgoing edges match $r_{out}$. Using Regular Path Queries (RPQs), edge cardinality can be exactly specified. When extending the language to Nested Regular Expressions (NREs), it is possible to specify structural constraints over arbitrarily large graph patterns.
 
-SHACL\footnote{\url{https://www.w3.org/TR/shacl/}} is a language for specifying constraints on RDF graphs. These constraints themselves are also represented as RDF graphs, and are called \emph{shapes}. Constraints on values, data types and cardinality are supported. This enables specification of allowed, optional, and mandatory edges. A review of the formal frameworks used to study the SHACL language and the validation of RDF graphs against SHACL schemas can be found in \citet{pareti2022shacl}.
+SHACL\footnote{\url{https://www.w3.org/TR/shacl/}} is a language for specifying constraints on RDF graphs \citep{pan2009rdf}. These constraints themselves are also represented as RDF graphs, and are called \emph{shapes}. Constraints on values, data types and cardinality are supported. This enables specification of allowed, optional, and mandatory edges. A review of the formal frameworks used to study the SHACL language and the validation of RDF graphs against SHACL schemas can be found in \citet{pareti2022shacl}.
 
 \subsection{Property Graph Schema}
 
@@ -270,7 +270,7 @@ Next, we define what it means for a property graph to conform to a schema.
     \item\label{rule:conformance-basic-edge}
           Every edge $e$ conforms to some schema edge $e'$, and the source and target nodes of $e$ conform to the respective endpoints of $e'$:
           \begin{align*}
-             & \forall e \in E \; \exists e' \in E' :\\
+             & \forall e \in E \; \exists e' \in E' :                      \\
              & \quad e \conf e' \wedge \src(\rho(e)) \conf \src(\rho'(e'))
             \wedge \trg(\rho(e)) \conf \trg(\rho'(e'))
           \end{align*}
@@ -381,24 +381,24 @@ An example of a property graph schema with cardinality constraints is given in \
     \item\label{rule:conformance-edge}
           Every edge $e$ conforms to some schema edge $e'$, and the source and target nodes of $e$ conform to the respective endpoints of $e'$:
           \begin{align*}
-            & \forall e \in E \; \exists e' \in E' :\\
-            & \quad e \conf e' \wedge \src(\rho(e)) \conf \src(\rho'(e'))
-           \wedge \trg(\rho(e)) \conf \trg(\rho'(e'))
+             & \forall e \in E \; \exists e' \in E' :                      \\
+             & \quad e \conf e' \wedge \src(\rho(e)) \conf \src(\rho'(e'))
+            \wedge \trg(\rho(e)) \conf \trg(\rho'(e'))
           \end{align*}
 
     \item\label{rule:conformance-out}
           If a node $n$ conforms to the source of a schema edge $e'$, it must have the right number of outgoing edges of the right type:
           \begin{align*}
-             & \forall n \in N \; \forall e' \in E' :\\
-             & \quad \big[n \conf \src(\rho(e')) \implies \exists^{\src(\eta(e'))} e \in E : \\
+             & \forall n \in N \; \forall e' \in E' :                                                        \\
+             & \quad \big[n \conf \src(\rho(e')) \implies \exists^{\src(\eta(e'))} e \in E :                 \\
              & \quad\quad e \conf e' \wedge \src(\rho(e)) = n \wedge \trg(\rho(e)) \conf \trg(\rho(e'))\big]
           \end{align*}
 
     \item\label{rule:conformance-in}
           If a node $n$ conforms to the target of a schema edge $e'$, it must have the right number of incoming edges of the right type:
           \begin{align*}
-             & \forall n \in N \; \forall e' \in E' :\\
-             & \quad \big[n \conf \trg(\rho(e')) \implies \exists^{\trg(\eta(e'))} e \in E : \\
+             & \forall n \in N \; \forall e' \in E' :                                                        \\
+             & \quad \big[n \conf \trg(\rho(e')) \implies \exists^{\trg(\eta(e'))} e \in E :                 \\
              & \quad\quad e \conf e' \wedge \src(\rho(e)) \conf \src(\rho(e')) \wedge \trg(\rho(e)) = n\big]
           \end{align*}
   \end{enumerate}
@@ -492,7 +492,7 @@ Our schema formalisms come with a number of limitations. First, it is not possib
 \begin{figure}[t]
   \centering
   \includegraphics{figures/drivers-license.pdf}
-  \caption{A schema consisting of three nodes and two edges. While we can enforce constraints on edge cardinalities, we cannot specify that a person may only drive a car if they have a driver's license.}
+  \caption{A schema consisting of three nodes and two edges. While we can specify constraints on edge cardinalities, we cannot ensure that a person only drives a car if they have a driver's license.}
   \label{fig:drivers-license}
 \end{figure}
 
@@ -530,6 +530,24 @@ In \autoref{fig:subtyping}, a constraint is specified which we can express in wo
   \end{subfigure}
   \caption{A schema consisting of a supertype with two subtypes which cannot be modeled using our schema formalism. Any property graph that conforms to~(a) also conforms to~(b), but not the other way around.}
 \end{figure}
+
+\section{Experimental Study}
+
+We have defined a property graph schema formalism which is capable of expressing constraints in commonly used conceptual data modeling methods. Next, we analyze the practical feasibility of our approach. We aim to answer the question: what is the cost of determining property graph schema conformance using currently available graph database systems? First, we investigate the schema capabilities of three existing graph database sytems. Second, we describe how these systems can be extended to support all kinds of constraints that can be specified in our schema formalism. Third, we study the performance of our prototypical implementation in several realistic scenarios.
+
+\subsection{State of the art}
+
+Current property graph database systems vary in their support and philosophy around schema. Most embrace the flexibility of the property graph data model by supporting optional, partial, or implicit schemas. Others require the schema to be fully specified in advance. We take a closer look at three of the most popular property graph databases: Neo4j, JanusGraph, and TigerGraph.
+
+\paragraph{Neo4j.} Being one of the first to adopt the property graph data model, Neo4j has grown to become the most popular graph database engine today\footnote{\url{https://db-engines.com/en/ranking/graph+dbms} (accessed July 2022)}. Their data model differs from ours in that edges can only have a single label, while nodes can have multiple. Neo4j takes a schema-optional approach: after inserting data, the user can construct a schema that describes the data using built-in functions. In addition, a few kinds of constraints can be explicitly specified, namely existence of mandatory properties, uniqueness of property values, and key constraints. Limitations of Neo4j's schema functionality are lack of mandatory edges and more general edge cardinality constraints.
+
+\paragraph{JanusGraph.} Originating from the open source Titan project, JanusGraph is a continuation of the effort to create a distributed and highly scalable graph database\footnote{\url{https://janusgraph.org/}}. In their data model, nodes and edges always have one label. Properties can have sets and lists as values, and there may exist multiple properties with the same key on the same node. Furthermore, properties themselves can have properties. In this sense, the data model is like a blend of property graphs and RDF \citep{pan2009rdf}.
+
+JanusGraph has the largest set of schema features among all systems we came across. Similarly to Neo4j, JanusGraph can automatically generate a schema during operation. However, this functionality can be disabled, in which case the schema must be explicitly defined. There is built-in support for specifying which node labels, edge labels, and property keys may exist. Furthermore, it can be specified which properties may exist depending on the label of a node or edge. Property values are restricted to a datatype and may be single-valued or multi-valued (lists or sets). In addition, the types of nodes that may be connected by an edge with a particular label can be constrained. Edge cardinality can be constrained to one-to-one, one-to-many, many-to-one, many-to-many, or ``simple'' (at most one edge of a particular label between any pair of nodes). Finally, there are features to support static (immutable) nodes, time-to-live (TTL), and unidrectional edges which can only be enumerated for a given source node, but not for the target.
+
+All of JanusGraph's schema features are centered around specifying what is allowed in the graph, but mandatory properties and edges are not supported. Cardinality constraints are supported, but not to the full extent of our definition. To be precise, JanusGraph can impose constraints on the maximum edge cardinality, but not the minimum. For example, a many-to-one schema edge ensures that every target node has at most one incoming edge of a particular type, but does not prevent a target node from having no incoming edges.
+
+\paragraph{TigerGraph.} A unique aspect of TigerGraph \citep{deutsch2019tigergraph} is that it is schema-first: the entire schema must be specified before a database is instantiated. This allows for more powerful optimizations, building on decades of research on relational databases. 
 
 \bibliography{main}
 
