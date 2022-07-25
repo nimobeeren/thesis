@@ -4,7 +4,7 @@
 
 ## Installation
 
-Run a Docker container with TigerGraph:
+Run a Docker container with TigerGraph, making sure to mount the data directory as well as a directory `thesis` which has the contents of this repository:
 
 ```bash
 docker run \
@@ -13,5 +13,22 @@ docker run \
   --name tigergraph \
   --ulimit nofile=1000000:1000000 \
   -v ~/tigergraph/data:/home/tigergraph/mydata \
-  -t docker.tigergraph.com/tigergraph:latest
+  -v ~/Development/thesis:/home/tigergraph/thesis \
+  -t docker.tigergraph.com/tigergraph:3.6.0
 ```
+
+## Data loading
+
+1. Connect to the TigerGraph instance with `ssh -p 14022 tigergraph@localhost` and enter password `tigergraph`.
+
+2. Start the TigerGraph services with `gadmin start all`.
+
+### SNB
+
+1. Run the GSQL prepare script using
+```bash
+gsql thesis/tigergraph/snb/prepare.gsql
+```
+
+2. Adjust the data path variable in the `load.sh` script and run it with `thesis/tigergraph/snb/load.sh`.
+
