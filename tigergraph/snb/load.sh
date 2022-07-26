@@ -1,7 +1,7 @@
 #!/bin/env bash
 
 ## Modify the line below to the directory that contains the SNB dataset
-export LDBC_SNB_DATA_DIR=/home/tigergraph/mydata
+export LDBC_SNB_DATA_DIR=/home/tigergraph/mydata/snb
 
 gsql -g ldbc_snb "run loading job load_ldbc_snb using 
 v_organisation_file=\"${LDBC_SNB_DATA_DIR}/static/organisation_0_0.csv\", 

@@ -543,6 +543,8 @@ We have defined a property graph schema formalism which is capable of expressing
 
 Current property graph database systems vary in their support and philosophy around schema. Most embrace the flexibility of the property graph data model by supporting optional, partial, or implicit schemas. Others require the schema to be fully specified in advance. We take a closer look at three of the most popular property graph databases: Neo4j, JanusGraph, and TigerGraph.
 
+% TODO: summary table
+
 \paragraph{Neo4j.} Being one of the first to adopt the property graph data model, Neo4j has grown to become the most popular graph database engine today\footnote{\url{https://db-engines.com/en/ranking/graph+dbms} (accessed July 2022)}. Their data model differs from ours in that edges can only have a single label, while nodes can have multiple. Neo4j takes an implicit schema approach: after inserting data, the user can construct a schema that describes the data using built-in functions. In addition, some constraints can be explicitly specified, namely existence of mandatory properties, uniqueness of property values, and key constraints. Limitations of Neo4j's schema functionality are lack of mandatory edges and more general edge cardinality constraints.
 
 \paragraph{JanusGraph.} Originating from the open source Titan project, JanusGraph is a continuation of the effort to create a distributed and highly scalable graph database. In their data model, nodes and edges always have one label. Properties can have sets and lists as values, and there may exist multiple properties with the same key on the same node. Furthermore, properties themselves can have properties. In this sense, the data model is like a blend of property graphs and RDF \citep{pan2009rdf}.

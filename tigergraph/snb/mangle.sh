@@ -4,12 +4,12 @@ set -euo pipefail
 # Sets a mandatory property from a specific vertex to the null value
 curl -Ss -d '{
   "vertices": {
-    "Movie": {
-      "0": {
-        "title": {
-          "value": "Toy Story"
+    "Post": {
+      "3": {
+        "length": {
+          "value": -1
         }
       }
     }
   }
-}' "http://localhost:9000/graph/Recommendations?update_vertex_only=true"
+}' "http://localhost:9000/graph/ldbc_snb?update_vertex_only=true"

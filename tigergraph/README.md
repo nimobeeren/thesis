@@ -27,41 +27,66 @@ docker run \
 
 1. Download the [recommendations data](https://drive.google.com/drive/folders/17byMzP_Ux7DloJsYuNdk07-mjC9PbMbF?usp=sharing) and place all CSV files in a directory `~/tigergraph/data/recomendations`.
 
-1. Drop the existing database and create the schema:
+2. Drop the existing database and create the schema:
 ```bash
 gsql thesis/tigergraph/recommendations/schema.gsql
 ```
 
-2. Prepare jobs for loading the data:
+3. Prepare jobs for loading the data:
 ```bash
 gsql thesis/tigergraph/recommendations/preload.gsql
 ```
 
-3. Execute the loading jobs:
+4. Execute the loading jobs:
 ```bash
 gsql thesis/tigergraph/recommendations/load.gsql
 ```
 
-4. Install the validation queries:
+5. Install the validation queries:
 ```bash
 gsql thesis/tigergraph/recommendations/prevalidate.gsql
 ```
 
-5. (Optional) Introduce errors in the data by running the `mangle.sh` script:
+6. (Optional) Introduce errors in the data by running the `mangle.sh` script:
 ```bash
 bash thesis/tigergraph/recommendations/mangle.sh | jq
 ```
 
-6. Run the validation queries:
+7. Run the validation queries:
 ```bash
 bash thesis/tigergraph/recommendations/validate.sh | jq
 ```
 
 ### SNB
 
-1. Run the GSQL prepare script using
+1. Download the Social Network Benchmark dataset file `social_network-csv_basic-sf$SCALE_FACTOR.tar.zst` (where `$SCALE_FACTOR` is `0.1`, `0.3`, `1` etc.) from [this repository](https://github.com/ldbc/data-sets-surf-repository) and extract the CSV files using the instructions.
+
+2. Drop the existing database and create the schema:
 ```bash
-gsql thesis/tigergraph/snb/prepare.gsql
+gsql thesis/tigergraph/snb/schema.gsql
 ```
 
-2. Adjust the data path variable in the `load.sh` script and run it with `thesis/tigergraph/snb/load.sh`.
+3. Prepare jobs for loading the data:
+```bash
+gsql thesis/tigergraph/snb/preload.gsql
+```
+
+4. Adjust the `LDBC_SNB_DATA_DIR` variable in the `load.sh` script and execute it:
+```bash
+bash thesis/tigergraph/snb/load.sh
+```
+
+<!-- 5. Install the validation queries:
+```bash
+gsql thesis/tigergraph/snb/prevalidate.gsql
+``` -->
+
+6. (Optional) Introduce errors in the data by running the `mangle.sh` script:
+```bash
+bash thesis/tigergraph/snb/mangle.sh | jq
+```
+
+<!-- 7. Run the validation queries:
+```bash
+bash thesis/tigergraph/snb/validate.sh | jq
+``` -->
