@@ -92,7 +92,8 @@ OR relType = ":`RATED`" AND (
 RETURN relType, propertyName, propertyTypes;
 
 // Check for edges between wrong types of nodes
-// We can't do this with the schema statistics, because this finds that some Actors have DIRECTED eges, which is allowed, but only when they are also Directors
+// We can't do this with the schema statistics, because this finds that some Actors have DIRECTED eges,
+// which is allowed, but only when they are also Directors
 MATCH (n)-[e:ACTED_IN]->(m) WHERE NOT "Actor" IN labels(n) OR NOT "Movie" IN labels(m) RETURN count(e) = 0;
 MATCH (n)-[e:DIRECTED]->(m) WHERE NOT "Director" IN labels(n) OR NOT "Movie" IN labels(m) RETURN count(e) = 0;
 MATCH (n)-[e:IN_GENRE]->(m) WHERE NOT "Movie" IN labels(n) OR NOT "Genre" IN labels(m) RETURN count(e) = 0;

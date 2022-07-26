@@ -37,6 +37,7 @@ CREATE QUERY validateProperties () {
 }
 
 // Finds the nodes that violate an edge cardinality constraint
+// TODO: use outdegree() function
 CREATE QUERY validateCardinality () {
     // Find the actors who acted in 0 movies
     SumAccum<int> @numActedIn;
