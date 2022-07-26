@@ -1,0 +1,140 @@
+USE GRAPH ldbc_snb
+
+SET syntax_version="v2"
+
+// Finds the objects that are missing a mandatory property
+// Since TigerGraph does not support null values, we check if the value is the
+// default value instead
+CREATE QUERY validateProperties () {
+    SetAccum<VERTEX> @@violatingNodes;
+
+    violatingForums =
+        SELECT forum
+        FROM Forum:forum
+        WHERE forum.title == "" OR forum.creationDate == to_datetime("1970-01-01 00:00:00")
+        ACCUM @@violatingNodes += forum;
+
+    violatingMessages =
+        SELECT message
+        FROM (Comment|Post):message
+        WHERE message.browserUsed == "" OR message.creationDate == to_datetime("1970-01-01 00:00:00") OR message.locationIP == "" OR message.length == -1
+        ACCUM @@violatingNodes += message;
+
+    violatingPlacesOrTags = 
+        SELECT placeOrTag
+        FROM (City|Country|Continent|Tag|TagClass):placeOrTag
+        WHERE placeOrTag.name == "" OR placeOrTag.url == ""
+        ACCUM @@violatingNodes += placeOrTag;
+
+    violatingPersons =
+        SELECT person
+        FROM Person:person
+        // TODO: change when multi-valued attributes are loaded, ensure default values are correct
+        // WHERE person.firstName == "" OR person.lastName == "" OR person.gender == "" OR person.birthday == "" OR person.email == "" OR person.speaks == "" OR person.browserUsed == "" OR person.locationIP == "" OR person.creationDate == to_datetime("1970-01-01 00:00:00");
+        WHERE person.firstName == "" OR person.lastName == "" OR person.gender == "" OR person.birthday == "" OR person.browserUsed == "" OR person.locationIP == "" OR person.creationDate == to_datetime("1970-01-01 00:00:00")
+        ACCUM @@violatingNodes += person;
+
+    SetAccum<EDGE> @@violatingEdges;
+
+    violatingHasMember =
+        SELECT n // doesn't matter
+        FROM Forum:n -(HAS_MEMBER>:hasMember)- Person:m
+        WHERE hasMember.creationDate == to_datetime("1970-01-01 00:00:00")
+        ACCUM @@violatingEdges += hasMember;
+
+    violatingKnows =
+        SELECT n // doesn't matter
+        FROM Person:n -(KNOWS:knows)- Person:m
+        WHERE knows.creationDate == to_datetime("1970-01-01 00:00:00")
+        ACCUM @@violatingEdges += knows;
+
+    violatingLikes =
+        SELECT n // doesn't matter
+        FROM Person:n -(LIKES>:likes)- (Comment|Post):m
+        WHERE likes.creationDate == to_datetime("1970-01-01 00:00:00")
+        ACCUM @@violatingEdges += likes;
+
+    violatingStudyAt =
+        SELECT n // doesn't matter
+        FROM Person:n -(STUDY_AT>:studyAt)- University:m
+        WHERE studyAt.classYear == 0
+        ACCUM @@violatingEdges += studyAt;
+
+    violatingWorkAt =
+        SELECT n // doesn't matter
+        FROM Person:n -(WORK_AT>:worksAt)- Company:m
+        WHERE worksAt.workFrom == 0
+        ACCUM @@violatingEdges += worksAt;
+
+    PRINT @@violatingNodes, @@violatingEdges;
+}
+
+// Finds the nodes that violate an edge cardinality constraint
+// TODO: use outdegree() function
+CREATE QUERY validateCardinality () {
+    SetAccum<VERTEX> @@violatingNodes;
+
+    missingOutHasCreator =
+        SELECT message
+        FROM (Post|Comment):message
+        WHERE message.outdegree("HAS_CREATOR") == 0
+        ACCUM @@violatingNodes += message;
+
+    missingOutHasInterest =
+        SELECT person
+        FROM Person:person
+        WHERE person.outdegree("HAS_INTEREST") == 0
+        ACCUM @@violatingNodes += person;
+
+    missingOutHasTag =
+        SELECT forum
+        FROM Forum:forum
+        WHERE forum.outdegree("HAS_TAG") == 0
+        ACCUM @@violatingNodes += forum;
+
+    missingOutHasType =
+        SELECT tag
+        FROM Tag:tag
+        WHERE tag.outdegree("HAS_TYPE") == 0
+        ACCUM @@violatingNodes += tag;
+
+    missingOutIsLocatedIn =
+        SELECT n
+        FROM (Company|University|Post|Comment|Person):n
+        WHERE n.outdegree("IS_LOCATED_IN") == 0
+        ACCUM @@violatingNodes += n;
+
+    missingOutIsPartOf =
+        SELECT n
+        FROM (City|Country):n
+        WHERE n.outdegree("IS_PART_OF") == 0
+        ACCUM @@violatingNodes += n;
+
+    // ()-[CONTAINER_OF]->Post
+    SumAccum<int> @numInContainerOf;
+    tmp =
+        SELECT post
+        FROM :n -(CONTAINER_OF>)- Post:post
+        ACCUM post.@numInContainerOf += 1;
+    violatingActors =
+        SELECT post
+        FROM Post:post
+        WHERE post.@numInContainerOf == 0
+        ACCUM @@violatingNodes += post;
+
+    // ()-[IS_PART_OF]->(Country|Continent)
+    SumAccum<int> @numInIsPartOf;
+    tmp =
+        SELECT place
+        FROM :n -(IS_PART_OF>)- (Country|Continent):place
+        ACCUM place.@numInIsPartOf += 1;
+    violatingActors =
+        SELECT place
+        FROM (Country|Continent):place
+        WHERE place.@numInIsPartOf == 0
+        ACCUM @@violatingNodes += place;
+
+    PRINT @@violatingNodes;
+}
+
+INSTALL QUERY validateProperties, validateCardinality

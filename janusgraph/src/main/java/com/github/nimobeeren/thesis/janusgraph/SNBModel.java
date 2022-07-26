@@ -269,7 +269,7 @@ public class SNBModel extends DataModel {
         // (Tag)-[HAS_TYPE]->()
         hasLabel("Tag").not(outE("HAS_TYPE")),
         // (Organisation|Message|Person)-[IS_LOCATED_IN]->()
-        hasLabel(P.within("Company", "Univeristy", "Post", "Comment", "Person"))
+        hasLabel(P.within("Company", "University", "Post", "Comment", "Person"))
             .not(outE("IS_LOCATED_IN")),
         // (City|Country)-[IS_PART_OF]->()
         hasLabel(P.within("City", "Country")).not(outE("IS_PART_OF")),

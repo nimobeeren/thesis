@@ -76,17 +76,17 @@ gsql thesis/tigergraph/snb/preload.gsql
 bash thesis/tigergraph/snb/load.sh
 ```
 
-<!-- 5. Install the validation queries:
+5. Install the validation queries:
 ```bash
 gsql thesis/tigergraph/snb/prevalidate.gsql
-``` -->
+```
 
 6. (Optional) Introduce errors in the data by running the `mangle.sh` script:
 ```bash
 bash thesis/tigergraph/snb/mangle.sh | jq
 ```
 
-<!-- 7. Run the validation queries:
+7. Run the validation queries:
 ```bash
 bash thesis/tigergraph/snb/validate.sh | jq
-``` -->
+```
