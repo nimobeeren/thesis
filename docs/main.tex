@@ -100,13 +100,15 @@ SHACL\footnote{\url{https://www.w3.org/TR/shacl/}} is a language for specifying 
 
 \subsection{Property Graph Schema}
 
-The property graph data model has been adopted by numerous contemporary graph database systems (dating back to at least 2007 with the first release of Neo4j\footnote{\url{https://neo4j.com/open-source-project/}}), but a formal specification was missing until one was proposed by \citet{angles2018property}. The author also brought integrity constraints to the property graph model, and defined a basic notion of schema using first-order logic rules. In this approach, no distinction was made between mandatory and optional properties, nor were cardinality constraints addressed.
+The property graph data model has been adopted by numerous contemporary graph database systems (dating back to at least 2007 with the first release of Neo4j\footnote{\url{https://neo4j.com/open-source-project/}}), but a formal specification was missing until one was proposed by \citet{angles2018property}. The author also brought integrity constraints to the property graph model, and defined a basic notion of schema using first-order logic rules. In this work, no distinction was made between mandatory and optional properties, nor were cardinality constraints addressed.
 
 \citet{bonifati2019schema} present a property graph schema validation approach based on graph homomorphisms. They differentiate between mandatory and optional properties, though edges are always interpreted as optional. Cardinality constraints are not discussed. The authors look at schemas from two different angles: they can be descriptive in the sense that they only reflect the data, or they can be prescriptive by means of enforcing constraints on data. This distinction is relevant in particular to the topic of schema evolution, where it may be desirable to switch between these two modes as an application matures. It is noted that most contemporary graph database systems only provide descriptive schema tools.
 
 \citet{lbath2021inference} look at property graph schemas from the perspective of schema inference. Their goal is to extract an accurate and complete schema for an arbitrary property graph instance. To this end, a property graph schema formalism is defined, supporting cardinality constraints, mandatory and optional edges, as well as subtyping. In addition, a syntax for schema definition is presented, and the schema inference pipeline is evaluated using real-world datasets. The problem of validating a graph against a given schema is not addressed. Statistical methods are applied in \citep{bonifati2022hierarchical} to improve performance.
 
 \citet{lei2021thesis} proposes a semi-automated method for schema extraction which incorporates expert knowledge. The user can adjust parameters and similarity measures which affect how the schema is generated. An implementation and experimental results are given. Cardinality constraints are not covered.
+
+Many commercially available property graph database systems currently support some form of schema or constraints. Some require the user to specify a schema, while others infer a schema from data. We further analyze the schema capabilities of existing systems in \autoref{sec:sota}.
 
 \section{Property Graphs}
 
@@ -532,10 +534,12 @@ In \autoref{fig:subtyping}, a constraint is specified which we can express in wo
 \end{figure}
 
 \section{Experimental Study}
+\label{sec:experiment}
 
 We have defined a property graph schema formalism which is capable of expressing constraints in commonly used conceptual data modeling methods. Next, we analyze the practical feasibility of our approach. We aim to answer the question: what is the cost of determining property graph schema conformance using currently available graph database systems? First, we investigate the schema capabilities of three existing graph database sytems. Second, we describe how these systems can be extended to support all kinds of constraints that can be specified in our schema formalism. Third, we study the performance of our prototypical implementation in several realistic scenarios.
 
 \subsection{State of the art}
+\label{sec:sota}
 
 Current property graph database systems vary in their support and philosophy around schema. Most embrace the flexibility of the property graph data model by supporting optional, partial, or implicit schemas. Others require the schema to be fully specified in advance. We take a closer look at three of the most popular property graph databases: Neo4j, JanusGraph, and TigerGraph.
 
@@ -549,7 +553,22 @@ All of JanusGraph's schema features are centered around specifying what is allow
 
 \paragraph{TigerGraph.} A unique aspect of TigerGraph \citep{deutsch2019tigergraph} is that it is schema-first: the entire schema must be specified before a database is instantiated. This allows for more powerful optimizations, building on decades of research on relational databases. In TigerGraph's data model, nodes and edges have exactly one label, but nodes can be associated with any number of \emph{tags}, which are conceptually similar to labels. Edges can be directed or undirected.
 
-TigerGraph's schema is strict, in the sense that every node label, edge label, and property must be explicitly defined. All properties are mandatory and have a fixed datatype, which may be singular or multi-valued. There are no null values; if a property value is missing during insertion, a default value is set. All nodes have a primary key, which may be a single property or a composite key. Schema edges must specify a source and target node type, though it is possible to specify multiple types on either side. By default, directed edges can only be traversed from source to target, though a reverse edge may be automatically constructed. Cardinality constraints cannot be expressed in TigerGraph's schema language.
+TigerGraph's schema is strict, in the sense that every node label, edge label, and property must be explicitly defined. All properties are mandatory and have a fixed datatype, which may be singular or multi-valued. There are no null values; if a property value is missing during insertion, a default value is set. All nodes have a primary key, which may be a single property or a composite key. Schema edges must specify a source and target node type, though it is possible to specify multiple types on either side. By default, directed edges can only be traversed from source to target, though a reverse edge may be automatically constructed. Mandatory edges and other cardinality constraints cannot be expressed in TigerGraph's schema language.
+
+\subsection{Extending schema capabilities}
+
+Having investigated existing property graph database systems, we find that none are currently capable of expressing all kinds of constraints that our schema formalism can. In this section, we describe how a property graph can be validated against our notion of schema conformance using each of the three database systems.
+
+We consider two variants of the schema validation problem:
+
+\begin{itemize}
+  \item \textbf{Boolean validation:} given a graph and a schema, determine whether the graph conforms to the schema or not.
+  \item \textbf{Full validation:} given a graph and a schema, find all graph objects which cause a violation of at least one of the rules of schema conformance.
+\end{itemize}
+
+While a Boolean validation method may be sufficient in some situations, full validation is required when we want to explain why a graph does not conform. Boolean validation is a strictly easier problem because we can stop as soon as we find a single violation, while full validation always requires at least one full scan.
+
+Where possible, we make use of the schema functionality exposed by the database engine.
 
 \bibliography{main}
 
