@@ -31,4 +31,3 @@ gsql thesis/tigergraph/snb/prepare.gsql
 ```
 
 2. Adjust the data path variable in the `load.sh` script and run it with `thesis/tigergraph/snb/load.sh`.
-
