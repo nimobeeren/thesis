@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
-set -euxo pipefail
+set -euo pipefail
 
 # Removes a mandatory property from a specific vertex
-curl -d '{
+curl -Ss -d '{
   "vertices": {
     "Movie": {
       "0": {
         "title": {
-          "value": ""
+          "value": "Toy Story"
         }
       }
     }

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-set -euxo pipefail
+set -euo pipefail
 
-curl "http://localhost:9000/query/validateProperties"
+curl -Ss "http://localhost:9000/query/validateProperties"
 echo
-curl "http://localhost:9000/query/validateCardinality"
+curl -Ss "http://localhost:9000/query/validateCardinality"
