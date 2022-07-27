@@ -486,7 +486,7 @@ We adjust the definitions of property conformance, record type, and record confo
 
 It may be desirable to allow a record to have properties with any name or any value. Such \emph{open record types} can already be expressed under the current definitions. For a record type $\rtype$, we can allow properties with any name by setting $\rtype(k) = \ptype?$ for all (previously unspecified) property names $k \in \mathcal{N}$, where $\ptype$ is an arbitrary property type. Note that there may be infinitely many such $k$, so in practice we may want to have a special syntax to express this. We can allow these properties to have any value by choosing a $\ptype$ such that $\sem{\ptype} = \mathcal{V}$, or we can restrict them to a subset of $\mathcal{V}$.
 
-\section{Discussion}
+\subsection{Discussion}
 
 % TODO: lack of key constraints?
 % TODO: suggest richer constraint language
@@ -586,6 +586,7 @@ Referring back to our definition of schema conformance (\autoref{def:schema-conf
   \caption{Comparison of schema capabilities of property graph database systems and our schema formalism. *: only one-to-one, one-to-many, etc.}
   \label{tab:schema-comparison}
 \end{table}
+% TODO: order of columns the same as in text
 
 Next, we detail the differences between the three database systems in our scope with regard to data model and schema capabilities.
 
@@ -605,7 +606,8 @@ TigerGraph's schema is strict, in the sense that every node label, edge label, a
 
 \subsection{Extending schema capabilities}
 
-Having investigated existing property graph database systems, we find that none are currently capable of expressing all kinds of constraints that our schema formalism can. In this section, we describe how a property graph can be validated against our notion of schema conformance using each of the three database systems.
+Having investigated existing property graph database systems, we find that none are currently able to enforce all kinds of constraints that can be expressed with our schema formalism, in particular cardinality constraints. In this section, we describe how these systems can be extended to support all schema features. Where possible, we make use of the schema functionality exposed by the database engine. For the other features, we provide queries which determine schema conformance.
+% TODO: why queries instead of in-engine implementation?
 
 We consider two variants of the schema validation problem:
 
@@ -614,9 +616,39 @@ We consider two variants of the schema validation problem:
   \item \textbf{Full validation:} given a graph and a schema, find all graph objects which cause a violation of at least one of the rules of schema conformance.
 \end{itemize}
 
-While a Boolean validation method may be sufficient in some situations, full validation is required when we want to explain why a graph does not conform. Boolean validation is a strictly easier problem because we can stop as soon as we find a single violation, while full validation always requires at least one full scan.
+While a Boolean validation method may be sufficient in some situations, full validation is required when we want to explain why a graph does not conform. Boolean validation is a strictly easier problem because we can stop as soon as we find a single violation, while full validation always requires at least one full scan of the graph.
 
-Where possible, we make use of the schema functionality exposed by the database engine.
+To reduce the complexity of the implementation, we assume that the set of labels of a schema object functionally determines the record type of that schema object. Recall that every object must conform to a schema object (rules~\ref{rule:conformance-node} and \ref{rule:conformance-edge}). This implies that if an object has the same set of labels as a schema object, it must conform to that schema object (since there exists no schema object with the same label set and a different record type). We found that this assumption holds in many domains, including the ones we study in \autoref{sec:workloads}.
+
+Under this assumption, we can simplify the rules of conformance. Informally:
+
+\begin{enumerate}
+  \item
+  \begin{enumerate}
+    \item Every node has the same set of labels as some schema node.
+    \item All mandatory node properties exist on the node.
+    % \item If a data node and schema node have the same label set, all mandatory properties of the schema node must be present on the data node.
+    \item The node has no properties that are not allowed.
+    % \item If a data node and schema node have the same label set, the data node may not have properties that are not allowed by the schema node.
+    \item All node properties have a value of the right type.
+  \end{enumerate}
+  \item
+  \begin{enumerate}
+    \item Every edge has the same set of labels as some schema edge.
+    \item All mandatory edge properties exist on the edge.
+    \item All edge properties have a value of the right type.
+    \item Both endpoints of the edge have the right labels.
+  \end{enumerate}
+  \item Every node has the right number of outgoing edges with the right labels.
+  \item Every node has the right number of incoming edges with the right labels.
+\end{enumerate}
+
+Next, we describe the implementation in each of the three database systems.
+
+\paragraph{Neo4j.} 
+
+\subsection{Workloads}
+\label{sec:workloads}
 
 \bibliography{main}
 
