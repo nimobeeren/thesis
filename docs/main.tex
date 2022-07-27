@@ -16,6 +16,7 @@
 \usepackage{graphicx}
 \usepackage{caption}
 \usepackage{subcaption}
+\usepackage{tabularx}
 
 % Bibliography and citation style
 \usepackage[square]{natbib}
@@ -61,6 +62,10 @@
 
 % Undefined
 \newcommand{\undefined}{\mathbf{undef}}
+
+% Yes/No
+\newcommand{\yes}{\includegraphics[height=7pt]{figures/check.png}}
+\newcommand{\no}{\includegraphics[height=6.5pt]{figures/cross.png}}
 
 \title{Typing Property Graphs}
 \author{Nimo Beeren}
@@ -536,26 +541,67 @@ In \autoref{fig:subtyping}, a constraint is specified which we can express in wo
 \section{Experimental Study}
 \label{sec:experiment}
 
-We have defined a property graph schema formalism which is capable of expressing constraints in commonly used conceptual data modeling methods. Next, we analyze the practical feasibility of our approach. We aim to answer the question: what is the cost of determining property graph schema conformance using currently available graph database systems? First, we investigate the schema capabilities of three existing graph database sytems. Second, we describe how these systems can be extended to support all kinds of constraints that can be specified in our schema formalism. Third, we study the performance of our prototypical implementation in several realistic scenarios.
+We have defined a property graph schema formalism which is capable of expressing constraints in commonly used conceptual data modeling methods. Next, we analyze the practical feasibility of our approach. We aim to answer the question: what is the cost of determining property graph schema conformance using currently available graph database systems? First, we investigate the schema capabilities of three existing graph database sytems. Second, we describe how these systems can be extended to support all kinds of constraints that can be specified in our schema formalism. Third, we analyze the performance of our prototypical implementation in several realistic scenarios.
 
 \subsection{State of the art}
 \label{sec:sota}
 
 Current property graph database systems vary in their support and philosophy around schema. Most embrace the flexibility of the property graph data model by supporting optional, partial, or implicit schemas. Others require the schema to be fully specified in advance. We take a closer look at three of the most popular property graph databases: Neo4j, JanusGraph, and TigerGraph.
 
-% TODO: summary table
+A summary of the differences in schema capabilities is shown in \autoref{tab:schema-comparison}. We elaborate here on the meaning of the listed schema features. Mandatory property constraints express that some property must exist on an object. Allowed property constraints express that no properties may exist, other than the ones explicitly specified. Endpoint constraints express that edges may not connect nodes which do not conform to some specified types. Data type constraints express that the value of a property must be of a particular data type. Maximum and mimumum cardinality constraints express that a node must have some number of incoming or outgoing edges of a particular type. Property uniqueness constraints express that no two nodes may have the same value for a particular property (note that a property is a key if it is mandatory and unique).
 
-\paragraph{Neo4j.} Being one of the first to adopt the property graph data model, Neo4j has grown to become the most popular graph database engine today\footnote{\url{https://db-engines.com/en/ranking/graph+dbms} (accessed July 2022)}. Their data model differs from ours in that edges can only have a single label, while nodes can have multiple. Neo4j takes an implicit schema approach: after inserting data, the user can construct a schema that describes the data using built-in functions. In addition, some constraints can be explicitly specified, namely existence of mandatory properties, uniqueness of property values, and key constraints. Limitations of Neo4j's schema functionality are lack of mandatory edges and more general edge cardinality constraints.
+Referring back to our definition of schema conformance (\autoref{def:schema-conformance}), we can see how each of the constraints in \autoref{tab:schema-comparison} can be linked to a conformance rule. Mandatory and allowed properties are captured by our notion of record conformance (\autoref{def:record-conformance}), which corresponds to rule~\ref{rule:conformance-node}. Endpoint constraints correspond to rule~\ref{rule:conformance-edge}. Data type constraints are captured by our notion of object conformance (\autoref{def:object-conformance}), and correspond to rule~\ref{rule:conformance-node}. Cardinality constraints correspond to rules~\ref{rule:conformance-out} and \ref{rule:conformance-in}.
+
+\begin{table}[t]
+  \centering
+  \begin{tabularx}{\textwidth}{|X|l|l|l|l|l|}
+    \hline
+                & \textbf{Neo4j}     & \textbf{Neo4j} & \textbf{TigerGraph} & \textbf{JanusGraph} & \textbf{Ours} \\
+                & \textbf{Community} & \textbf{Enterprise} &                &                     &               \\
+    \hline
+    Mandatory   & \no                & \yes                & \yes           & \no                 & \yes          \\
+    properties  &                    &                     &                &                     &               \\
+    \hline
+    Allowed     & \no                & \no                 & \no            & \yes                & \yes          \\
+    properties  &                    &                     &                &                     &               \\
+    \hline
+    Endpoint    & \no                & \no                 & \yes           & \yes                & \yes          \\
+    constraints &                    &                     &                &                     &               \\
+    \hline
+    Data type   & \no                & \no                 & \yes           & \yes                & \yes          \\
+    constraints &                    &                     &                &                     &               \\
+    \hline
+    Maximum     & \no                & \no                 & \no            & \yes*               & \yes          \\
+    cardinality &                    &                     &                &                     &               \\
+    \hline
+    Minimum     & \no                & \no                 & \no            & \no                 & \yes          \\
+    cardinality &                    &                     &                &                     &               \\
+    \hline
+    Property    & \yes               & \yes                & \yes           & \no                 & \no           \\
+    uniqueness  &                    &                     &                &                     &               \\
+    % \hline
+    % Subtyping   & \no & \no & \no & \no & \no \\
+    \hline
+  \end{tabularx}
+  \caption{Comparison of schema capabilities of property graph database systems and our schema formalism. *: only one-to-one, one-to-many, etc.}
+  \label{tab:schema-comparison}
+\end{table}
+
+Next, we detail the differences between the three database systems in our scope with regard to data model and schema capabilities.
+
+\paragraph{Neo4j.} Being one of the first to adopt the property graph data model, Neo4j has grown to become the most popular graph database engine today\footnote{\url{https://db-engines.com/en/ranking/graph+dbms} (accessed July 2022)}. Their data model differs from ours in that edges can only have a single label, while nodes can have multiple.
+
+Neo4j's approach to schema is primarily implicit: after inserting data, the user can construct a schema that describes the data using built-in functions. In addition, some constraints can be explicitly specified, namely existence of mandatory properties (enterprise edition only), uniqueness of property values, and key constraints.
 
 \paragraph{JanusGraph.} Originating from the open source Titan project, JanusGraph is a continuation of the effort to create a distributed and highly scalable graph database. In their data model, nodes and edges always have one label. Properties can have sets and lists as values, and there may exist multiple properties with the same key on the same node. Furthermore, properties themselves can have properties. In this sense, the data model is like a blend of property graphs and RDF \citep{pan2009rdf}.
 
-JanusGraph has the largest set of schema features among all systems we came across. Similarly to Neo4j, JanusGraph can automatically generate a schema during operation. However, this functionality can be disabled, in which case the schema must be explicitly defined. There is built-in support for specifying which node labels, edge labels, and property keys may exist. Furthermore, it can be specified which properties may exist depending on the label of a node or edge. Property values are restricted to a datatype and may be single-valued or multi-valued (lists or sets). In addition, the types of the source and target nodes that may be connected by an edge with a particular label can be constrained. Edge cardinality can be constrained to one-to-one, one-to-many, many-to-one, many-to-many, or ``simple'' (at most one edge of a particular label between any pair of nodes). Finally, there are features to support static (immutable) nodes, time-to-live (TTL), and unidrectional edges which can only be traversed from source to target.
+JanusGraph has the largest set of schema features among all systems we came across. Similarly to Neo4j, JanusGraph can automatically generate a schema during operation. However, this functionality can be disabled, in which case the schema must be explicitly defined. There is built-in support for specifying which node labels, edge labels, and property names may exist. Furthermore, it can be specified which properties may exist depending on the label of a node or edge. Property values are restricted to a data type and may be single-valued or multi-valued (lists or sets). In addition, the types of the source and target nodes that may be connected by an edge with a particular label can be constrained. Edge cardinality can be constrained to one-to-one, one-to-many, many-to-one, many-to-many, or ``simple'' (at most one edge of a particular label between any pair of nodes). Finally, there are features to support static (immutable) nodes, time-to-live (TTL), and unidrectional edges which can only be traversed from source to target.
 
 All of JanusGraph's schema features are centered around specifying what is allowed in the graph, but mandatory properties and edges are not supported. Cardinality constraints are supported, but not to the full extent of our definition. To be precise, JanusGraph can impose constraints on the maximum edge cardinality, but not the minimum. For example, a many-to-one schema edge ensures that every target node has at most one incoming edge of a particular type, but does not prevent a target node from having no incoming edges.
 
 \paragraph{TigerGraph.} A unique aspect of TigerGraph \citep{deutsch2019tigergraph} is that it is schema-first: the entire schema must be specified before a database is instantiated. This allows for more powerful optimizations, building on decades of research on relational databases. In TigerGraph's data model, nodes and edges have exactly one label, but nodes can be associated with any number of \emph{tags}, which are conceptually similar to labels. Edges can be directed or undirected.
 
-TigerGraph's schema is strict, in the sense that every node label, edge label, and property must be explicitly defined. All properties are mandatory and have a fixed datatype, which may be singular or multi-valued. There are no null values; if a property value is missing during insertion, a default value is set. All nodes have a primary key, which may be a single property or a composite key. Schema edges must specify a source and target node type, though it is possible to specify multiple types on either side. By default, directed edges can only be traversed from source to target, though a reverse edge may be automatically constructed. Mandatory edges and other cardinality constraints cannot be expressed in TigerGraph's schema language.
+TigerGraph's schema is strict, in the sense that every node label, edge label, and property must be explicitly defined. All properties are mandatory and have a fixed data type, which may be singular or multi-valued. There are no null values; if a property value is missing during insertion, a default value is set. All nodes have a primary key, which may be a single property or a composite key. Schema edges must specify a source and target node type, though it is possible to specify multiple types on either side. By default, directed edges can only be traversed from source to target, though a reverse edge can be automatically constructed if desired.
 
 \subsection{Extending schema capabilities}
 
