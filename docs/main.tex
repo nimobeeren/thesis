@@ -95,8 +95,11 @@
 \newcommand{\undefined}{\mathbf{undef}}
 
 % Yes/No
+% TODO: use colored characters?
 \newcommand{\yes}{\includegraphics[height=7pt]{figures/check.png}}
 \newcommand{\no}{\includegraphics[height=6.5pt]{figures/cross.png}}
+
+\renewcommand{\itemautorefname}{Rule}
 
 \title{Typing Property Graphs}
 \author{Nimo Beeren}
@@ -299,13 +302,13 @@ Next, we define what it means for a property graph to conform to a schema.
   Given a property graph $$G = (N, E, \rho, \lambda, \pi)$$ and a property graph schema $$S = (N', E', \rho', \omega)$$ we say that $G$ \emph{conforms} to $S$ if and only if all of the following rules hold.
 
   \begin{enumerate}
-    \item\label{rule:conformance-basic-node}
+    \item\label{rule:basic-node}
           Every node $n$ conforms to some schema node $n'$:
           \begin{align*}
              & \forall n \in N \; \exists n' \in N' : n \conf n'
           \end{align*}
 
-    \item\label{rule:conformance-basic-edge}
+    \item\label{rule:basic-edge}
           Every edge $e$ conforms to some schema edge $e'$, and the source and target nodes of $e$ conform to the respective endpoints of $e'$:
           \begin{align*}
              & \forall e \in E \; \exists e' \in E' :                      \\
@@ -317,7 +320,7 @@ Next, we define what it means for a property graph to conform to a schema.
 
 \autoref{fig:conformance-basic} contains some examples of property graphs which are validated against the schema of \autoref{fig:pg-schema-basic}. In particular, \autoref{fig:conformance-basic-in} shows a case that we might want to prevent (a \texttt{Post} with no creator), but the current schema formalism cannot express this.
 
-Intuitively, rule~\ref{rule:conformance-basic-node} specifies the types of nodes that are allowed to exist in the graph. If there exists a node in the graph that is not specified in the schema, the graph does not conform. Rule~\ref{rule:conformance-basic-edge} similarly specifies the allowed types of edges. In contrast to rule~\ref{rule:conformance-basic-node}, it looks not only at the properties of the edge itself, but also at the source and target nodes. This prevents a node from having an edge that is not explicitly allowed, even if that edge itself does conform to some schema edge.
+Intuitively, \autoref{rule:basic-node} specifies the types of nodes that are allowed to exist in the graph. If there exists a node in the graph that is not specified in the schema, the graph does not conform. \autoref{rule:basic-edge} similarly specifies the allowed types of edges. In contrast to \autoref{rule:basic-node}, it looks not only at the properties of the edge itself, but also at the source and target nodes. This prevents a node from having an edge that is not explicitly allowed, even if that edge itself does conform to some schema edge.
 
 Under these definitions, it is not possible to specify that an edge is mandatory. In the following, we introduce a notion of cardinality constraints which makes this possible.
 
@@ -326,14 +329,14 @@ Under these definitions, it is not possible to specify that an edge is mandatory
   \begin{subfigure}[t]{0.45\textwidth}
     \centering
     \includegraphics[width=\textwidth]{figures/conformance-basic-node.pdf}
-    \caption{A \texttt{Person} is missing a \texttt{birthday}, which violates rule~\ref{rule:conformance-basic-node}.}
+    \caption{A \texttt{Person} is missing a \texttt{birthday}, which violates \autoref{rule:basic-node}.}
     \label{fig:conformance-basic-node}
   \end{subfigure}
   \hfill
   \begin{subfigure}[t]{0.45\textwidth}
     \centering
     \includegraphics[width=\textwidth]{figures/conformance-basic-edge.pdf}
-    \caption{A \texttt{knows} edge is missing a \texttt{since} property, which violates rule~\ref{rule:conformance-basic-edge}.}
+    \caption{A \texttt{knows} edge is missing a \texttt{since} property, which violates \autoref{rule:basic-edge}.}
     \label{fig:conformance-basic-edge}
   \end{subfigure}
 
@@ -342,7 +345,7 @@ Under these definitions, it is not possible to specify that an edge is mandatory
   \begin{subfigure}[t]{0.45\textwidth}
     \centering
     \includegraphics[width=\textwidth]{figures/conformance-basic-edge-target.pdf}
-    \caption{The target of a \texttt{knows} edge is not a \texttt{Person}, which violates rule~\ref{rule:conformance-basic-edge}.}
+    \caption{The target of a \texttt{knows} edge is not a \texttt{Person}, which violates \autoref{rule:basic-edge}.}
     \label{fig:conformance-basic-edge-target}
   \end{subfigure}
   \hfill
@@ -410,13 +413,13 @@ An example of a property graph schema with cardinality constraints is given in \
   Given a property graph $$G = (N, E, \rho, \lambda, \pi)$$ and a property graph schema $$S = (N', E', \rho', \omega, \eta)$$ we say that $G$ \emph{conforms} to $S$ if and only if all of the following rules hold.
 
   \begin{enumerate}
-    \item\label{rule:conformance-node}
+    \item\label{rule:node}
           Every node $n$ conforms to some schema node $n'$:
           \begin{align*}
              & \forall n \in N \; \exists n' \in N' : n \conf n'
           \end{align*}
 
-    \item\label{rule:conformance-edge}
+    \item\label{rule:edge}
           Every edge $e$ conforms to some schema edge $e'$, and the source and target nodes of $e$ conform to the respective endpoints of $e'$:
           \begin{align*}
              & \forall e \in E \; \exists e' \in E' :                      \\
@@ -424,7 +427,7 @@ An example of a property graph schema with cardinality constraints is given in \
             \wedge \trg(\rho(e)) \conf \trg(\rho'(e'))
           \end{align*}
 
-    \item\label{rule:conformance-out}
+    \item\label{rule:out}
           If a node $n$ conforms to the source of a schema edge $e'$, it must have the right number of outgoing edges of the right type:
           \begin{align*}
              & \forall n \in N \; \forall e' \in E' :                                                        \\
@@ -432,7 +435,7 @@ An example of a property graph schema with cardinality constraints is given in \
              & \quad\quad e \conf e' \wedge \src(\rho(e)) = n \wedge \trg(\rho(e)) \conf \trg(\rho(e'))\big]
           \end{align*}
 
-    \item\label{rule:conformance-in}
+    \item\label{rule:in}
           If a node $n$ conforms to the target of a schema edge $e'$, it must have the right number of incoming edges of the right type:
           \begin{align*}
              & \forall n \in N \; \forall e' \in E' :                                                        \\
@@ -444,7 +447,7 @@ An example of a property graph schema with cardinality constraints is given in \
 
 \autoref{fig:conformance} contains some examples of property graphs which are validated against the schema of \autoref{fig:pg-schema}, taking into account the new rules.
 
-Compared to \autoref{def:schema-conformance-basic}, rules~\ref{rule:conformance-node} and~\ref{rule:conformance-edge} are unchanged, while rules~\ref{rule:conformance-out} and~\ref{rule:conformance-in} enforce cardinality constraints on edges. With these new rules, we can enforce mandatory edges, i.e. a cardinality constraint of ``at least one''.
+Compared to \autoref{def:schema-conformance-basic}, rules~\ref{rule:node} and~\ref{rule:edge} are unchanged, while rules~\ref{rule:out} and~\ref{rule:in} enforce cardinality constraints on edges. With these new rules, we can enforce mandatory edges, i.e. a cardinality constraint of ``at least one''.
 
 \begin{figure}[t]
   \centering
@@ -467,7 +470,7 @@ Compared to \autoref{def:schema-conformance-basic}, rules~\ref{rule:conformance-
   \begin{subfigure}[t]{0.45\textwidth}
     \centering
     \includegraphics[width=\textwidth]{figures/conformance-too-many-in.pdf}
-    \caption{This \texttt{Post} has too many incoming \texttt{created} edges, which violates rule~\ref{rule:conformance-in}.}
+    \caption{This \texttt{Post} has too many incoming \texttt{created} edges, which violates \autoref{rule:in}.}
     \label{fig:conformance-edge-target}
   \end{subfigure}
   \hfill
@@ -475,7 +478,7 @@ Compared to \autoref{def:schema-conformance-basic}, rules~\ref{rule:conformance-
     \centering
     % FIXME: the violating Post should be highlighted
     \includegraphics[width=\textwidth]{figures/conformance-basic-in.pdf}
-    \caption{A \texttt{Post} is missing an incoming \texttt{created} edge, which violates rule~\ref{rule:conformance-in}.}
+    \caption{A \texttt{Post} is missing an incoming \texttt{created} edge, which violates \autoref{rule:in}.}
     \label{fig:conformance-out}
   \end{subfigure}
 
@@ -581,7 +584,7 @@ Current property graph database systems vary in their support and philosophy aro
 
 A summary of the differences in schema capabilities is shown in \autoref{tab:schema-comparison}. We elaborate here on the meaning of the listed schema features. Mandatory property constraints express that some property must exist on an object. Allowed property constraints express that no properties may exist, other than the ones explicitly specified. Endpoint constraints express that edges may not connect nodes which do not conform to some specified types. Data type constraints express that the value of a property must be of a particular data type. Maximum and mimumum cardinality constraints express that a node must have some number of incoming or outgoing edges of a particular type. Property uniqueness constraints express that no two nodes may have the same value for a particular property (note that a property is a key if it is mandatory and unique).
 
-Referring back to our definition of schema conformance (\autoref{def:schema-conformance}), we can see how each of the constraints in \autoref{tab:schema-comparison} can be linked to a conformance rule. Mandatory and allowed properties are captured by our notion of record conformance (\autoref{def:record-conformance}), which corresponds to rule~\ref{rule:conformance-node}. Endpoint constraints correspond to rule~\ref{rule:conformance-edge}. Data type constraints are captured by our notion of object conformance (\autoref{def:object-conformance}), and correspond to rule~\ref{rule:conformance-node}. Cardinality constraints correspond to rules~\ref{rule:conformance-out} and \ref{rule:conformance-in}.
+Referring back to our definition of schema conformance (\autoref{def:schema-conformance}), we can see how each of the constraints in \autoref{tab:schema-comparison} can be linked to a conformance rule. Mandatory and allowed properties are captured by our notion of record conformance (\autoref{def:record-conformance}), which corresponds to \autoref{rule:node}. Endpoint constraints correspond to \autoref{rule:edge}. Data type constraints are captured by our notion of object conformance (\autoref{def:object-conformance}), and correspond to \autoref{rule:node}. Cardinality constraints correspond to \autoref{rule:out} and \ref{rule:in}.
 
 \begin{table}[t]
   \centering
@@ -653,41 +656,50 @@ We consider two variants of the schema validation problem:
 
 While a Boolean validation method may be sufficient in some situations, full validation is required when we want to explain why a graph does not conform. Boolean validation is a strictly easier problem because we can stop as soon as we find a single violation, while full validation always requires at least one full scan of the graph.
 
-To reduce the complexity of the implementation, we assume that the set of labels of a schema object functionally determines the record type of that schema object. Recall that every object must conform to a schema object (rules~\ref{rule:conformance-node} and \ref{rule:conformance-edge}). This implies that if an object has the same set of labels as a schema object, it must conform to that schema object (since there exists no schema object with the same label set and a different record type). We found that this assumption holds in many domains, including the ones we study in \autoref{sec:workloads}.
+To reduce the complexity of the implementation, we assume that the set of labels of a schema object functionally determines the record type of that schema object. Recall that every object must conform to a schema object (rules~\ref{rule:node} and \ref{rule:edge}). This implies that if an object has the same set of labels as a schema object, it must conform to that schema object (since there exists no schema object with the same label set and a different record type). We found that this assumption holds in many domains, including the ones we study in \autoref{sec:workloads}.
 
 Under this assumption, we can simplify the rules of conformance. Informally:
 
 \begin{enumerate}
   \item
   \begin{enumerate}
-    \item Every node has the same set of labels as some schema node.
-    \item All mandatory properties exist on the node.
-    % \item If a data node and schema node have the same label set, all mandatory properties of the schema node must be present on the data node.
-    \item The node has no properties that are not allowed.
-    % \item If a data node and schema node have the same label set, the data node may not have properties that are not allowed by the schema node.
-    \item All node properties have a value of the right type.
+    \item\label{rule:simp-node-labels}
+    Every node has the same set of labels as some schema node.
+    \item\label{rule:simp-node-mandatory-props}
+    All mandatory properties exist on the node.
+    \item\label{rule:simp-node-allowed-props}
+    The node has no properties that are not allowed.
+    \item\label{rule:simp-node-datatype}
+    All node properties have a value of the right type.
   \end{enumerate}
   \item
   \begin{enumerate}
-    \item Every edge has the same set of labels as some schema edge.
-    \item All mandatory properties exist on the edge.
-    \item The edge has no properties that are not allowed.
-    \item All edge properties have a value of the right type.
-    \item Both endpoints of the edge have the right labels.
+    \item\label{rule:simp-edge-labels}
+    Every edge has the same set of labels as some schema edge.
+    \item\label{rule:simp-edge-mandatory-props}
+    All mandatory properties exist on the edge.
+    \item\label{rule:simp-edge-allowed-props}
+    The edge has no properties that are not allowed.
+    \item\label{rule:simp-edge-datatype}
+    All edge properties have a value of the right type.
+    \item\label{rule:simp-edge-endpoints}
+    Both endpoints of the edge have the right labels.
   \end{enumerate}
-  \item Every node has the right number of outgoing edges with the right labels.
-  \item Every node has the right number of incoming edges with the right labels.
+  \item\label{rule:simp-card-out}
+  Every node has the right number of outgoing edges with the right labels.
+  \item\label{rule:simp-card-in}
+  Every node has the right number of incoming edges with the right labels.
 \end{enumerate}
 
 Next, we describe the implementation in each of the three database systems.
 
-\paragraph{Neo4j.} We start by using all built-in schema functionality that Neo4j has to offer. To ensure the existence of mandatory properties (rules 1b and 2b), we use Neo4j's \texttt{CONSTRAINT} functionality, which lets us specify which properties are mandatory for nodes and edges with a particular label set (Enterprise edition only).
+\paragraph{Neo4j.} We start by using all built-in schema functionality that Neo4j has to offer. To ensure the existence of mandatory properties (\autoref{rule:simp-node-mandatory-props} and \ref{rule:simp-edge-mandatory-props}), we use Neo4j's \texttt{CONSTRAINT} functionality, which lets us specify which properties are mandatory for nodes and edges with a particular label set (Enterprise edition only).
 
-Next, we tackle the validation the labels of nodes and edges (rules 1a and 2a) using Cypher queries. Neo4j provides functions \texttt{db.labels()} and \texttt{db.relationshipTypes()}, which respectively return a list of all node and edge labels that exist in the database. Unfortunately, these functions do not tell us which \emph{combinations} of labels exist. Since nodes can have multiple labels, we must fall back to a \texttt{MATCH} query which checks that every node has one of the allowed combinations of labels. Since edges in Neo4j can only have one label (called a \emph{relationship type}), we can use \texttt{db.relationshipTypes()} to determine if there exist any edges with a label that is not allowed. This is sufficient for Boolean validation, but if we want to find out precisely which edges have an illegal label, we again need to use a \texttt{MATCH} query.
+Next, we tackle the validation the labels of nodes and edges (\autoref{rule:simp-node-labels} and \ref{rule:simp-edge-labels}) using Cypher queries. Neo4j provides functions \texttt{db.labels()} and \texttt{db.relationshipTypes()}, which respectively return a list of all node and edge labels that exist in the database. Unfortunately, these functions do not tell us which \emph{combinations} of labels exist. Since nodes can have multiple labels, we must fall back to a \texttt{MATCH} query which checks that every node has one of the allowed combinations of labels. Since edges in Neo4j can only have one label (called a \emph{relationship type}), we can use \texttt{db.relationshipTypes()} to determine if there exist any edges with a label that is not allowed. This is sufficient for Boolean validation, but if we want to find out precisely which edges have an illegal label, we again need to use a \texttt{MATCH} query.
 
-Next, we look at the properties. The functions \texttt{db.schema.nodeTypeProperties()} and \texttt{db.schema.relTypeProperties()} provide useful information about the properties that exist on nodes and edges, as well as their data types. This allows us to determine if there are any nodes or edges that have properties that are not allowed (rules 1c and 2c), or have the wrong data type (rules 1d and 2d). Again, if we want to find the violating objects, we need to use a \texttt{MATCH} query that scans all properties of all objects in the database. In that case, we use the \texttt{apoc.meta.type()} function (provided by the APOC library\footnote{\url{https://neo4j.com/labs/apoc/}}) to get the data type of a property at query-time.
+Next, we look at the properties. The functions \texttt{db.schema.nodeTypeProperties()} and \texttt{db.schema.relTypeProperties()} provide useful information about the properties that exist on nodes and edges, as well as their data types. This allows us to determine if there are any nodes or edges that have properties that are not allowed (\autoref{rule:simp-node-allowed-props} and \ref{rule:simp-edge-allowed-props}), or have the wrong data type (\autoref{rule:simp-node-datatype} and \ref{rule:simp-edge-datatype}). Again, if we want to find the violating objects, we need to use a \texttt{MATCH} query that scans all properties of all objects in the database. In that case, we use the \texttt{apoc.meta.type()} function (provided by the APOC library\footnote{\url{https://neo4j.com/labs/apoc/}}) to get the data type of a property at query-time.
 
-To check rule~2e, we do a \texttt{MATCH} query for every edge label, and look at the source and target nodes. For every edge, there must exist a schema edge such that the labels of the source and target in the data match the labels of the source and target in the schema.
+To check \autoref{rule:simp-edge-endpoints}, we do a \texttt{MATCH} query for every edge label, and look at the source and target nodes. For every edge, there must exist a schema edge such that the labels of the source and target in the data match the labels of the source and target in the schema.
 % An example of such a query is shown in \autoref{lst:neo4j-endpoints}.
 
 % \begin{lstlisting}[
@@ -699,24 +711,24 @@ To check rule~2e, we do a \texttt{MATCH} query for every edge label, and look at
 % RETURN e;
 % \end{lstlisting}
 
-Finally, we check the cardinality constraints (rules 3 and 4). Since the schemas of our datasets only contain ``one or more'' constraints, a simple \texttt{MATCH} query for each relevant node label is sufficient. If there is no match, the constraint is violated.
+Finally, we check the cardinality constraints (\autoref{rule:simp-card-out} and \ref{rule:simp-card-in}). Since the schemas of our datasets only contain ``one or more'' constraints, a simple \texttt{MATCH} query for each relevant node label is sufficient. If there is no match, the constraint is violated.
 % If the cardinality constraint is more specific (say, exactly 3), then we can use the \texttt{size()} function to count the number of matches of the pattern.
 
-\paragraph{JanusGraph.} The additional schema features that JanusGraph provides allow us to enforce most conformance rules at the time of schema definition, preventing any non-conforming data from being inserted. The complete set of allowed node and edge labels (rules 1a and 2a) are defined using \texttt{makeVertexLabel()} and \texttt{makeEdgeLabel()}. If a schema object has more than one label, we concatenate them to form a single label. This does not affect the semantics (as long as the order of concatenation is consistent), since we only ever check for equality of label sets.
+\paragraph{JanusGraph.} The additional schema features that JanusGraph provides allow us to enforce most conformance rules at the time of schema definition, preventing any non-conforming data from being inserted. The complete set of allowed node and edge labels (\autoref{rule:simp-node-labels} and \ref{rule:simp-edge-labels}) are defined using \texttt{makeVertexLabel()} and \texttt{makeEdgeLabel()}. If a schema object has more than one label, we concatenate them to form a single label. This does not affect the semantics (as long as the order of concatenation is consistent), since we only ever check for equality of label sets.
 
-The complete set of allowed property names is defined using \texttt{makePropertyKey()}. Next, each label is mapped to a set of property names using \texttt{addProperties()}. This prevents objects from having properties that are not allowed (rules 1c and 2c). The data type of each property is defined using \texttt{dataType()} (rules 1d and 2d). In JanusGraph, there cannot exist two properties with the same name and different data type. If this is desired, the property name must be disambiguated, which could be achieved by prefixing it with the object label.
+The complete set of allowed property names is defined using \texttt{makePropertyKey()}. Next, each label is mapped to a set of property names using \texttt{addProperties()}. This prevents objects from having properties that are not allowed (\autoref{rule:simp-node-allowed-props} and \ref{rule:simp-edge-allowed-props}). The data type of each property is defined using \texttt{dataType()} (\autoref{rule:simp-node-datatype} and \ref{rule:simp-edge-datatype}). In JanusGraph, there cannot exist two properties with the same name and different data type. If this is desired, the property name must be disambiguated, which could be achieved by prefixing it with the object label.
 
-For each edge label, the method \texttt{addConnection()} lets us specify the allowed labels of the edge endpoints (rule~2e). The maximum cardinality for an edge label is can be set with \texttt{multiplicity()}, but this does not provide any guarantees on minimum cardinality.
+For each edge label, the method \texttt{addConnection()} lets us specify the allowed labels of the edge endpoints (\autoref{rule:simp-edge-endpoints}). The maximum cardinality for an edge label is can be set with \texttt{multiplicity()}, but this does not provide any guarantees on minimum cardinality.
 
-The remaining rules cannot be fully enforced by JanusGraph's schema, so we write queries to achieve this. Missing mandatory properties (rules 1b and 2b) are found using a combination of \texttt{hasLabel} and \texttt{hasNot} steps of the Gremlin query language. For cardinality constraints, we leverage the fact that our schemas only have constraints of the form ``one or more''. We can validate these constraints using a combination of \texttt{hasLabel}, \texttt{outE}, and \texttt{inE} steps.
+The remaining rules cannot be fully enforced by JanusGraph's schema, so we write queries to achieve this. Missing mandatory properties (\autoref{rule:simp-node-mandatory-props} and \ref{rule:simp-edge-mandatory-props}) are found using a combination of \texttt{hasLabel} and \texttt{hasNot} steps of the Gremlin query language. For cardinality constraints, we leverage the fact that our schemas only have constraints of the form ``one or more''. We can validate these constraints using a combination of \texttt{hasLabel}, \texttt{outE}, and \texttt{inE} steps.
 
 If we are only interested in the Boolean validation problem, we do not need to enumerate all query results. To give the query engine the best chance of terminating early, we write the entire validation as a single disjunctive query. JanusGraph unfortunately does not allow a single query to range over all nodes and all edges, so instead we execute one query for nodes and one for edges, in sequence.
 
-\paragraph{TigerGraph.} Before any data is loaded, TigerGraph requires the user to specify a schema describing all nodes, edges and their properties. This is done with a series of \texttt{CREATE VERTEX} and \texttt{CREATE EDGE} statements. Every node and edge has a label and a set of properties, and every property has a datatype. Furthermore, every node type has a primary key. Finally, every edge type must specify a source and target node types. Using these built-in schema capabilities, we can already guarantee conformance to a few of our rules. Objects cannot have illegal labels (rules 1a and 2a) or illegal properties (rules 1c and 2c), and properties cannot have illegal data types (rules 1d and 2d). In addition, the endpoint constraint of edges is satisfied (rule~2e).
+\paragraph{TigerGraph.} Before any data is loaded, TigerGraph requires the user to specify a schema describing all nodes, edges and their properties. This is done with a series of \texttt{CREATE VERTEX} and \texttt{CREATE EDGE} statements. Every node and edge has a label and a set of properties, and every property has a datatype. Furthermore, every node type has a primary key. Finally, every edge type must specify a source and target node types. Using these built-in schema capabilities, we can already guarantee conformance to a few of our rules. Objects cannot have illegal labels (\autoref{rule:simp-node-labels} and \ref{rule:simp-edge-labels}) or illegal properties (\autoref{rule:simp-node-allowed-props} and \ref{rule:simp-edge-allowed-props}), and properties cannot have illegal data types (\autoref{rule:simp-node-datatype} and \ref{rule:simp-edge-datatype}). In addition, the endpoint constraint of edges is satisfied (\autoref{rule:simp-edge-endpoints}).
 
-Unique to TigerGraph is that all properties must have a value as soon as the object is instantiated (there are no null values). When a value is missing, it is set to a default value, such as the empty string, the number 0, or the first of January 1970. While it is possible to prevent objects with missing values from being loaded, in some cases we may want to check for missing values on an existing graph. To this end, we use a query that finds all objects which have a mandatory property with the default value (satisfying rules 1b and 2b). If the default value naturally appears in valid data, then we use another indicator value. The query consists of a set of simple \texttt{SELECT-FROM-WHERE} patterns which range over all nodes and edges.
+Unique to TigerGraph is that all properties must have a value as soon as the object is instantiated (there are no null values). When a value is missing, it is set to a default value, such as the empty string, the number 0, or the first of January 1970. While it is possible to prevent objects with missing values from being loaded, in some cases we may want to check for missing values on an existing graph. To this end, we use a query that finds all objects which have a mandatory property with the default value (satisfying \autoref{rule:simp-node-mandatory-props} and \ref{rule:simp-edge-mandatory-props}). If the default value naturally appears in valid data, then we use another indicator value. The query consists of a set of simple \texttt{SELECT-FROM-WHERE} patterns which range over all nodes and edges.
 
-Finally, cardinality constraints are also validated using a query. For outgoing edges (rule~3), we use the built-in \texttt{outdegree()} function, which returns the number of outgoing edges with a particular label for a given node. By default, TigerGraph maintains an index that stores these statistics for every node. For incoming edges (rule~4), we use another TigerGraph feature known as an accumulator. This lets us compute the number of incoming edges for all relevant nodes in a single pass over the graph. Afterwards, the violating nodes are picked out.
+Finally, cardinality constraints are also validated using a query. For outgoing edges (\autoref{rule:simp-card-out}), we use the built-in \texttt{outdegree()} function, which returns the number of outgoing edges with a particular label for a given node. By default, TigerGraph maintains an index that stores these statistics for every node. For incoming edges (\autoref{rule:simp-card-in}), we use another TigerGraph feature known as an accumulator. This lets us compute the number of incoming edges for all relevant nodes in a single pass over the graph. Afterwards, the violating nodes are picked out.
 
 % TODO: tigergraph boolean version?
 
