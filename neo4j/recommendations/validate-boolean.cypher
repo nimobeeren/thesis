@@ -95,10 +95,10 @@ RETURN relType, propertyName, propertyTypes;
 // Check for edges between wrong types of nodes
 // We can't do this with the schema statistics, because this finds that some Actors have DIRECTED eges,
 // which is allowed, but only when they are also Directors
-MATCH (n)-[e:ACTED_IN]->(m) WHERE NOT "Actor" IN labels(n) OR NOT "Movie" IN labels(m) RETURN count(e) = 0;
-MATCH (n)-[e:DIRECTED]->(m) WHERE NOT "Director" IN labels(n) OR NOT "Movie" IN labels(m) RETURN count(e) = 0;
-MATCH (n)-[e:IN_GENRE]->(m) WHERE NOT "Movie" IN labels(n) OR NOT "Genre" IN labels(m) RETURN count(e) = 0;
-MATCH (n)-[e:RATED]->(m) WHERE NOT "User" IN labels(n) OR NOT "Movie" IN labels(m) RETURN count(e) = 0;
+MATCH (n)-[e:ACTED_IN]->(m) WHERE NOT "Actor" IN labels(n) OR NOT labels(m) = ["Movie"] RETURN count(e) = 0;
+MATCH (n)-[e:DIRECTED]->(m) WHERE NOT "Director" IN labels(n) OR NOT labels(m) = ["Movie"] RETURN count(e) = 0;
+MATCH (n)-[e:IN_GENRE]->(m) WHERE NOT labels(n) = ["Movie"] OR NOT labels(m) = ["Genre"] RETURN count(e) = 0;
+MATCH (n)-[e:RATED]->(m) WHERE NOT labels(n) = ["User"] OR NOT labels(m) = ["Movie"] RETURN count(e) = 0;
 
 // Check for missing mandatory edges
 MATCH (a:Actor) WHERE NOT (a)-[:ACTED_IN]->(:Movie) RETURN count(a) = 0;
