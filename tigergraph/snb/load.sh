@@ -1,4 +1,5 @@
-#!/bin/env bash
+#!/usr/bin/env bash
+set -euo pipefail
 
 ## Modify the line below to the directory that contains the SNB dataset
 export LDBC_SNB_DATA_DIR=/home/tigergraph/mydata/snb
