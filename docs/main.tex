@@ -1,14 +1,8 @@
 \documentclass{article}
 
+% Layout
 \usepackage[a4paper, margin=1.5in]{geometry}
 \usepackage{parskip}
-
-\usepackage{hyperref}
-\hypersetup{
-  colorlinks,
-  linkcolor=[rgb]{0.859,0,0.659},
-  citecolor=[rgb]{0.859,0,0.659}
-}
 
 \usepackage{amsmath}
 \usepackage{amssymb}
@@ -17,11 +11,47 @@
 \usepackage{caption}
 \usepackage{subcaption}
 \usepackage{tabularx}
+\usepackage{xcolor}
+
+\definecolor{pink}{rgb}{0.780,0.223,0.537}
+\definecolor{reddish}{rgb}{0.769,0.263,0.169}
+\definecolor{darkblue}{rgb}{0.012,0.184,0.384}
+\definecolor{blue}{rgb}{0.000,0.361,0.773}
+\definecolor{purple}{rgb}{0.435,0.259,0.757}
+\definecolor{orange}{rgb}{0.890,0.384,0.035}
+
+% References
+\usepackage{hyperref}
+\hypersetup{
+  colorlinks,
+  linkcolor=blue,
+  citecolor=blue
+}
+\renewcommand{\UrlFont}{\color{purple}\ttfamily}
+
+% Fonts
+\usepackage{pxfonts}
 
 % Bibliography and citation style
 \usepackage[square]{natbib}
 \bibliographystyle{apalike}
 \renewcommand{\refname}{Bibliography}
+
+% Code listings
+\usepackage{listing}
+\usepackage{listings}
+\lstset{
+  language=SQL,
+  breaklines=true,
+  frame=lines,
+  captionpos=b,
+  aboveskip=2\parskip,
+  belowskip=0pt,
+  basicstyle=\ttfamily,
+  stringstyle=\color{blue},
+  keywordstyle=\color{reddish},
+  morekeywords={RETURN}
+}
 
 % Definitions
 \theoremstyle{definition}
@@ -655,7 +685,16 @@ Next, we look at the properties. To ensure the existence of mandatory properties
 \end{sloppypar}
 
 To check rule 2e, we do a \texttt{MATCH} query for every edge label, and look at the source and target nodes. For every edge, there must exist a schema edge such that the labels of the source and target in the data match the labels of the source and target in the schema.
-% TODO: example
+% An example of such a query is shown in \autoref{lst:neo4j-endpoints}.
+
+% \begin{lstlisting}[
+%   caption={A query that finds all \texttt{ACTED\_IN} edges such that the endpoints have the wrong label. Note that the source node may have additional labels.},
+%   label=lst:neo4j-endpoints
+% ]
+% MATCH (n)-[e:ACTED_IN]->(m)
+% WHERE NOT "Actor" IN labels(n) OR NOT labels(m) = ["Movie"]
+% RETURN e;
+% \end{lstlisting}
 
 Finally, we check the cardinality constraints (rule 3 and 4). Depending on the kind of cardinality constraints that appear in the schema, we can take two different approaches. For cardinality constraints requiring ``one or more'' edges, a simple pattern matching query is sufficient. If there is no match, the constraint is violated. If the cardinality constraint is more specific (say, exactly 3), then we can use the \texttt{size()} function to count the number of matches of the pattern.
 
