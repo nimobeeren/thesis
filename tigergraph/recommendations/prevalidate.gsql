@@ -6,6 +6,9 @@ SET syntax_version="v2"
 // Since TigerGraph does not support null values, we check if the value is the
 // default value instead
 CREATE QUERY validateProperties () {
+
+    // TODO: use accumulator to store all violating nodes
+    
     violatingMovies =
         SELECT movie
         FROM Movie:movie

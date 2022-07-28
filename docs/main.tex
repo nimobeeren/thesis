@@ -326,14 +326,14 @@ Under these definitions, it is not possible to specify that an edge is mandatory
   \begin{subfigure}[t]{0.45\textwidth}
     \centering
     \includegraphics[width=\textwidth]{figures/conformance-basic-node.pdf}
-    \caption{A \texttt{Person} is missing a \texttt{birthday}, which violates rule \ref{rule:conformance-basic-node}.}
+    \caption{A \texttt{Person} is missing a \texttt{birthday}, which violates rule~\ref{rule:conformance-basic-node}.}
     \label{fig:conformance-basic-node}
   \end{subfigure}
   \hfill
   \begin{subfigure}[t]{0.45\textwidth}
     \centering
     \includegraphics[width=\textwidth]{figures/conformance-basic-edge.pdf}
-    \caption{A \texttt{knows} edge is missing a \texttt{since} property, which violates rule \ref{rule:conformance-basic-edge}.}
+    \caption{A \texttt{knows} edge is missing a \texttt{since} property, which violates rule~\ref{rule:conformance-basic-edge}.}
     \label{fig:conformance-basic-edge}
   \end{subfigure}
 
@@ -342,7 +342,7 @@ Under these definitions, it is not possible to specify that an edge is mandatory
   \begin{subfigure}[t]{0.45\textwidth}
     \centering
     \includegraphics[width=\textwidth]{figures/conformance-basic-edge-target.pdf}
-    \caption{The target of a \texttt{knows} edge is not a \texttt{Person}, which violates rule \ref{rule:conformance-basic-edge}.}
+    \caption{The target of a \texttt{knows} edge is not a \texttt{Person}, which violates rule~\ref{rule:conformance-basic-edge}.}
     \label{fig:conformance-basic-edge-target}
   \end{subfigure}
   \hfill
@@ -467,7 +467,7 @@ Compared to \autoref{def:schema-conformance-basic}, rules~\ref{rule:conformance-
   \begin{subfigure}[t]{0.45\textwidth}
     \centering
     \includegraphics[width=\textwidth]{figures/conformance-too-many-in.pdf}
-    \caption{This \texttt{Post} has too many incoming \texttt{created} edges, which violates rule \ref{rule:conformance-in}.}
+    \caption{This \texttt{Post} has too many incoming \texttt{created} edges, which violates rule~\ref{rule:conformance-in}.}
     \label{fig:conformance-edge-target}
   \end{subfigure}
   \hfill
@@ -475,7 +475,7 @@ Compared to \autoref{def:schema-conformance-basic}, rules~\ref{rule:conformance-
     \centering
     % FIXME: the violating Post should be highlighted
     \includegraphics[width=\textwidth]{figures/conformance-basic-in.pdf}
-    \caption{A \texttt{Post} is missing an incoming \texttt{created} edge, which violates rule \ref{rule:conformance-in}.}
+    \caption{A \texttt{Post} is missing an incoming \texttt{created} edge, which violates rule~\ref{rule:conformance-in}.}
     \label{fig:conformance-out}
   \end{subfigure}
 
@@ -687,7 +687,7 @@ Next, we tackle the validation the labels of nodes and edges (rules 1a and 2a) u
 
 Next, we look at the properties. The functions \texttt{db.schema.nodeTypeProperties()} and \texttt{db.schema.relTypeProperties()} provide useful information about the properties that exist on nodes and edges, as well as their data types. This allows us to determine if there are any nodes or edges that have properties that are not allowed (rules 1c and 2c), or have the wrong data type (rules 1d and 2d). Again, if we want to find the violating objects, we need to use a \texttt{MATCH} query that scans all properties of all objects in the database. In that case, we use the \texttt{apoc.meta.type()} function (provided by the APOC library\footnote{\url{https://neo4j.com/labs/apoc/}}) to get the data type of a property at query-time.
 
-To check rule 2e, we do a \texttt{MATCH} query for every edge label, and look at the source and target nodes. For every edge, there must exist a schema edge such that the labels of the source and target in the data match the labels of the source and target in the schema.
+To check rule~2e, we do a \texttt{MATCH} query for every edge label, and look at the source and target nodes. For every edge, there must exist a schema edge such that the labels of the source and target in the data match the labels of the source and target in the schema.
 % An example of such a query is shown in \autoref{lst:neo4j-endpoints}.
 
 % \begin{lstlisting}[
@@ -706,11 +706,19 @@ Finally, we check the cardinality constraints (rules 3 and 4). Since the schemas
 
 The complete set of allowed property names is defined using \texttt{makePropertyKey()}. Next, each label is mapped to a set of property names using \texttt{addProperties()}. This prevents objects from having properties that are not allowed (rules 1c and 2c). The data type of each property is defined using \texttt{dataType()} (rules 1d and 2d). In JanusGraph, there cannot exist two properties with the same name and different data type. If this is desired, the property name must be disambiguated, which could be achieved by prefixing it with the object label.
 
-For each edge label, the method \texttt{addConnection()} lets us specify the allowed labels of the edge endpoints (rule 2e). The maximum cardinality for an edge label is can be set with \texttt{multiplicity()}, but this does not provide any guarantees on minimum cardinality.
+For each edge label, the method \texttt{addConnection()} lets us specify the allowed labels of the edge endpoints (rule~2e). The maximum cardinality for an edge label is can be set with \texttt{multiplicity()}, but this does not provide any guarantees on minimum cardinality.
 
 The remaining rules cannot be fully enforced by JanusGraph's schema, so we write queries to achieve this. Missing mandatory properties (rules 1b and 2b) are found using a combination of \texttt{hasLabel} and \texttt{hasNot} steps of the Gremlin query language. For cardinality constraints, we leverage the fact that our schemas only have constraints of the form ``one or more''. We can validate these constraints using a combination of \texttt{hasLabel}, \texttt{outE}, and \texttt{inE} steps.
 
 If we are only interested in the Boolean validation problem, we do not need to enumerate all query results. To give the query engine the best chance of terminating early, we write the entire validation as a single disjunctive query. JanusGraph unfortunately does not allow a single query to range over all nodes and all edges, so instead we execute one query for nodes and one for edges, in sequence.
+
+\paragraph{TigerGraph.} Before any data is loaded, TigerGraph requires the user to specify a schema describing all nodes, edges and their properties. This is done with a series of \texttt{CREATE VERTEX} and \texttt{CREATE EDGE} statements. Every node and edge has a label and a set of properties, and every property has a datatype. Furthermore, every node type has a primary key. Finally, every edge type must specify a source and target node types. Using these built-in schema capabilities, we can already guarantee conformance to a few of our rules. Objects cannot have illegal labels (rules 1a and 2a) or illegal properties (rules 1c and 2c), and properties cannot have illegal data types (rules 1d and 2d). In addition, the endpoint constraint of edges is satisfied (rule~2e).
+
+Unique to TigerGraph is that all properties must have a value as soon as the object is instantiated (there are no null values). When a value is missing, it is set to a default value, such as the empty string, the number 0, or the first of January 1970. While it is possible to prevent objects with missing values from being loaded, in some cases we may want to check for missing values on an existing graph. To this end, we use a query that finds all objects which have a mandatory property with the default value (satisfying rules 1b and 2b). If the default value naturally appears in valid data, then we use another indicator value. The query consists of a set of simple \texttt{SELECT-FROM-WHERE} patterns which range over all nodes and edges.
+
+Finally, cardinality constraints are also validated using a query. For outgoing edges (rule~3), we use the built-in \texttt{outdegree()} function, which returns the number of outgoing edges with a particular label for a given node. By default, TigerGraph maintains an index that stores these statistics for every node. For incoming edges (rule~4), we use another TigerGraph feature known as an accumulator. This lets us compute the number of incoming edges for all relevant nodes in a single pass over the graph. Afterwards, the violating nodes are picked out.
+
+% TODO: tigergraph boolean version?
 
 \subsection{Workloads}
 \label{sec:workloads}
