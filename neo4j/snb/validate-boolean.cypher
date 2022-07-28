@@ -5,10 +5,11 @@
 // It does not check for things that can be avoided using Neo4j's built-in
 // constraints, such as missing mandatory properties.
 
-// Find node labels that are not allowed
-CALL db.labels() YIELD label AS allLabels
-RETURN all(label IN collect(allLabels) WHERE label IN ["Message", "Comment", "Post", "Organisation", "Company", "University", "Place", "City", "Country", "Continent", "Forum", "Person", "Tag", "TagClass"]);
-// Find edge labels that are not allowed
+// Check if there are any nodes that have a label set that is not allowed
+// NOTE: this depends on the order of labels in the list, but it seems to be consistent
+WITH [["Comment", "Message"], ["Company", "Organisation"], ["Organisation", "University"], ["Message", "Post"], ["TagClass"], ["Tag"], ["Person"], ["Place", "City"], ["Country", "Place"], ["Place", "Continent"], ["Forum"]] AS allowedLabelSets
+MATCH (n) WHERE NOT labels(n) IN allowedLabelSets RETURN count(n) = 0;
+// Check if there are any edge labels that are not allowed
 CALL db.relationshipTypes() YIELD relationshipType AS allTypes
 RETURN all(type IN collect(allTypes) WHERE type IN ["CONTAINER_OF", "HAS_CREATOR", "HAS_INTEREST", "HAS_MEMBER", "HAS_MODERATOR", "HAS_TAG", "HAS_TYPE", "IS_LOCATED_IN", "IS_PART_OF", "IS_SUBCLASS_OF", "KNOWS", "LIKES", "REPLY_OF", "STUDY_AT", "WORK_AT"]);
 
@@ -28,7 +29,7 @@ WITH {
     TagClass: ["id", "name", "url"]
 } AS allowedNodeProperties
 CALL db.schema.nodeTypeProperties() YIELD nodeLabels, propertyName
-WHERE "Comment" IN nodeLabels AND NOT propertyName IN allowedNodeProperties.Movie
+WHERE "Comment" IN nodeLabels AND NOT propertyName IN allowedNodeProperties.Comment
 OR "Post" IN nodeLabels AND NOT propertyName IN allowedNodeProperties.Post
 OR "Company" IN nodeLabels AND NOT propertyName IN allowedNodeProperties.Company
 OR "University" IN nodeLabels AND NOT propertyName IN allowedNodeProperties.University

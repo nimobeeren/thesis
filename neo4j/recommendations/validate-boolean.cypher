@@ -5,10 +5,10 @@
 // It does not check for things that can be avoided using Neo4j's built-in
 // constraints, such as missing mandatory properties.
 
-// Find node labels that are not allowed
-CALL db.labels() YIELD label AS allLabels
-RETURN all(label IN collect(allLabels) WHERE label IN ["Movie", "Genre", "User", "Actor", "Director", "Person"]);
-// Find edge labels that are not allowed
+// Check if there are any nodes that have a label set that is not allowed
+// NOTE: this depends on the order of labels in the list, but it seems to be consistent
+MATCH (n) WHERE NOT labels(n) IN [["Movie"], ["Genre"], ["User"], ["Actor", "Person"], ["Director", "Person"], ["Actor", "Director", "Person"]] RETURN count(n) = 0;
+// Check if there are any edge labels that are not allowed
 CALL db.relationshipTypes() YIELD relationshipType AS allTypes
 RETURN all(type IN collect(allTypes) WHERE type IN ["IN_GENRE", "RATED", "ACTED_IN", "DIRECTED"]);
 

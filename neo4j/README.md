@@ -96,7 +96,15 @@ bin/neo4j-admin import \
   --relationships=IS_LOCATED_IN=import/dynamic/post_isLocatedIn_place_0_0.csv
 ```
 
-5. Run the queries in `snb/load-properties.cypher` to load the multi-valued properties.
+4. Start the Neo4j server:
+```bash
+neo4j start
+```
+
+5. Run the queries in `snb/load-properties.cypher` to load the multi-valued properties:
+```bash
+cat thesis/neo4j/snb/load-properties.cypher | cypher-shell -u neo4j -p neo4j
+```
 
 ### Schema validation
 

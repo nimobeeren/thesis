@@ -4,10 +4,10 @@
 // It does not check for things that can be avoided using Neo4j's built-in
 // constraints, such as missing mandatory properties.
 
-// Find all nodes that have a label that is not allowed
-MATCH (n) WHERE NOT all(label IN labels(n)
-WHERE label IN ["Message", "Comment", "Post", "Organisation", "Company", "University", "Place", "City", "Country", "Continent", "Forum", "Person", "Tag", "TagClass"])
-RETURN n;
+// Find all nodes that have a label set that is not allowed
+// NOTE: this depends on the order of labels in the list, but it seems to be consistent
+WITH [["Comment", "Message"], ["Company", "Organisation"], ["Organisation", "University"], ["Message", "Post"], ["TagClass"], ["Tag"], ["Person"], ["Place", "City"], ["Country", "Place"], ["Place", "Continent"], ["Forum"]] AS allowedLabelSets
+MATCH (n) WHERE NOT labels(n) IN allowedLabelSets RETURN n;
 // Find all edges that have a label that is not allowed
 MATCH ()-[e]->()
 WHERE NOT type(e) IN ["CONTAINER_OF", "HAS_CREATOR", "HAS_INTEREST", "HAS_MEMBER", "HAS_MODERATOR", "HAS_TAG", "HAS_TYPE", "IS_LOCATED_IN", "IS_PART_OF", "IS_SUBCLASS_OF", "KNOWS", "LIKES", "REPLY_OF", "STUDY_AT", "WORK_AT"]
