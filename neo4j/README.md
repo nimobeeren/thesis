@@ -14,7 +14,7 @@ docker run \
     -v $HOME/neo4j/logs:/logs \
     -v $HOME/neo4j/import:/var/lib/neo4j/import \
     -v $HOME/neo4j/plugins:/plugins \
-    -e NEO4J_AUTH=neo4j/thesis \
+    -v $HOME/Development/thesis:$HOME/thesis \
     -e NEO4JLABS_PLUGINS=\[\"apoc\"\] \
     -e NEO4J_ACCEPT_LICENSE_AGREEMENT=yes \
     -it \
