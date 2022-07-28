@@ -13,6 +13,10 @@
 \usepackage{tabularx}
 \usepackage{xcolor}
 
+% Fonts
+\usepackage{pxfonts}
+
+% Colors
 \definecolor{pink}{rgb}{0.780,0.223,0.537}
 \definecolor{reddish}{rgb}{0.769,0.263,0.169}
 \definecolor{darkblue}{rgb}{0.012,0.184,0.384}
@@ -29,16 +33,13 @@
 }
 \renewcommand{\UrlFont}{\color{purple}\ttfamily}
 
-% Fonts
-\usepackage{pxfonts}
-
 % Bibliography and citation style
 \usepackage[square]{natbib}
 \bibliographystyle{apalike}
 \renewcommand{\refname}{Bibliography}
 
 % Code listings
-\usepackage{listing}
+% TODO: define different languages (Cypher, GSQL, Java)
 \usepackage{listings}
 \lstset{
   language=SQL,
@@ -620,7 +621,7 @@ Referring back to our definition of schema conformance (\autoref{def:schema-conf
 
 Next, we detail the differences between the three database systems in our scope with regard to data model and schema capabilities.
 
-% TODO: query languages
+% TODO: mention query languages
 
 \paragraph{Neo4j.} Being one of the first to adopt the property graph data model, Neo4j has grown to become the most popular graph database engine today\footnote{\url{https://db-engines.com/en/ranking/graph+dbms} (accessed July 2022)}. Their data model differs from ours in that edges can only have a single label, while nodes can have multiple.
 
@@ -637,10 +638,12 @@ All of JanusGraph's schema features are centered around specifying what is allow
 TigerGraph's schema is strict, in the sense that every node label, edge label, and property must be explicitly defined. All properties are mandatory and have a fixed data type, which may be singular or multi-valued. There are no null values; if a property value is missing during insertion, a default value is set. All nodes have a primary key, which may be a single property or a composite key. Schema edges must specify a source and target node type, though it is possible to specify multiple types on either side. By default, directed edges can only be traversed from source to target, though a reverse edge can be automatically constructed if desired.
 
 \subsection{Extending schema capabilities}
+% TODO: examples
 
 Having investigated existing property graph database systems, we find that none are currently able to enforce all kinds of constraints that can be expressed with our schema formalism, in particular cardinality constraints. In this section, we describe how these systems can be extended to support all schema features. Where possible, we make use of the schema functionality exposed by the database engine. For the other features, we provide queries which determine schema conformance.
 % TODO: why queries instead of in-engine implementation?
 
+% TODO: this should probably go in a different section
 We consider two variants of the schema validation problem:
 
 \begin{itemize}
@@ -682,9 +685,7 @@ Next, we describe the implementation in each of the three database systems.
 
 Next, we tackle the validation the labels of nodes and edges (rules 1a and 2a) using Cypher queries. Neo4j provides functions \texttt{db.labels()} and \texttt{db.relationshipTypes()}, which respectively return a list of all node and edge labels that exist in the database. Unfortunately, these functions do not tell us which \emph{combinations} of labels exist. Since nodes can have multiple labels, we must fall back to a \texttt{MATCH} query which checks that every node has one of the allowed combinations of labels. Since edges in Neo4j can only have one label (called a \emph{relationship type}), we can use \texttt{db.relationshipTypes()} to determine if there exist any edges with a label that is not allowed. This is sufficient for Boolean validation, but if we want to find out precisely which edges have an illegal label, we again need to use a \texttt{MATCH} query.
 
-\begin{sloppypar}
-Next, we look at the properties. The functions \texttt{nodeTypeProperties()} and \texttt{relTypeProperties()} provide useful information about the properties that exist on nodes and edges, as well as their data types. This allows us to determine if there are any nodes or edges that have properties that are not allowed (rules 1c and 2c), or have the wrong data type (rules 1d and 2d). Again, if we want to find the violating objects, we need to use a \texttt{MATCH} query that scans all properties of all objects in the database. In that case, we use the \texttt{apoc.meta.type()} function (provided by the APOC library\footnote{\url{https://neo4j.com/labs/apoc/}}) to get the data type of a property at query-time.
-\end{sloppypar}
+Next, we look at the properties. The functions \texttt{db.schema.nodeTypeProperties()} and \texttt{db.schema.relTypeProperties()} provide useful information about the properties that exist on nodes and edges, as well as their data types. This allows us to determine if there are any nodes or edges that have properties that are not allowed (rules 1c and 2c), or have the wrong data type (rules 1d and 2d). Again, if we want to find the violating objects, we need to use a \texttt{MATCH} query that scans all properties of all objects in the database. In that case, we use the \texttt{apoc.meta.type()} function (provided by the APOC library\footnote{\url{https://neo4j.com/labs/apoc/}}) to get the data type of a property at query-time.
 
 To check rule 2e, we do a \texttt{MATCH} query for every edge label, and look at the source and target nodes. For every edge, there must exist a schema edge such that the labels of the source and target in the data match the labels of the source and target in the schema.
 % An example of such a query is shown in \autoref{lst:neo4j-endpoints}.
