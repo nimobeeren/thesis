@@ -590,6 +590,8 @@ Referring back to our definition of schema conformance (\autoref{def:schema-conf
 
 Next, we detail the differences between the three database systems in our scope with regard to data model and schema capabilities.
 
+% TODO: query languages
+
 \paragraph{Neo4j.} Being one of the first to adopt the property graph data model, Neo4j has grown to become the most popular graph database engine today\footnote{\url{https://db-engines.com/en/ranking/graph+dbms} (accessed July 2022)}. Their data model differs from ours in that edges can only have a single label, while nodes can have multiple.
 
 Neo4j's approach to schema is primarily implicit: after inserting data, the user can construct a schema that describes the data using built-in functions. In addition, some constraints can be explicitly specified, namely existence of mandatory properties (enterprise edition only), uniqueness of property values, and key constraints.
@@ -626,7 +628,7 @@ Under this assumption, we can simplify the rules of conformance. Informally:
   \item
   \begin{enumerate}
     \item Every node has the same set of labels as some schema node.
-    \item All mandatory node properties exist on the node.
+    \item All mandatory properties exist on the node.
     % \item If a data node and schema node have the same label set, all mandatory properties of the schema node must be present on the data node.
     \item The node has no properties that are not allowed.
     % \item If a data node and schema node have the same label set, the data node may not have properties that are not allowed by the schema node.
@@ -635,7 +637,8 @@ Under this assumption, we can simplify the rules of conformance. Informally:
   \item
   \begin{enumerate}
     \item Every edge has the same set of labels as some schema edge.
-    \item All mandatory edge properties exist on the edge.
+    \item All mandatory properties exist on the edge.
+    \item The edge has no properties that are not allowed.
     \item All edge properties have a value of the right type.
     \item Both endpoints of the edge have the right labels.
   \end{enumerate}
@@ -645,7 +648,16 @@ Under this assumption, we can simplify the rules of conformance. Informally:
 
 Next, we describe the implementation in each of the three database systems.
 
-\paragraph{Neo4j.} 
+\paragraph{Neo4j.} We start by validating the labels of nodes and edges (rules 1a and 2a). Neo4j provides functions \texttt{db.labels()} and \texttt{db.relationshipTypes()}, which respectively return a list of all node and edge labels that exist in the database. Unfortunately, these functions do not tell us which \emph{combinations} of labels exist. Since nodes can have multiple labels, we must fall back to a \texttt{MATCH} query which that every node has one of the allowed combinations of labels. Since edges in Neo4j can only have one label (called a \emph{relationship type}), we can use \texttt{db.relationshipTypes()} to determine if there exist any edges with a label that is not allowed. This is sufficient for Boolean validation, but if we want to find out precisely which edges have an illegal label, we again need to use a \texttt{MATCH} query.
+
+\begin{sloppypar}
+Next, we look at the properties. To ensure the existence of mandatory properties (rules 1b and 2b), we use Neo4j's \texttt{CONSTRAINT} functionality, which lets us specify which properties are mandatory for nodes and edges with a particular label set (Enterprise edition only). The functions \texttt{db.schema.nodeTypeProperties()} and \texttt{db.schema.relTypeProperties()} provide useful information about the properties that exist on nodes and edges, as well as their data types. This allows us to determine if there are any nodes or edges that have properties that are not allowed (rules 1c and 2c), or have the wrong data type (rules 1d and 2d). Again, if we want to find the violating objects, we need to use a \texttt{MATCH} query that scans all properties of all objects in the database. In that case, we use the \texttt{apoc.meta.type()} function (provided by the APOC library\footnote{\url{https://neo4j.com/labs/apoc/}}) to get the data type of a property at query-time.
+\end{sloppypar}
+
+To check rule 2e, we do a \texttt{MATCH} query for every edge label, and look at the source and target nodes. For every edge, there must exist a schema edge such that the labels of the source and target in the data match the labels of the source and target in the schema.
+% TODO: example
+
+Finally, we check the cardinality constraints (rule 3 and 4). Depending on the kind of cardinality constraints that appear in the schema, we can take two different approaches. For cardinality constraints requiring ``one or more'' edges, a simple pattern matching query is sufficient. If there is no match, the constraint is violated. If the cardinality constraint is more specific (say, exactly 3), then we can use the \texttt{size()} function to count the number of matches of the pattern.
 
 \subsection{Workloads}
 \label{sec:workloads}

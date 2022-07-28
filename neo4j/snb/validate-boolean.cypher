@@ -107,7 +107,7 @@ OR propertyName = "workFrom" AND propertyTypes <> ["Long"]
 RETURN propertyName, propertyTypes;
 
 // Check for edges between wrong types of nodes
-// TODO: do this with schema statistics?
+// TODO: do this with schema statistics? db.schema.visualization() or apoc.meta.schema()
 MATCH (n)-[e:CONTAINER_OF]->(m) WHERE NOT "Forum" IN labels(n) OR NOT "Post" IN labels(m) RETURN count(e) = 0;
 MATCH (n)-[e:HAS_CREATOR]->(m) WHERE NOT "Message" IN labels(n) OR NOT "Person" IN labels(m) RETURN count(e) = 0;
 MATCH (n)-[e:HAS_INTEREST]->(m) WHERE NOT "Person" IN labels(n) OR NOT "Tag" IN labels(m) RETURN count(e) = 0;
