@@ -50,7 +50,8 @@
   belowskip=0pt,
   basicstyle=\ttfamily,
   stringstyle=\color{blue},
-  keywordstyle=\color{reddish}
+  keywordstyle=\color{reddish},
+  commentstyle=\color{green}
 }
 \lstdefinelanguage{Cypher}{
   language=SQL,
@@ -857,11 +858,59 @@ RETURN a;
 
 \paragraph{JanusGraph.} The additional schema features that JanusGraph provides allow us to enforce most conformance rules at the time of schema definition, preventing any non-conforming data from being inserted. The complete set of allowed node and edge labels (\autoref{rule:simp-node-labels} and \ref{rule:simp-edge-labels}) are defined using \texttt{makeVertexLabel()} and \texttt{makeEdgeLabel()}. If a schema object has more than one label, we concatenate them to form a single label. This does not affect the semantics (as long as the order of concatenation is consistent), since we only ever check for equality of label sets.
 
-The complete set of allowed property names is defined using \texttt{makePropertyKey()}. Next, each label is mapped to a set of property names using \texttt{addProperties()}. This prevents objects from having properties that are not allowed (\autoref{rule:simp-node-allowed-props} and \ref{rule:simp-edge-allowed-props}). The data type of each property is defined using \texttt{dataType()} (\autoref{rule:simp-node-datatype} and \ref{rule:simp-edge-datatype}). In JanusGraph, there cannot exist two properties with the same name and different data type. If this is desired, the property name must be disambiguated, which could be achieved by prefixing it with the object label.
-
 For each edge label, the method \texttt{addConnection()} lets us specify the allowed labels of the edge endpoints (\autoref{rule:simp-edge-endpoints}). The maximum cardinality for an edge label is can be set with \texttt{multiplicity()}, but this does not provide any guarantees on minimum cardinality.
 
-The remaining rules cannot be fully enforced by JanusGraph's schema, so we write queries to achieve this. Missing mandatory properties (\autoref{rule:simp-node-mandatory-props} and \ref{rule:simp-edge-mandatory-props}) are found using a combination of \texttt{hasLabel} and \texttt{hasNot} steps of the Gremlin query language. For cardinality constraints, we leverage the fact that our schemas only have constraints of the form ``one or more''. We can validate these constraints using a combination of \texttt{hasLabel}, \texttt{outE}, and \texttt{inE} steps.
+The complete set of allowed property names is defined using \texttt{makePropertyKey()}. Next, each label is mapped to a set of property names using \texttt{addProperties()}. This prevents objects from having properties that are not allowed (\autoref{rule:simp-node-allowed-props} and \ref{rule:simp-edge-allowed-props}). The data type of each property is defined using \texttt{dataType()} (\autoref{rule:simp-node-datatype} and \ref{rule:simp-edge-datatype}). In JanusGraph, there cannot exist two properties with the same name and different data type. If this is desired, the property name must be disambiguated, which could be achieved by prefixing it with the object label.
+
+For an example of all of JanusGraph's built-in schema functions working together, have a look at \autoref{lst:janusgraph-schema}.
+
+\begin{figure}[H]
+\begin{lstlisting}[
+  language=Java,
+  caption={A simplified version of the Recommendations schema, expressed using JanusGraph's schema methods. Mandatory properties and cardinality constraints cannot be validated this way. The \texttt{Multiplicity.SIMPLE} configuration ensures there is no more than one \texttt{ACTED\_IN} edge between any given actor and movie.},
+  label=lst:janusgraph-schema
+]
+// Vertex labels
+VertexLabel Actor = mgmt.makeVertexLabel("Actor").make();
+VertexLabel Movie = mgmt.makeVertexLabel("Movie").make();
+// Edge labels
+EdgeLabel ACTED_IN = mgmt.makeEdgeLabel("ACTED_IN").multiplicity(Multiplicity.SIMPLE).make();
+// Edge connections
+mgmt.addConnection(ACTED_IN, Actor, Movie);
+// Property keys
+PropertyKey nameKey = mgmt.makePropertyKey("name").dataType(String.class).make();
+PropertyKey titleKey = mgmt.makePropertyKey("title").dataType(String.class).make();
+PropertyKey revenueKey = mgmt.makePropertyKey("revenue").dataType(Long.class).make();
+PropertyKey roleKey = mgmt.makePropertyKey("role").dataType(String.class).make();
+// Property mapping
+mgmt.addProperties(Actor, nameKey);
+mgmt.addProperties(Movie, titleKey, revenueKey);
+mgmt.addProperties(ACTED_IN, roleKey);
+\end{lstlisting}
+\end{figure}
+
+The remaining rules cannot be fully enforced by JanusGraph's schema, so we write queries to achieve this. Missing mandatory properties (\autoref{rule:simp-node-mandatory-props} and \ref{rule:simp-edge-mandatory-props}) are found using a combination of \texttt{hasLabel} and \texttt{hasNot} steps of the Gremlin query language (see \autoref{lst:janusgraph-mandatory-props}). For cardinality constraints, we leverage the fact that our schemas only have constraints of the form ``one or more''. We can validate these constraints using a combination of \texttt{hasLabel}, \texttt{outE}, and \texttt{inE} steps (see \autoref{lst:janusgraph-mandatory-edges}).
+
+\begin{figure}[H]
+\begin{lstlisting}[
+  language=Java,
+  caption={A query to find \texttt{User} nodes which are missing a mandatory property.},
+  label=lst:janusgraph-mandatory-props
+]
+g.V().hasLabel("User").or(hasNot("name"), hasNot("userId"))
+\end{lstlisting}
+\end{figure}
+
+\begin{figure}[H]
+\begin{lstlisting}[
+  language=Java,
+  caption={A query to find \texttt{Actor} nodes which are missing an outgoing \texttt{ACTED\_IN} edge. Note that \texttt{ActorDirector} is the concatenation of the \texttt{Actor} and \texttt{Director} labels.},
+  label=lst:janusgraph-mandatory-edges
+]
+g.V().hasLabel(P.within("Actor", "ActorDirector"))
+    .not(outE("ACTED_IN"))
+\end{lstlisting}
+\end{figure}
 
 If we are only interested in the Boolean validation problem, we do not need to enumerate all query results. To give the query engine the best chance of terminating early, we write the entire validation as a single disjunctive query. JanusGraph unfortunately does not allow a single query to range over all nodes and all edges, so instead we execute one query for nodes and one for edges, in sequence.
 
