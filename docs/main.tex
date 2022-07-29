@@ -370,7 +370,6 @@ We first introduce a generalization of the existential quantifier which enables 
   The \emph{counting quantifier} is defined as follows. Given two numbers $n, m \in \N$, a predicate $P$, and a set $X$, define
   \begin{itemize}
     \item $\exists^{\geq n} x \in X : P(x) \equiv \exists x_1, \ldots, x_n \in X : P(x_1) \wedge \ldots \wedge P(x_n) \wedge \forall 1 \leq i < j \leq n : x_i \neq x_j$;
-          % FIXME: this might be ambiguous, add brackets?
     \item $\exists^{\leq n} x \in X : P(x) \equiv \exists x_1, \ldots, x_n, x_{n+1}, \ldots, x_k \in X : P(x_1) \wedge \ldots \wedge P(x_k) \implies \forall n < i < j \leq k : x_i = x_j$;
     \item $\exists^{[n, m]} x \in X : P(x) \equiv \exists^{\geq n} x \in X : P(x) \wedge \exists^{\leq m} x' \in X : P(x')$;
     \item $\exists^{[n, *]} x \in X : P(x) \equiv \exists^{\geq n} x \in X : P(x)$.
@@ -654,8 +653,8 @@ While a Boolean validation method may be sufficient in some situations, full val
 \paragraph{Datasets.} Our schema validation methods are applied to two datasets:
 
 \begin{itemize}
-  \item The \textbf{Recommendations Graph}\footnote{\url{https://github.com/neo4j-graph-examples/recommendations}} is a relatively small dataset with a simple schema, provided by Neo4j. It contains movies, actors, directors, and users who rate movies. The schema is given in TODO. This dataset is intended as a working example for people who want to explore the functionality of a graph database. The small size makes it suitable as a proof-of-concept for our schema validation methods.
-  \item The \textbf{LDBC Social Network Benchmark} (SNB) \citep{angles2020snb} was designed to evaluate graph-like data management technologies in a realistic setting. The dataset consists of users, messages, likes, and other concepts that can be found in the domain of social networks. The full schema is given in TODO. The data is made available at various scales, ranging from less than a gigabyte to a terrabyte of raw data. We run multiple tests with scale factor 0.1, 0.3, and 1. This lets us study how our solution scales with the size of the data.
+  \item The \textbf{Recommendations Graph}\footnote{\url{https://github.com/neo4j-graph-examples/recommendations}} is a relatively small dataset with a simple schema, provided by Neo4j. It contains movies, actors, directors, and users who rate movies. The schema is given in \autoref{fig:schema-recommendations}. This dataset is intended as a working example for people who want to explore the functionality of a graph database. The small size makes it suitable as a proof-of-concept for our schema validation methods.
+  \item The \textbf{LDBC Social Network Benchmark} (SNB) \citep{angles2020snb} was designed to evaluate graph-like data management technologies in a realistic setting. The dataset consists of users, messages, likes, and other concepts that can be found in the domain of social networks. The schema is of moderate size, and is given in \autoref{fig:schema-snb}. The data is made available at various scales, ranging from less than a gigabyte to a terrabyte of raw data. We run multiple tests with scale factor 0.1, 0.3, and 1. This lets us study how our solution scales with the size of the data.
 \end{itemize}
 
 A comparison of the datasets is given in \autoref{tab:dataset-comparison}.
@@ -679,6 +678,20 @@ A comparison of the datasets is given in \autoref{tab:dataset-comparison}.
   \caption{A comparison of the datasets used in the experiment. $|N|$ and $|E|$ represent the number of nodes and edges. $|N'|$ and $|E'|$ represent the number of schema nodes and schema edges. The raw size is measured as the combined size of all CSV files.}
   \label{tab:dataset-comparison}
 \end{table}
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\textwidth]{figures/schema-recommendations.pdf}
+  \caption{Schema of the Recommendations Graph dataset. This schema was constructed manually by analyzing the data.}
+  \label{fig:schema-recommendations}
+\end{figure}
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\textwidth]{figures/schema-snb.png}
+  \caption{Schema of the SNB dataset (source: \citet{angles2020snb}).}
+  \label{fig:schema-snb}
+\end{figure}
 
 \subsection{Extending schema capabilities}
 
