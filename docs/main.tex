@@ -781,7 +781,7 @@ WHERE NOT labels(n) IN allowedNodeLabelSets
 RETURN n
 \end{lstlisting}
 \end{figure}
-
+\vspace*{-8pt}
 \begin{figure}[H]
 \begin{lstlisting}[
   language=Cypher,
@@ -811,7 +811,7 @@ WHERE "User" IN nodeLabels AND (
 RETURN nodeLabels, propertyName, propertyTypes
 \end{lstlisting}
 \end{figure}
-
+\vspace*{-8pt}
 \begin{figure}[H]
 \begin{lstlisting}[
   language=Cypher,
@@ -902,7 +902,7 @@ The remaining rules cannot be fully enforced by JanusGraph's schema, so we write
 g.V().hasLabel("User").or(hasNot("name"), hasNot("userId"))
 \end{lstlisting}
 \end{figure}
-
+\vspace*{-8pt}
 \begin{figure}[H]
 \begin{lstlisting}[
   language=Java,
@@ -981,7 +981,7 @@ FROM Actor:actor
 WHERE actor.outdegree("ACTED_IN") == 0
 \end{lstlisting}
 \end{figure}
-
+\vspace*{-8pt}
 \begin{figure}[H]
 \begin{lstlisting}[
   language=GSQL,
