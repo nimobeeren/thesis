@@ -58,7 +58,9 @@
   morekeywords={RETURN,FOR,REQUIRE,IS,WITH,CALL,YIELD}
 }
 \lstdefinelanguage{GSQL}{
-  language=SQL
+  language=SQL,
+  morekeywords={VERTEX,EDGE,DIRECTED,PRIMARY_ID,TO,ACCUM,PRINT},
+  deletekeywords={ROLE}
 }
 
 % Definitions
@@ -867,7 +869,7 @@ For an example of all of JanusGraph's built-in schema functions working together
 \begin{figure}[H]
 \begin{lstlisting}[
   language=Java,
-  caption={A simplified version of the Recommendations schema, expressed using JanusGraph's schema methods. Mandatory properties and cardinality constraints cannot be validated this way. The \texttt{Multiplicity.SIMPLE} configuration ensures there is no more than one \texttt{ACTED\_IN} edge between any given actor and movie.},
+  caption={A fragment of the Recommendations schema, expressed using JanusGraph's schema methods. Mandatory properties and cardinality constraints cannot be validated this way. The \texttt{Multiplicity.SIMPLE} configuration ensures there is no more than one \texttt{ACTED\_IN} edge between any given actor and movie.},
   label=lst:janusgraph-schema
 ]
 // Vertex labels
@@ -916,9 +918,87 @@ If we are only interested in the Boolean validation problem, we do not need to e
 
 \paragraph{TigerGraph.} Before any data is loaded, TigerGraph requires the user to specify a schema describing all nodes, edges and their properties. This is done with a series of \texttt{CREATE VERTEX} and \texttt{CREATE EDGE} statements. Using these built-in schema capabilities, we can already guarantee conformance to some of our rules. Every node and edge has a label (\autoref{rule:simp-node-labels} and \ref{rule:simp-edge-labels}) and a fixed set of properties (\autoref{rule:simp-node-allowed-props} and \ref{rule:simp-edge-allowed-props}). Every property has a datatype (\autoref{rule:simp-node-datatype} and \ref{rule:simp-edge-datatype}). Furthermore, every node type has a primary key. Finally, every edge type must specify a source and target node types (\autoref{rule:simp-edge-endpoints}).
 
-Unique to TigerGraph is that all properties must have a value as soon as the object is instantiated (there are no null values). When a value is missing, it is set to a default value, such as the empty string, the number 0, or the first of January 1970. While it is possible to prevent objects with missing values from being loaded, in some cases we may want to check for missing values on an existing graph. To this end, we use a query that finds all objects which have a mandatory property with the default value (validating \autoref{rule:simp-node-mandatory-props} and \ref{rule:simp-edge-mandatory-props}). If the default value naturally appears in valid data, then we use another indicator value. The query consists of a set of simple \texttt{SELECT-FROM-WHERE} patterns which range over all nodes and edges.
+\begin{figure}[H]
+\begin{lstlisting}[
+  language=GSQL,
+  caption={A fragment of the Recommendations schema, expressed in TigerGraph's schema definition language.},
+  label=lst:tigergraph-schema
+]
+CREATE VERTEX Actor (
+    PRIMARY_ID id STRING,
+    name STRING
+)
+CREATE VERTEX Movie (
+    PRIMARY_ID id STRING,
+    title STRING,
+    revenue INT
+)
+CREATE DIRECTED EDGE ACTED_IN (
+    FROM Actor,
+    TO Movie,
+    role STRING
+)
+\end{lstlisting}
+\end{figure}
 
-To cover the final remaining rules, cardinality constraints are also validated using a query. For outgoing edges (\autoref{rule:simp-card-out}), we use the built-in \texttt{outdegree()} function, which returns the number of outgoing edges with a particular label for a given node. By default, TigerGraph maintains an index that stores these statistics for every node. For incoming edges (\autoref{rule:simp-card-in}), we use another TigerGraph feature known as an accumulator. This lets us compute the number of incoming edges for all relevant nodes in a single pass over the graph. Afterwards, the violating nodes are picked out.
+Unique to TigerGraph is that all properties must have a value as soon as the object is instantiated (there are no null values). When a value is missing, it is set to a default value, such as the empty string, the number 0, or the first of January 1970. While it is possible to prevent objects with missing values from being loaded, in some cases we may want to check for missing values on an existing graph. To this end, we use a query that finds all objects which have a mandatory property with the default value (validating \autoref{rule:simp-node-mandatory-props} and \ref{rule:simp-edge-mandatory-props}). If the default value naturally appears in valid data, then we use another indicator value. The query consists of a set of simple \texttt{SELECT-FROM-WHERE} patterns which range over all nodes and edges, as in \autoref{lst:tigergraph-mandatory-props}.
+
+\begin{figure}[H]
+\begin{lstlisting}[
+  language=GSQL,
+  caption={A query to find \texttt{Movie} and \texttt{User} nodes which have a mandatory property with a default value. All violating nodes are collected in the accumulator variable \texttt{@@violatingNodes}, which is returned at the end.},
+  label=lst:tigergraph-mandatory-props
+]
+SetAccum<VERTEX> @@violatingNodes;
+
+violatingMovies =
+    SELECT movie
+    FROM Movie:movie
+    WHERE movie.imdbId == "" OR movie.movieId == ""
+        OR movie.title == "";
+    ACCUM @@violatingNodes += movie;
+
+violatingUsers =
+    SELECT user
+    FROM User:user
+    WHERE user.name == "" OR user.userId == "";
+    ACCUM @@violatingNodes += user;
+
+PRINT @@violatingNodes;
+\end{lstlisting}
+\end{figure}
+
+To cover the final remaining rules, cardinality constraints are also validated using a query. For outgoing edges (\autoref{rule:simp-card-out}), we use the built-in \texttt{outdegree()} function, which returns the number of outgoing edges with a particular label for a given node (see \autoref{lst:tigergraph-mandatory-edges-out}). By default, TigerGraph maintains an index that stores these statistics for every node. For incoming edges (\autoref{rule:simp-card-in}), we use another TigerGraph feature known as an accumulator. This lets us compute the number of incoming edges for all relevant nodes in a single pass over the graph. Afterwards, the violating nodes are picked out (see \autoref{lst:tigergraph-mandatory-edges-in}).
+
+\begin{figure}[H]
+\begin{lstlisting}[
+  language=GSQL,
+  caption={A query to find \texttt{Actor} nodes which are missing a outgoing \texttt{ACTED\_IN} edge.},
+  label=lst:tigergraph-mandatory-edges-out
+]
+SELECT actor
+FROM Actor:actor
+WHERE actor.outdegree("ACTED_IN") == 0
+\end{lstlisting}
+\end{figure}
+
+\begin{figure}[H]
+\begin{lstlisting}[
+  language=GSQL,
+  caption={A query to find \texttt{Post} nodes which are missing a incoming \texttt{CONTAINER\_OF} edge.},
+  label=lst:tigergraph-mandatory-edges-in
+]
+SumAccum<int> @numInContainerOf;
+tmp =
+    SELECT post
+    FROM :n -(CONTAINER_OF>)- Post:post
+    ACCUM post.@numInContainerOf += 1;
+violatingActors =
+    SELECT post
+    FROM Post:post
+    WHERE post.@numInContainerOf == 0
+\end{lstlisting}
+\end{figure}
 
 % TODO: tigergraph boolean version?
 
