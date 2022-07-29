@@ -1,4 +1,4 @@
-\documentclass{article}
+\documentclass{report}
 
 % Layout
 \usepackage[a4paper, margin=1.5in]{geometry}
@@ -110,7 +110,17 @@
 
 \maketitle
 
-\section{Introduction}
+\renewcommand{\thepage}{\roman{page}}
+
+\tableofcontents
+\listoffigures
+\listoftables
+% TODO: use short captions for list of figures/tables
+
+\setcounter{page}{0}
+\renewcommand{\thepage}{\arabic{page}}
+
+\chapter{Introduction}
 
 Graph databases have been steadily growing in popularity in recent years, receiving attention in the form of fundamental research as well as practical usage. One of the spearpoints of the graph database is its flexibility. While the traditionally dominant relational data model organizes data into tables and requires a fixed schema, graphs offer a simple yet powerful model consisting of nodes and edges which can be structured freely.
 
@@ -120,9 +130,9 @@ The \emph{property graph model} is the predominant data model among graph databa
 
 Our overarching goal is to develop an end-to-end framework for property graph schema specification and validation. To this end, we propose a schema formalism capable of expressing local and structural constraints, we provide a prototypical implementation for schema validation in the form of graph queries, and we investigate the practical feasibility of this approach on current graph database systems and realistic datasets.
 
-\section{Related Work}
+\chapter{Related Work}
 
-\subsection{Graph Integrity Constraints}
+\section{Graph Integrity Constraints}
 
 % TODO: refer to querying graphs book instead of discussing integrity constraints here
 
@@ -130,7 +140,7 @@ The problem of expressing and validating integrity constraints for graphs has re
 
 % TODO: other kinds of graph integrity constraints (pokorny 2017?)
 
-\subsection{Graph Schema}
+\section{Graph Schema}
 
 Some approaches to graph schema have been discussed in the literature. While these methods are based on different graph models, they may be adapted to the property graph model. \citet{buneman1997adding} propose a method that represents both data and schema as edge-labeled graphs. This enables the specification of the types of edges and paths that are allowed to occur in a database instance, but does not cover mandatory edges or more general cardinality constraints.
 
@@ -138,7 +148,7 @@ Some approaches to graph schema have been discussed in the literature. While the
 
 SHACL\footnote{\url{https://www.w3.org/TR/shacl/}} is a language for specifying constraints on RDF graphs \citep{pan2009rdf}. These constraints themselves are also represented as RDF graphs, and are called \emph{shapes}. Constraints on values, data types and cardinality are supported. This enables specification of allowed, optional, and mandatory edges. A review of the formal frameworks used to study the SHACL language and the validation of RDF graphs against SHACL schemas can be found in \citet{pareti2022shacl}.
 
-\subsection{Property Graph Schema}
+\section{Property Graph Schema}
 
 The property graph data model has been adopted by numerous contemporary graph database systems (dating back to at least 2007 with the first release of Neo4j\footnote{\url{https://neo4j.com/open-source-project/}}), but a formal specification was missing until one was proposed by \citet{angles2018property}. The author also brought integrity constraints to the property graph model, and defined a basic notion of schema using first-order logic rules. In this work, no distinction was made between mandatory and optional properties, nor were cardinality constraints addressed.
 
@@ -150,7 +160,7 @@ The property graph data model has been adopted by numerous contemporary graph da
 
 Many commercially available property graph database systems currently support some form of schema or constraints. Some require the user to specify a schema, while others infer a schema from data. We further analyze the schema capabilities of existing systems in \autoref{sec:sota}.
 
-\section{Property Graphs}
+\chapter{Property Graphs}
 
 We start by introducing our data model, which is based on the definition of \emph{property graph} established by the Working Group for Database Languages~(WG3) as part of ISO/IEC JTC1/SC32 \citep{deutsch2021gpml}. We use this data model in the rest of this document.
 
@@ -188,7 +198,7 @@ The functions $\src$ and $\trg$ map pairs to their first and second element, i.e
   \label{fig:pg}
 \end{figure}
 
-\section{Property Graph Schemas}
+\chapter{Property Graph Schemas}
 
 A schema should allow modeling of real-world entities and their relationships. A more expressive schema language enables the specification of more complex constraints, but may come at a cost of greater research and engineering effort, as well as worse runtime performance. This needs to be balanced in our choice of schema language.
 
@@ -198,7 +208,7 @@ After the original specification, the ER model has been extended in various ways
 
 In the next subsection, we first establish a basic definition of property graph schema, which we then extend with additional features such as cardinality constraints (\autoref{sec:cardinality}) and optional properties (\autoref{sec:optional-properties}).
 
-\subsection{Basic definition}
+\section{Basic definition}
 
 In this subsection, we define a notion of property graph schema which incorporates the basic features of the ER model: entities, relationships, attributes, and values.
 
@@ -361,7 +371,7 @@ Under these definitions, it is not possible to specify that an edge is mandatory
   \label{fig:conformance-basic}
 \end{figure}
 
-\subsection{Cardinality constraints}
+\section{Cardinality constraints}
 \label{sec:cardinality}
 
 We first introduce a generalization of the existential quantifier which enables counting the number of distinct variables that satisfy a predicate.
@@ -485,7 +495,7 @@ Compared to \autoref{def:schema-conformance-basic}, \autoref{rule:node} and \ref
   \label{fig:conformance}
 \end{figure}
 
-\subsection{Optional properties}
+\section{Optional properties}
 \label{sec:optional-properties}
 
 We revise the definition of record by adding a special property value $\undefined$, which indicates that the value of a property is not defined. The following definitions subsume Definition~\ref{def:record-basic}, \ref{def:property-conformance-basic}, \ref{def:record-type-basic}, and \ref{def:record-conformance-basic}.
@@ -515,11 +525,11 @@ We adjust the definitions of property conformance, record type, and record confo
   We say that a record $r$ \emph{conforms} to a record type $\rtype$, denoted $r \in \sem{\rtype}$, if and only if for each property name $k \in \mathcal{N}$ it holds that $r(k) \in \sem{\rtype(k)}$.
 \end{definition}
 
-\subsection{Open record types}
+\section{Open record types}
 
 It may be desirable to allow a record to have properties with any name or any value. Such \emph{open record types} can already be expressed under the current definitions. For a record type $\rtype$, we can allow properties with any name by setting $\rtype(k) = \ptype?$ for all (previously unspecified) property names $k \in \mathcal{N}$, where $\ptype$ is an arbitrary property type. Note that there may be infinitely many such $k$, so in practice we may want to have a special syntax to express this. We can allow these properties to have any value by choosing a $\ptype$ such that $\sem{\ptype} = \mathcal{V}$, or we can restrict them to a subset of $\mathcal{V}$.
 
-\subsection{Discussion}
+\section{Discussion}
 
 % TODO: lack of key constraints?
 % TODO: suggest richer constraint language
@@ -571,12 +581,12 @@ In \autoref{fig:subtyping}, a constraint is specified which we can express in wo
   \caption{A schema consisting of a supertype with two subtypes which cannot be modeled using our schema formalism. Any property graph that conforms to~(a) also conforms to~(b), but not the other way around.}
 \end{figure}
 
-\section{Experimental Study}
+\chapter{Experimental Study}
 \label{sec:experiment}
 
 We have defined a property graph schema formalism which is capable of expressing constraints in commonly used conceptual data modeling methods. Next, we analyze the practical feasibility of our approach. We aim to answer the question: what is the cost of determining property graph schema conformance using currently available graph database systems? First, we investigate the schema capabilities of three existing graph database sytems. Second, we describe how these systems can be extended to support all kinds of constraints that can be specified in our schema formalism. Third, we analyze the performance of our prototypical implementation in several realistic scenarios.
 
-\subsection{State of the art}
+\section{State of the art}
 \label{sec:sota}
 
 Current property graph database systems vary in their support and philosophy around schema. Most embrace the flexibility of the property graph data model by supporting optional, partial, or implicit schemas. Others require the schema to be fully specified in advance. We take a closer look at three of the most popular property graph databases: Neo4j, JanusGraph, and TigerGraph.
@@ -620,7 +630,7 @@ Referring back to our definition of schema conformance (\autoref{def:schema-conf
   \label{tab:schema-comparison}
 \end{table}
 
-Next, we detail the differences between the three database systems in our scope with regard to data model and schema capabilities.
+Next, we detail the differences between the three database systems in our scope with respect to their data models and schema capabilities.
 
 % TODO: mention query languages
 
@@ -638,7 +648,7 @@ All of JanusGraph's schema features are centered around specifying what is allow
 
 TigerGraph's schema is strict, in the sense that every node label, edge label, and property must be explicitly defined. All properties are mandatory and have a fixed data type, which may be singular or multi-valued. There are no null values; if a property value is missing during insertion, a default value is set. All nodes have a primary key, which may be a single property or a composite key. Schema edges must specify a source and target node type, though it is possible to specify multiple types on either side. By default, directed edges can only be traversed from source to target, though a reverse edge can be automatically constructed if desired.
 
-\subsection{Workloads}
+\section{Workloads}
 \label{sec:workloads}
 
 \paragraph{Objective.} We consider two variants of the schema validation problem:
@@ -728,7 +738,7 @@ Under this assumption, we can simplify the rules of conformance. Informally:
   Every node has the right number of incoming edges with the right labels.
 \end{enumerate}
 
-\subsection{Implementation}
+\section{Implementation}
 
 Having investigated existing property graph database systems, we find that none are currently able to enforce all kinds of constraints that can be expressed with our schema formalism, in particular cardinality constraints. In this section, we describe how these systems can be extended to support all schema features. Where possible, we make use of the schema functionality exposed by the database engine. For conformance rules that cannot be checked this way, we provide queries.
 
