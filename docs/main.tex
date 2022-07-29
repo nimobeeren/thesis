@@ -102,7 +102,7 @@
 
 \renewcommand{\itemautorefname}{Rule}
 
-\title{Typing Property Graphs}
+\title{Property Graph Schemas}
 \author{Nimo Beeren}
 
 
@@ -693,12 +693,7 @@ A comparison of the datasets is given in \autoref{tab:dataset-comparison}.
   \label{fig:schema-snb}
 \end{figure}
 
-\subsection{Extending schema capabilities}
-
-Having investigated existing property graph database systems, we find that none are currently able to enforce all kinds of constraints that can be expressed with our schema formalism, in particular cardinality constraints. In this section, we describe how these systems can be extended to support all schema features. Where possible, we make use of the schema functionality exposed by the database engine. For the other features, we provide queries which determine schema conformance.
-% TODO: why queries instead of in-engine implementation?
-
-To reduce the complexity of the implementation, we assume that the set of labels of a schema object functionally determines the record type of that schema object. Recall that every object must conform to a schema object (\autoref{rule:node} and \ref{rule:edge}). This implies that if an object has the same set of labels as a schema object, it must conform to that schema object (since there exists no schema object with the same label set and a different record type). We find that this assumption holds in many domains, including the ones we study in \autoref{sec:workloads}. % TODO: check if reference is still accurate
+\paragraph{Assumptions.} To reduce the complexity of the implementation, we assume that the set of labels of a schema object functionally determines the record type of that schema object. Recall that every object must conform to a schema object (\autoref{rule:node} and \ref{rule:edge}). This implies that if an object has the same set of labels as a schema object, it must conform to that schema object (since there exists no schema object with the same label set and a different record type). We find that this assumption holds in many domains, including the datasets we study.
 
 Under this assumption, we can simplify the rules of conformance. Informally:
 
@@ -733,7 +728,12 @@ Under this assumption, we can simplify the rules of conformance. Informally:
   Every node has the right number of incoming edges with the right labels.
 \end{enumerate}
 
-Next, we describe the implementation in each of the three database systems.
+\subsection{Implementation}
+
+Having investigated existing property graph database systems, we find that none are currently able to enforce all kinds of constraints that can be expressed with our schema formalism, in particular cardinality constraints. In this section, we describe how these systems can be extended to support all schema features. Where possible, we make use of the schema functionality exposed by the database engine. For conformance rules that cannot be checked this way, we provide queries.
+
+% TODO: why queries instead of in-engine implementation?
+
 % TODO: examples
 
 \paragraph{Neo4j.} We start by using the built-in schema functionality that Neo4j offers. To ensure the existence of mandatory properties (\autoref{rule:simp-node-mandatory-props} and \ref{rule:simp-edge-mandatory-props}), we use Neo4j's \texttt{CONSTRAINT} functionality, which lets us specify which properties are mandatory for nodes and edges with a particular label set (Enterprise edition only).
@@ -767,11 +767,11 @@ The remaining rules cannot be fully enforced by JanusGraph's schema, so we write
 
 If we are only interested in the Boolean validation problem, we do not need to enumerate all query results. To give the query engine the best chance of terminating early, we write the entire validation as a single disjunctive query. JanusGraph unfortunately does not allow a single query to range over all nodes and all edges, so instead we execute one query for nodes and one for edges, in sequence.
 
-\paragraph{TigerGraph.} Before any data is loaded, TigerGraph requires the user to specify a schema describing all nodes, edges and their properties. This is done with a series of \texttt{CREATE VERTEX} and \texttt{CREATE EDGE} statements. Every node and edge has a label and a set of properties, and every property has a datatype. Furthermore, every node type has a primary key. Finally, every edge type must specify a source and target node types. Using these built-in schema capabilities, we can already guarantee conformance to a few of our rules. Objects cannot have illegal labels (\autoref{rule:simp-node-labels} and \ref{rule:simp-edge-labels}) or illegal properties (\autoref{rule:simp-node-allowed-props} and \ref{rule:simp-edge-allowed-props}), and properties cannot have illegal data types (\autoref{rule:simp-node-datatype} and \ref{rule:simp-edge-datatype}). In addition, the endpoint constraint of edges is satisfied (\autoref{rule:simp-edge-endpoints}).
+\paragraph{TigerGraph.} Before any data is loaded, TigerGraph requires the user to specify a schema describing all nodes, edges and their properties. This is done with a series of \texttt{CREATE VERTEX} and \texttt{CREATE EDGE} statements. Using these built-in schema capabilities, we can already guarantee conformance to some of our rules. Every node and edge has a label (\autoref{rule:simp-node-labels} and \ref{rule:simp-edge-labels}) and a fixed set of properties (\autoref{rule:simp-node-allowed-props} and \ref{rule:simp-edge-allowed-props}). Every property has a datatype (\autoref{rule:simp-node-datatype} and \ref{rule:simp-edge-datatype}). Furthermore, every node type has a primary key. Finally, every edge type must specify a source and target node types (\autoref{rule:simp-edge-endpoints}).
 
-Unique to TigerGraph is that all properties must have a value as soon as the object is instantiated (there are no null values). When a value is missing, it is set to a default value, such as the empty string, the number 0, or the first of January 1970. While it is possible to prevent objects with missing values from being loaded, in some cases we may want to check for missing values on an existing graph. To this end, we use a query that finds all objects which have a mandatory property with the default value (satisfying \autoref{rule:simp-node-mandatory-props} and \ref{rule:simp-edge-mandatory-props}). If the default value naturally appears in valid data, then we use another indicator value. The query consists of a set of simple \texttt{SELECT-FROM-WHERE} patterns which range over all nodes and edges.
+Unique to TigerGraph is that all properties must have a value as soon as the object is instantiated (there are no null values). When a value is missing, it is set to a default value, such as the empty string, the number 0, or the first of January 1970. While it is possible to prevent objects with missing values from being loaded, in some cases we may want to check for missing values on an existing graph. To this end, we use a query that finds all objects which have a mandatory property with the default value (validating \autoref{rule:simp-node-mandatory-props} and \ref{rule:simp-edge-mandatory-props}). If the default value naturally appears in valid data, then we use another indicator value. The query consists of a set of simple \texttt{SELECT-FROM-WHERE} patterns which range over all nodes and edges.
 
-Finally, cardinality constraints are also validated using a query. For outgoing edges (\autoref{rule:simp-card-out}), we use the built-in \texttt{outdegree()} function, which returns the number of outgoing edges with a particular label for a given node. By default, TigerGraph maintains an index that stores these statistics for every node. For incoming edges (\autoref{rule:simp-card-in}), we use another TigerGraph feature known as an accumulator. This lets us compute the number of incoming edges for all relevant nodes in a single pass over the graph. Afterwards, the violating nodes are picked out.
+To cover the final remaining rules, cardinality constraints are also validated using a query. For outgoing edges (\autoref{rule:simp-card-out}), we use the built-in \texttt{outdegree()} function, which returns the number of outgoing edges with a particular label for a given node. By default, TigerGraph maintains an index that stores these statistics for every node. For incoming edges (\autoref{rule:simp-card-in}), we use another TigerGraph feature known as an accumulator. This lets us compute the number of incoming edges for all relevant nodes in a single pass over the graph. Afterwards, the violating nodes are picked out.
 
 % TODO: tigergraph boolean version?
 
