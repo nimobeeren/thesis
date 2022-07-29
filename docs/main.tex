@@ -12,6 +12,7 @@
 \usepackage{subcaption}
 \usepackage{tabularx}
 \usepackage{xcolor}
+\usepackage{float}
 
 % Fonts
 \usepackage{pxfonts}
@@ -41,19 +42,22 @@
 \renewcommand{\refname}{Bibliography}
 
 % Code listings
-% TODO: define different languages (Cypher, GSQL, Java)
 \usepackage{listings}
 \lstset{
-  language=SQL,
   breaklines=true,
   frame=lines,
   captionpos=b,
-  aboveskip=2\parskip,
   belowskip=0pt,
   basicstyle=\ttfamily,
   stringstyle=\color{blue},
-  keywordstyle=\color{reddish},
-  morekeywords={RETURN}
+  keywordstyle=\color{reddish}
+}
+\lstdefinelanguage{Cypher}{
+  language=SQL,
+  morekeywords={RETURN,FOR,REQUIRE,IS,WITH,CALL,YIELD}
+}
+\lstdefinelanguage{GSQL}{
+  language=SQL
 }
 
 % Definitions
@@ -746,26 +750,110 @@ Having investigated existing property graph database systems, we find that none 
 
 % TODO: examples
 
-\paragraph{Neo4j.} We start by using the built-in schema functionality that Neo4j offers. To ensure the existence of mandatory properties (\autoref{rule:simp-node-mandatory-props} and \ref{rule:simp-edge-mandatory-props}), we use Neo4j's \texttt{CONSTRAINT} functionality, which lets us specify which properties are mandatory for nodes and edges with a particular label set (Enterprise edition only).
+\paragraph{Neo4j.} We start by using the built-in schema functionality that Neo4j offers. To ensure the existence of mandatory properties (\autoref{rule:simp-node-mandatory-props} and \ref{rule:simp-edge-mandatory-props}), we use Neo4j's \texttt{CONSTRAINT} functionality, which lets us specify which properties are mandatory for nodes and edges with a particular label set (Enterprise edition only). An example is given in \autoref{lst:neo4j-mandatory-props}.
 
-Next, we tackle the validation the labels of nodes and edges (\autoref{rule:simp-node-labels} and \ref{rule:simp-edge-labels}) using Cypher queries. Neo4j provides functions \texttt{db.labels()} and \texttt{db.relationshipTypes()}, which respectively return a list of all node and edge labels that exist in the database. Unfortunately, these functions do not tell us which \emph{combinations} of labels exist. Since nodes can have multiple labels, we must fall back to a \texttt{MATCH} query which checks that every node has one of the allowed combinations of labels. Since edges in Neo4j can only have one label (called a \emph{relationship type}), we can use \texttt{db.relationshipTypes()} to determine if there exist any edges with a label that is not allowed. This is sufficient for Boolean validation, but if we want to find out precisely which edges have an illegal label, we again need to use a \texttt{MATCH} query.
+\begin{figure}[H]
+\begin{lstlisting}[
+  language=Cypher,
+  caption={Creation of constraints which require the existence of some mandatory properties on \texttt{Movie} nodes.},
+  label=lst:neo4j-mandatory-props
+]
+CREATE CONSTRAINT FOR (m:Movie) REQUIRE m.imdbId IS NOT NULL;
+CREATE CONSTRAINT FOR (m:Movie) REQUIRE m.movieId IS NOT NULL;
+CREATE CONSTRAINT FOR (m:Movie) REQUIRE m.title IS NOT NULL;
+\end{lstlisting}
+\end{figure}
 
-Next, we look at the properties. The functions \texttt{db.schema.nodeTypeProperties()} and \texttt{db.schema.relTypeProperties()} provide useful information about the properties that exist on nodes and edges, as well as their data types. This allows us to determine if there are any nodes or edges that have properties that are not allowed (\autoref{rule:simp-node-allowed-props} and \ref{rule:simp-edge-allowed-props}), or have the wrong data type (\autoref{rule:simp-node-datatype} and \ref{rule:simp-edge-datatype}). Again, if we want to find the violating objects, we need to use a \texttt{MATCH} query that scans all properties of all objects in the database. In that case, we use the \texttt{apoc.meta.type()} function (provided by the APOC library\footnote{\url{https://neo4j.com/labs/apoc/}}) to get the data type of a property at query-time.
+Next, we tackle the validation of the node and edge labels (\autoref{rule:simp-node-labels} and \ref{rule:simp-edge-labels}) using Cypher queries. Neo4j provides functions \texttt{db.labels()} and \texttt{db.relationshipTypes()}, which respectively return a list of all node and edge labels that exist in the database. Unfortunately, these functions do not tell us which \emph{combinations} of labels exist. Since nodes can have multiple labels, we must fall back to a \texttt{MATCH} query which checks that every node has one of the allowed combinations of labels (see \autoref{lst:neo4j-node-labels}). Since edges in Neo4j can only have one label (called a \emph{relationship type}), we can use \texttt{db.relationshipTypes()} to determine if there exist any edges with a label that is not allowed (see \autoref{lst:neo4j-edge-labels}). This is sufficient for Boolean validation, but if we want to find out precisely which edges have an illegal label, we again need to use a \texttt{MATCH} query.
+
+\begin{figure}[H]
+\begin{lstlisting}[
+  language=Cypher,
+  caption={A query to find all nodes that have a label set that is not allowed.},
+  label=lst:neo4j-node-labels
+]
+WITH [["Actor", "Person"], ["Movie"], ["User"], ...] AS allowedNodeLabelSets
+MATCH (n)
+WHERE NOT labels(n) IN allowedNodeLabelSets
+RETURN n
+\end{lstlisting}
+\end{figure}
+
+\begin{figure}[H]
+\begin{lstlisting}[
+  language=Cypher,
+  caption={A query to check if there are any edge labels that are not allowed. Note that this query returns a Boolean, and does not explain which edges have an illegal label.},
+  label=lst:neo4j-edge-labels
+]
+WITH ["ACTED_IN", "DIRECTED", ...] AS allowedEdgeLabels
+CALL db.relationshipTypes() YIELD relationshipType AS allTypes
+RETURN all(type IN collect(allTypes) WHERE type IN allowedEdgeLabels)
+\end{lstlisting}
+\end{figure}
+
+Next, we look at the properties. The functions \texttt{db.schema.nodeTypeProperties()} and \texttt{db.schema.relTypeProperties()} provide useful information about the properties that exist on nodes and edges, as well as their data types. This allows us to determine if there are any nodes or edges that have properties that are not allowed (\autoref{rule:simp-node-allowed-props} and \ref{rule:simp-edge-allowed-props}), or have the wrong data type (\autoref{rule:simp-node-datatype} and \ref{rule:simp-edge-datatype}). See \autoref{lst:neo4j-allowed-props-boolean} for an example of such a query. Again, if we want to find the violating objects, we need to use a \texttt{MATCH} query that scans all properties of all objects in the database. In that case, we use the \texttt{apoc.meta.type()} function (provided by the APOC library\footnote{\url{https://neo4j.com/labs/apoc/}}) to get the data type of a property at query-time. \autoref{lst:neo4j-allowed-props-full} shows an example.
+
+\begin{figure}[H]
+\begin{lstlisting}[
+  language=Cypher,
+  caption={A query to check if there are any \texttt{User} nodes with properties that are not allowed or have the wrong datatype. If the result is empty, there are no violations.},
+  label=lst:neo4j-allowed-props-boolean
+]
+CALL db.schema.nodeTypeProperties() YIELD nodeLabels, propertyName, propertyTypes
+WHERE "User" IN nodeLabels AND (
+    NOT propertyName IN ["userId", "name"]
+    OR propertyName = "userId" AND propertyTypes <> ["String"]
+    OR propertyName = "name" AND propertyTypes <> ["String"]
+)
+RETURN nodeLabels, propertyName, propertyTypes
+\end{lstlisting}
+\end{figure}
+
+\begin{figure}[H]
+\begin{lstlisting}[
+  language=Cypher,
+  caption={A query to find all \texttt{User} nodes with properties that are not allowed or have the wrong datatype.},
+  label=lst:neo4j-allowed-props-full
+]
+WITH {
+    userId: "STRING",
+    name: "STRING"
+} AS propertyTypes
+MATCH (n:User)
+WHERE NOT all(pKey IN keys(n) WHERE pKey IN keys(propertTypes) AND apoc.meta.type(n[pKey]) = propertyTypes[pKey])
+RETURN n
+\end{lstlisting}
+\end{figure}
 
 To check \autoref{rule:simp-edge-endpoints}, we do a \texttt{MATCH} query for every edge label, and look at the source and target nodes. For every edge, there must exist a schema edge such that the labels of the source and target in the data match the labels of the source and target in the schema.
 % An example of such a query is shown in \autoref{lst:neo4j-endpoints}.
 
-% \begin{lstlisting}[
-%   caption={A query that finds all \texttt{ACTED\_IN} edges such that the endpoints have the wrong label. Note that the source node may have additional labels.},
-%   label=lst:neo4j-endpoints
-% ]
-% MATCH (n)-[e:ACTED_IN]->(m)
-% WHERE NOT "Actor" IN labels(n) OR NOT labels(m) = ["Movie"]
-% RETURN e;
-% \end{lstlisting}
+\begin{figure}[H]
+\begin{lstlisting}[
+  language=Cypher,
+  caption={A query that finds all \texttt{ACTED\_IN} edges where the endpoints have the wrong label. Note that the source node \texttt{n} may have additional labels.},
+  label=lst:neo4j-endpoints
+]
+MATCH (n)-[e:ACTED_IN]->(m)
+WHERE NOT "Actor" IN labels(n) OR NOT labels(m) = ["Movie"]
+RETURN e;
+\end{lstlisting}
+\end{figure}
 
-Finally, we check the cardinality constraints (\autoref{rule:simp-card-out} and \ref{rule:simp-card-in}). Since the schemas of our datasets only contain ``one or more'' constraints, a simple \texttt{MATCH} query for each relevant node label is sufficient. If there is no match, the constraint is violated.
+Finally, we check the cardinality constraints (\autoref{rule:simp-card-out} and \ref{rule:simp-card-in}). Since the schemas of our datasets only contain ``one or more'' constraints, a simple \texttt{MATCH} query for each relevant node label is sufficient. See \autoref{lst:neo4j-mandatory-edges} for an example.
 % If the cardinality constraint is more specific (say, exactly 3), then we can use the \texttt{size()} function to count the number of matches of the pattern.
+
+\begin{figure}[H]
+\begin{lstlisting}[
+  language=Cypher,
+  caption={A query to find \texttt{ACTOR} nodes that are missing a mandatory \texttt{ACTED\_IN} edge.},
+  label=lst:neo4j-mandatory-edges
+]
+MATCH (a:Actor)
+WHERE NOT (a)-[:ACTED_IN]->(:Movie)
+RETURN a;
+\end{lstlisting}
+\end{figure}
 
 \paragraph{JanusGraph.} The additional schema features that JanusGraph provides allow us to enforce most conformance rules at the time of schema definition, preventing any non-conforming data from being inserted. The complete set of allowed node and edge labels (\autoref{rule:simp-node-labels} and \ref{rule:simp-edge-labels}) are defined using \texttt{makeVertexLabel()} and \texttt{makeEdgeLabel()}. If a schema object has more than one label, we concatenate them to form a single label. This does not affect the semantics (as long as the order of concatenation is consistent), since we only ever check for equality of label sets.
 
