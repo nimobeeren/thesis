@@ -591,29 +591,29 @@ Referring back to our definition of schema conformance (\autoref{def:schema-conf
   \centering
   \begin{tabularx}{\textwidth}{|X|l|l|l|l|l|}
     \hline
-                & \textbf{Neo4j}     & \textbf{Neo4j} & \textbf{TigerGraph} & \textbf{JanusGraph} & \textbf{Ours} \\
-                & \textbf{Community} & \textbf{Enterprise} &                &                     &               \\
+                & \textbf{Neo4j}     & \textbf{Neo4j}      & \textbf{TigerGraph} & \textbf{JanusGraph} & \textbf{Ours} \\
+                & \textbf{Community} & \textbf{Enterprise} &                     &                     &               \\
     \hline
-    Mandatory   & \no                & \yes                & \yes           & \no                 & \yes          \\
-    properties  &                    &                     &                &                     &               \\
+    Mandatory   & \no                & \yes                & \no                 & \yes                & \yes          \\
+    properties  &                    &                     &                     &                     &               \\
     \hline
-    Allowed     & \no                & \no                 & \no            & \yes                & \yes          \\
-    properties  &                    &                     &                &                     &               \\
+    Allowed     & \no                & \no                 & \yes                & \no                 & \yes          \\
+    properties  &                    &                     &                     &                     &               \\
     \hline
-    Endpoint    & \no                & \no                 & \yes           & \yes                & \yes          \\
-    constraints &                    &                     &                &                     &               \\
+    Endpoint    & \no                & \no                 & \yes                & \yes                & \yes          \\
+    constraints &                    &                     &                     &                     &               \\
     \hline
-    Data type   & \no                & \no                 & \yes           & \yes                & \yes          \\
-    constraints &                    &                     &                &                     &               \\
+    Data type   & \no                & \no                 & \yes                & \yes                & \yes          \\
+    constraints &                    &                     &                     &                     &               \\
     \hline
-    Maximum     & \no                & \no                 & \no            & \yes*               & \yes          \\
-    cardinality &                    &                     &                &                     &               \\
+    Maximum     & \no                & \no                 & \yes*               & \no                 & \yes          \\
+    cardinality &                    &                     &                     &                     &               \\
     \hline
-    Minimum     & \no                & \no                 & \no            & \no                 & \yes          \\
-    cardinality &                    &                     &                &                     &               \\
+    Minimum     & \no                & \no                 & \no                 & \no                 & \yes          \\
+    cardinality &                    &                     &                     &                     &               \\
     \hline
-    Property    & \yes               & \yes                & \yes           & \no                 & \no           \\
-    uniqueness  &                    &                     &                &                     &               \\
+    Property    & \yes               & \yes                & \no                 & \yes                & \no           \\
+    uniqueness  &                    &                     &                     &                     &               \\
     % \hline
     % Subtyping   & \no & \no & \no & \no & \no \\
     \hline
@@ -621,7 +621,6 @@ Referring back to our definition of schema conformance (\autoref{def:schema-conf
   \caption{Comparison of schema capabilities of property graph database systems and our schema formalism. *: only one-to-one, one-to-many, etc.}
   \label{tab:schema-comparison}
 \end{table}
-% TODO: order of columns the same as in text
 
 Next, we detail the differences between the three database systems in our scope with regard to data model and schema capabilities.
 
@@ -660,7 +659,27 @@ While a Boolean validation method may be sufficient in some situations, full val
   \item The \textbf{LDBC Social Network Benchmark} (SNB) \citep{angles2020snb} was designed to evaluate graph-like data management technologies in a realistic setting. The dataset consists of users, messages, likes, and other concepts that can be found in the domain of social networks. The full schema is given in TODO. The data is made available at various scales, ranging from less than a gigabyte to a terrabyte of raw data. We run multiple tests with scale factor 0.1, 0.3, and 1. This lets us study how our solution scales with the size of the data.
 \end{itemize}
 
-A comparison of the datasets, including the number of objects, is given in TODO.
+A comparison of the datasets is given in \autoref{tab:dataset-comparison}.
+
+% TODO: SF0.3 and 1 statistics
+\begin{table}[t]
+  \centering
+  \begin{tabular}{|l|r|r|r|r|r|}
+    \hline
+    \textbf{Dataset} & $\bf{|N|}$ & $\bf{|E|}$ & $\bf{|N'|}$ & $\bf{|E'|}$ & \textbf{Raw} \\
+    \hline
+    Recommenations   & 28,863     & 166,261    & 6           & 6           & 22 MB        \\
+    \hline
+    SNB (SF0.1)      & 327,588    & 1,477,965  & 14          & 20          & 100 MB       \\
+    % \hline
+    % SNB (SF0.3) & 0 & 0 & 0 & 0 & 0\\
+    % \hline
+    % SNB (SF1)  & 0 & 0 & 0 & 0 & 0\\
+    \hline
+  \end{tabular}
+  \caption{A comparison of the datasets used in the experiment. $|N|$ and $|E|$ represent the number of nodes and edges. $|N'|$ and $|E'|$ represent the number of schema nodes and schema edges. The raw size is measured as the combined size of all CSV files.}
+  \label{tab:dataset-comparison}
+\end{table}
 
 \subsection{Extending schema capabilities}
 
