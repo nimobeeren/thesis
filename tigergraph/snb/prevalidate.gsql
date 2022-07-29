@@ -26,12 +26,13 @@ CREATE QUERY validateProperties () {
         WHERE placeOrTag.name == "" OR placeOrTag.url == ""
         ACCUM @@violatingNodes += placeOrTag;
 
+    // LEFT HERE: The feature is not supported yet in interpreted mode query.
     violatingPersons =
         SELECT person
         FROM Person:person
-        // TODO: change when multi-valued attributes are loaded, ensure default values are correct
-        // WHERE person.firstName == "" OR person.lastName == "" OR person.gender == "" OR person.birthday == "" OR person.email == "" OR person.speaks == "" OR person.browserUsed == "" OR person.locationIP == "" OR person.creationDate == to_datetime("1970-01-01 00:00:00");
-        WHERE person.firstName == "" OR person.lastName == "" OR person.gender == "" OR person.birthday == "" OR person.browserUsed == "" OR person.locationIP == "" OR person.creationDate == to_datetime("1970-01-01 00:00:00")
+        WHERE person.firstName == "" OR person.lastName == "" OR person.gender == "" OR person.birthday == ""
+        OR person.browserUsed == "" OR person.locationIP == "" OR person.creationDate == to_datetime("1970-01-01 00:00:00")
+        OR count(person.email) == 0 OR count(person.speaks) == 0
         ACCUM @@violatingNodes += person;
 
     SetAccum<EDGE> @@violatingEdges;

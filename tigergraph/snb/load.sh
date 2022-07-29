@@ -12,6 +12,8 @@ v_tagclass_file=\"${LDBC_SNB_DATA_DIR}/static/tagclass_0_0.csv\",
 v_comment_file=\"${LDBC_SNB_DATA_DIR}/dynamic/comment_0_0.csv\", 
 v_forum_file=\"${LDBC_SNB_DATA_DIR}/dynamic/forum_0_0.csv\",
 v_person_file=\"${LDBC_SNB_DATA_DIR}/dynamic/person_0_0.csv\",
+v_person_email_file=\"${LDBC_SNB_DATA_DIR}/dynamic/person_email_emailaddress_0_0.csv\",
+v_person_speaks_file=\"${LDBC_SNB_DATA_DIR}/dynamic/person_speaks_language_0_0.csv\",
 v_post_file=\"${LDBC_SNB_DATA_DIR}/dynamic/post_0_0.csv\",
 
 organisation_is_located_in_place_file=\"${LDBC_SNB_DATA_DIR}/static/organisation_isLocatedIn_place_0_0.csv\",
