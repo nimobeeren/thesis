@@ -8,6 +8,7 @@
 \usepackage{amssymb}
 \usepackage{amsthm}
 \usepackage{graphicx}
+% TODO: style captions (bold name, de-emphasized description, horizontal margin)
 \usepackage{caption}
 \usepackage{subcaption}
 \usepackage{tabularx}
@@ -593,6 +594,7 @@ In \autoref{fig:subtyping}, a constraint is specified which we can express in wo
 
 We have defined a property graph schema formalism which is capable of expressing constraints in commonly used conceptual data modeling methods. Next, we analyze the practical feasibility of our approach. We aim to answer the question: what is the cost of determining property graph schema conformance using currently available graph database systems? First, we investigate the schema capabilities of three existing graph database sytems. Second, we describe how these systems can be extended to support all kinds of constraints that can be specified in our schema formalism. Third, we analyze the performance of our prototypical implementation in several realistic scenarios.
 
+% TODO: move this to related work? but we need to know what a PG schema is and link features to conformance rules
 \section{State of the art}
 \label{sec:sota}
 
@@ -606,7 +608,7 @@ Referring back to our definition of schema conformance (\autoref{def:schema-conf
   \centering
   \begin{tabularx}{\textwidth}{|X|l|l|l|l|l|}
     \hline
-                & \textbf{Neo4j}     & \textbf{Neo4j}      & \textbf{TigerGraph} & \textbf{JanusGraph} & \textbf{Ours} \\
+                & \textbf{Neo4j}     & \textbf{Neo4j}      & \textbf{JanusGraph} & \textbf{TigerGraph} & \textbf{Ours} \\
                 & \textbf{Community} & \textbf{Enterprise} &                     &                     &               \\
     \hline
     Mandatory   & \no                & \yes                & \no                 & \yes                & \yes          \\
@@ -937,7 +939,7 @@ CREATE DIRECTED EDGE ACTED_IN (
 \end{lstlisting}
 \end{figure}
 
-Unique to TigerGraph is that all properties must have a value as soon as the object is instantiated (there are no null values). When a value is missing, it is set to a default value, such as the empty string, the number 0, or the first of January 1970. While it is possible to prevent objects with missing values from being loaded, in some cases we may want to check for missing values on an existing graph. To this end, we use a query that finds all objects which have a mandatory property with the default value (validating \autoref{rule:simp-node-mandatory-props} and \ref{rule:simp-edge-mandatory-props}). If the default value naturally appears in valid data, then we use another indicator value. The query consists of a set of simple \texttt{SELECT-FROM-WHERE} patterns which range over all nodes and edges, as in \autoref{lst:tigergraph-mandatory-props}.
+In TigerGraph, all properties must have a value as soon as the object is instantiated (there are no null values). When a value is missing, it is set to a default value, such as the empty string, the number 0, or the first of January 1970. While it is possible to prevent objects with missing values from being loaded, in some cases we may want to check for missing values on an existing graph. To this end, we use a query that finds all objects which have a mandatory property with the default value (validating \autoref{rule:simp-node-mandatory-props} and \ref{rule:simp-edge-mandatory-props}). If the default value naturally appears in valid data, then we use another indicator value. The query consists of a set of simple \texttt{SELECT-FROM-WHERE} patterns which range over all nodes and edges, as in \autoref{lst:tigergraph-mandatory-props}.
 
 \begin{figure}[H]
 \begin{lstlisting}[
@@ -984,15 +986,15 @@ WHERE actor.outdegree("ACTED_IN") == 0
   caption={A query to find \texttt{Post} nodes which are missing a incoming \texttt{CONTAINER\_OF} edge.},
   label=lst:tigergraph-mandatory-edges-in
 ]
-SumAccum<int> @numInContainerOf;
+SumAccum<int> @numContainerOf;
 tmp =
     SELECT post
     FROM :n -(CONTAINER_OF>)- Post:post
-    ACCUM post.@numInContainerOf += 1;
+    ACCUM post.@numContainerOf += 1;
 violatingActors =
     SELECT post
     FROM Post:post
-    WHERE post.@numInContainerOf == 0
+    WHERE post.@numContainerOf == 0
 \end{lstlisting}
 \end{figure}
 
