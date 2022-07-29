@@ -23,6 +23,8 @@
 \definecolor{blue}{rgb}{0.000,0.361,0.773}
 \definecolor{purple}{rgb}{0.435,0.259,0.757}
 \definecolor{orange}{rgb}{0.890,0.384,0.035}
+\definecolor{green}{rgb}{0.102,0.498,0.216}
+\definecolor{red}{rgb}{0.812,0.133,0.180}
 
 % References
 \usepackage{hyperref}
@@ -95,9 +97,8 @@
 \newcommand{\undefined}{\mathbf{undef}}
 
 % Yes/No
-% TODO: use colored characters?
-\newcommand{\yes}{\includegraphics[height=7pt]{figures/check.png}}
-\newcommand{\no}{\includegraphics[height=6.5pt]{figures/cross.png}}
+\newcommand{\yes}{\color{green}\checkmark}
+\newcommand{\no}{\color{red}$\times$}
 
 \renewcommand{\itemautorefname}{Rule}
 
@@ -447,7 +448,7 @@ An example of a property graph schema with cardinality constraints is given in \
 
 \autoref{fig:conformance} contains some examples of property graphs which are validated against the schema of \autoref{fig:pg-schema}, taking into account the new rules.
 
-Compared to \autoref{def:schema-conformance-basic}, rules~\ref{rule:node} and~\ref{rule:edge} are unchanged, while rules~\ref{rule:out} and~\ref{rule:in} enforce cardinality constraints on edges. With these new rules, we can enforce mandatory edges, i.e. a cardinality constraint of ``at least one''.
+Compared to \autoref{def:schema-conformance-basic}, \autoref{rule:node} and \ref{rule:edge} are unchanged, while \autoref{rule:out} and \ref{rule:in} enforce cardinality constraints on edges. With these new rules, we can enforce mandatory edges, i.e. a cardinality constraint of ``at least one''.
 
 \begin{figure}[t]
   \centering
@@ -640,14 +641,10 @@ All of JanusGraph's schema features are centered around specifying what is allow
 
 TigerGraph's schema is strict, in the sense that every node label, edge label, and property must be explicitly defined. All properties are mandatory and have a fixed data type, which may be singular or multi-valued. There are no null values; if a property value is missing during insertion, a default value is set. All nodes have a primary key, which may be a single property or a composite key. Schema edges must specify a source and target node type, though it is possible to specify multiple types on either side. By default, directed edges can only be traversed from source to target, though a reverse edge can be automatically constructed if desired.
 
-\subsection{Extending schema capabilities}
-% TODO: examples
+\subsection{Workloads}
+\label{sec:workloads}
 
-Having investigated existing property graph database systems, we find that none are currently able to enforce all kinds of constraints that can be expressed with our schema formalism, in particular cardinality constraints. In this section, we describe how these systems can be extended to support all schema features. Where possible, we make use of the schema functionality exposed by the database engine. For the other features, we provide queries which determine schema conformance.
-% TODO: why queries instead of in-engine implementation?
-
-% TODO: this should probably go in a different section
-We consider two variants of the schema validation problem:
+\paragraph{Objective.} We consider two variants of the schema validation problem:
 
 \begin{itemize}
   \item \textbf{Boolean validation:} given a graph and a schema, determine whether the graph conforms to the schema or not.
@@ -656,7 +653,21 @@ We consider two variants of the schema validation problem:
 
 While a Boolean validation method may be sufficient in some situations, full validation is required when we want to explain why a graph does not conform. Boolean validation is a strictly easier problem because we can stop as soon as we find a single violation, while full validation always requires at least one full scan of the graph.
 
-To reduce the complexity of the implementation, we assume that the set of labels of a schema object functionally determines the record type of that schema object. Recall that every object must conform to a schema object (rules~\ref{rule:node} and \ref{rule:edge}). This implies that if an object has the same set of labels as a schema object, it must conform to that schema object (since there exists no schema object with the same label set and a different record type). We found that this assumption holds in many domains, including the ones we study in \autoref{sec:workloads}.
+\paragraph{Datasets.} Our schema validation methods are applied to two datasets:
+
+\begin{itemize}
+  \item The \textbf{Recommendations Graph}\footnote{\url{https://github.com/neo4j-graph-examples/recommendations}} is a relatively small dataset with a simple schema, provided by Neo4j. It contains movies, actors, directors, and users who rate movies. The schema is given in TODO. This dataset is intended as a working example for people who want to explore the functionality of a graph database. The small size makes it suitable as a proof-of-concept for our schema validation methods.
+  \item The \textbf{LDBC Social Network Benchmark} (SNB) \citep{angles2020snb} was designed to evaluate graph-like data management technologies in a realistic setting. The dataset consists of users, messages, likes, and other concepts that can be found in the domain of social networks. The full schema is given in TODO. The data is made available at various scales, ranging from less than a gigabyte to a terrabyte of raw data. We run multiple tests with scale factor 0.1, 0.3, and 1. This lets us study how our solution scales with the size of the data.
+\end{itemize}
+
+A comparison of the datasets, including the number of objects, is given in TODO.
+
+\subsection{Extending schema capabilities}
+
+Having investigated existing property graph database systems, we find that none are currently able to enforce all kinds of constraints that can be expressed with our schema formalism, in particular cardinality constraints. In this section, we describe how these systems can be extended to support all schema features. Where possible, we make use of the schema functionality exposed by the database engine. For the other features, we provide queries which determine schema conformance.
+% TODO: why queries instead of in-engine implementation?
+
+To reduce the complexity of the implementation, we assume that the set of labels of a schema object functionally determines the record type of that schema object. Recall that every object must conform to a schema object (\autoref{rule:node} and \ref{rule:edge}). This implies that if an object has the same set of labels as a schema object, it must conform to that schema object (since there exists no schema object with the same label set and a different record type). We find that this assumption holds in many domains, including the ones we study in \autoref{sec:workloads}. % TODO: check if reference is still accurate
 
 Under this assumption, we can simplify the rules of conformance. Informally:
 
@@ -692,8 +703,9 @@ Under this assumption, we can simplify the rules of conformance. Informally:
 \end{enumerate}
 
 Next, we describe the implementation in each of the three database systems.
+% TODO: examples
 
-\paragraph{Neo4j.} We start by using all built-in schema functionality that Neo4j has to offer. To ensure the existence of mandatory properties (\autoref{rule:simp-node-mandatory-props} and \ref{rule:simp-edge-mandatory-props}), we use Neo4j's \texttt{CONSTRAINT} functionality, which lets us specify which properties are mandatory for nodes and edges with a particular label set (Enterprise edition only).
+\paragraph{Neo4j.} We start by using the built-in schema functionality that Neo4j offers. To ensure the existence of mandatory properties (\autoref{rule:simp-node-mandatory-props} and \ref{rule:simp-edge-mandatory-props}), we use Neo4j's \texttt{CONSTRAINT} functionality, which lets us specify which properties are mandatory for nodes and edges with a particular label set (Enterprise edition only).
 
 Next, we tackle the validation the labels of nodes and edges (\autoref{rule:simp-node-labels} and \ref{rule:simp-edge-labels}) using Cypher queries. Neo4j provides functions \texttt{db.labels()} and \texttt{db.relationshipTypes()}, which respectively return a list of all node and edge labels that exist in the database. Unfortunately, these functions do not tell us which \emph{combinations} of labels exist. Since nodes can have multiple labels, we must fall back to a \texttt{MATCH} query which checks that every node has one of the allowed combinations of labels. Since edges in Neo4j can only have one label (called a \emph{relationship type}), we can use \texttt{db.relationshipTypes()} to determine if there exist any edges with a label that is not allowed. This is sufficient for Boolean validation, but if we want to find out precisely which edges have an illegal label, we again need to use a \texttt{MATCH} query.
 
@@ -731,9 +743,6 @@ Unique to TigerGraph is that all properties must have a value as soon as the obj
 Finally, cardinality constraints are also validated using a query. For outgoing edges (\autoref{rule:simp-card-out}), we use the built-in \texttt{outdegree()} function, which returns the number of outgoing edges with a particular label for a given node. By default, TigerGraph maintains an index that stores these statistics for every node. For incoming edges (\autoref{rule:simp-card-in}), we use another TigerGraph feature known as an accumulator. This lets us compute the number of incoming edges for all relevant nodes in a single pass over the graph. Afterwards, the violating nodes are picked out.
 
 % TODO: tigergraph boolean version?
-
-\subsection{Workloads}
-\label{sec:workloads}
 
 \bibliography{main}
 
