@@ -70,7 +70,6 @@ CREATE QUERY validateProperties () {
 }
 
 // Finds the nodes that violate an edge cardinality constraint
-// TODO: use outdegree() function
 CREATE QUERY validateCardinality () {
     SetAccum<VERTEX> @@violatingNodes;
 

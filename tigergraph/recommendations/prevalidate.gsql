@@ -6,76 +6,69 @@ SET syntax_version="v2"
 // Since TigerGraph does not support null values, we check if the value is the
 // default value instead
 CREATE QUERY validateProperties () {
-
-    // TODO: use accumulator to store all violating nodes
+    SetAccum<VERTEX> @@violatingNodes;
     
     violatingMovies =
         SELECT movie
         FROM Movie:movie
-        WHERE movie.imdbId == "" OR movie.movieId == "" OR movie.title == "";
+        WHERE movie.imdbId == "" OR movie.movieId == "" OR movie.title == ""
+        ACCUM @@violatingNodes += movie;
 
     violatingPersons =
         SELECT person
         FROM Actor|Director|ActorDirector:person
-        WHERE person.name == "" OR person.tmdbId == "" OR person.url == "";
+        WHERE person.name == "" OR person.tmdbId == "" OR person.url == ""
+        ACCUM @@violatingNodes += person;
 
     violatingUsers =
         SELECT user
         FROM User:user
-        WHERE user.name == "" OR user.userId == "";
+        WHERE user.name == "" OR user.userId == ""
+        ACCUM @@violatingNodes += user;
 
     violatingGenres =
         SELECT genre
         FROM Genre:genre
-        WHERE genre.genre == "";
+        WHERE genre.genre == ""
+        ACCUM @@violatingNodes += genre;
 
-    ListAccum<EDGE> @@violatingRatings; // use accumulator since we can't select edges
+    SetAccum<EDGE> @@violatingEdges;
+
     tmp =
         SELECT movie // doesn't matter
         FROM User:user -(RATED>:rated)- Movie:movie
         WHERE rated.rating == 0.0 OR rated.timestamp == 0
-        ACCUM @@violatingRatings += rated;
+        ACCUM @@violatingEdges += rated;
 
-    PRINT violatingMovies, violatingPersons, violatingUsers, violatingGenres, @@violatingRatings;
+    PRINT @@violatingNodes, @@violatingEdges;
 }
 
 // Finds the nodes that violate an edge cardinality constraint
-// TODO: use outdegree() function
 CREATE QUERY validateCardinality () {
+    SetAccum<VERTEX> @@violatingNodes;
+
     // Find the actors who acted in 0 movies
-    SumAccum<int> @numActedIn;
-    tmp =
-        SELECT actor
-        FROM Actor|ActorDirector:actor -(ACTED_IN>)- Movie:m
-        ACCUM actor.@numActedIn += 1;
-    violatingActors =
+    missingActedIn =
         SELECT actor
         FROM Actor:actor
-        WHERE actor.@numActedIn == 0;
+        WHERE actor.outdegree("ACTED_IN") == 0
+        ACCUM @@violatingNodes += actor;
 
-    // Find the directors who directed 0 movies
-    SumAccum<int> @numDirectorOf;
-    tmp =
-        SELECT director
-        FROM Director|ActorDirector:director -(DIRECTOR_OF>)- Movie:m
-        ACCUM director.@numDirectorOf += 1;
-    violatingDirectors =
+    // Find the actors who acted in 0 movies
+    missingDirectorOf =
         SELECT director
         FROM Director:director
-        WHERE director.@numDirectorOf == 0;
+        WHERE director.outdegree("DIRECTOR_OF") == 0
+        ACCUM @@violatingNodes += director;
 
-    // Find the movies that are in 0 genres
-    SumAccum<int> @numInGenre;
-    tmp =
-        SELECT movie
-        FROM Movie:movie -(IN_GENRE>)- Genre:g
-        ACCUM movie.@numInGenre += 1;
-    violatingMovies =
+    // Find the movies who are in 0 genres
+    missingInGenre =
         SELECT movie
         FROM Movie:movie
-        WHERE movie.@numInGenre == 0;
+        WHERE movie.outdegree("IN_GENRE") == 0
+        ACCUM @@violatingNodes += movie;
 
-    PRINT violatingActors, violatingDirectors, violatingMovies;
+    PRINT @@violatingNodes;
 }
 
 INSTALL QUERY validateProperties, validateCardinality
