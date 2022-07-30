@@ -19,7 +19,11 @@ docker run \
 
 ## Data loading
 
-1. Connect to the TigerGraph instance with `ssh -p 14022 tigergraph@localhost` and enter password `tigergraph`.
+1. Connect to the TigerGraph instance with
+```bash
+ssh -p 14022 tigergraph@localhost
+```
+and enter password `tigergraph`.
 
 2. Start the TigerGraph services with `gadmin start all`.
 

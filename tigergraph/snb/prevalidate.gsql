@@ -26,7 +26,6 @@ CREATE QUERY validateProperties () {
         WHERE placeOrTag.name == "" OR placeOrTag.url == ""
         ACCUM @@violatingNodes += placeOrTag;
 
-    // LEFT HERE: The feature is not supported yet in interpreted mode query.
     violatingPersons =
         SELECT person
         FROM Person:person
