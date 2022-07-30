@@ -26,7 +26,7 @@ WHERE "Movie" IN nodeLabels AND NOT propertyName IN allowedNodeProperties.Movie
 OR "Person" IN nodeLabels AND NOT propertyName IN allowedNodeProperties.Person
 OR "User" IN nodeLabels AND NOT propertyName IN allowedNodeProperties.User
 OR "Genre" IN nodeLabels AND NOT propertyName IN allowedNodeProperties.Genre
-RETURN nodeLabels, propertyName;
+RETURN count(nodeLabels) = 0;
 
 // Find edge properties that are not allowed
 WITH {
@@ -40,7 +40,7 @@ WHERE relType = ":`ACTED_IN`" AND NOT propertyName IN allowedEdgeProperties.ACTE
 OR relType = ":`DIRECTED`" AND NOT propertyName IN allowedEdgeProperties.DIRECTED
 OR relType = ":`RATED`" AND NOT propertyName IN allowedEdgeProperties.RATED
 OR relType = ":`IN_GENRE`" AND NOT propertyName IN allowedEdgeProperties.IN_GENRE
-RETURN relType, propertyName;
+RETURN count(relType) = 0;
 
 // Find node properties with the wrong datatype
 CALL db.schema.nodeTypeProperties() YIELD nodeLabels, propertyName, propertyTypes
@@ -80,7 +80,7 @@ OR "User" IN nodeLabels AND (
 OR "Genre" IN nodeLabels AND (
     propertyName = "name" AND propertyTypes <> ["String"]
 )
-RETURN nodeLabels, propertyName, propertyTypes;
+RETURN count(nodeLabels) = 0;
 
 // Find edge properties with the wrong datatype
 CALL db.schema.relTypeProperties() YIELD relType, propertyName, propertyTypes
@@ -90,7 +90,7 @@ OR relType = ":`RATED`" AND (
     propertyName = "rating" AND propertyTypes <> ["Double"]
     OR propertyName = "timestamp" AND propertyTypes <> ["Long"]
 )
-RETURN relType, propertyName, propertyTypes;
+RETURN count(relType) = 0;
 
 // Check for edges between wrong types of nodes
 // We can't do this with the schema statistics, because this finds that some Actors have DIRECTED eges,
@@ -103,4 +103,4 @@ MATCH (n)-[e:RATED]->(m) WHERE NOT labels(n) = ["User"] OR NOT labels(m) = ["Mov
 // Check for missing mandatory edges
 MATCH (a:Actor) WHERE NOT (a)-[:ACTED_IN]->(:Movie) RETURN count(a) = 0;
 MATCH (d:Director) WHERE NOT (d)-[:DIRECTED]->(:Movie) RETURN count(d) = 0;
-MATCH (m:Movie) WHERE NOT (m)-[:IN_GENRE]->(:Genre) RETURN count(g) = 0;
+MATCH (m:Movie) WHERE NOT (m)-[:IN_GENRE]->(:Genre) RETURN count(m) = 0;

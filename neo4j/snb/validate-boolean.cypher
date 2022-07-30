@@ -40,7 +40,7 @@ OR "Forum" IN nodeLabels AND NOT propertyName IN allowedNodeProperties.Forum
 OR "Person" IN nodeLabels AND NOT propertyName IN allowedNodeProperties.Person
 OR "Tag" IN nodeLabels AND NOT propertyName IN allowedNodeProperties.Tag
 OR "TagClass" IN nodeLabels AND NOT propertyName IN allowedNodeProperties.TagClass
-RETURN nodeLabels, propertyName;
+RETURN count(nodeLabels) = 0;
 
 // Find edge properties that are not allowed
 WITH {
@@ -76,7 +76,7 @@ OR relType = ":`LIKES`" AND NOT propertyName IN allowedEdgeProperties.LIKES
 OR relType = ":`REPLY_OF`" AND NOT propertyName IN allowedEdgeProperties.REPLY_OF
 OR relType = ":`STUDY_AT`" AND NOT propertyName IN allowedEdgeProperties.STUDY_AT
 OR relType = ":`WORK_AT`" AND NOT propertyName IN allowedEdgeProperties.WORK_AT
-RETURN relType, propertyName;
+RETURN count(relType) = 0;
 
 // Find node properties with the wrong datatype
 CALL db.schema.nodeTypeProperties() YIELD propertyName, propertyTypes
@@ -97,14 +97,14 @@ OR propertyName = "gender" AND propertyTypes <> ["String"]
 OR propertyName = "birthday" AND propertyTypes <> ["Date"]
 OR propertyName = "speaks" AND propertyTypes <> ["StringArray"]
 OR propertyName = "email" AND propertyTypes <> ["StringArray"]
-RETURN propertyName, propertyTypes;
+RETURN count(propertyName) = 0;
 
 // Find edge properties with the wrong datatype
 CALL db.schema.relTypeProperties() YIELD propertyName, propertyTypes
 WHERE propertyName = "creationDate" AND propertyTypes <> ["DateTime"]
 OR propertyName = "classYear" AND propertyTypes <> ["Long"]
 OR propertyName = "workFrom" AND propertyTypes <> ["Long"]
-RETURN propertyName, propertyTypes;
+RETURN count(propertyName) = 0;
 
 // Check for edges between wrong types of nodes
 // TODO: do this with schema statistics? db.schema.visualization() or apoc.meta.schema()
@@ -131,7 +131,7 @@ MATCH (person:Person) WHERE NOT (person)-[:HAS_INTEREST]->() RETURN count(person
 // MATCH (forum:Forum) WHERE NOT (forum)-[:HAS_MEMBER]->() RETURN count(forum) = 0; // this constraint seems to be violated in data
 MATCH (forum:Forum) WHERE NOT (forum)-[:HAS_TAG]->() RETURN count(forum) = 0;
 MATCH (tag:Tag) WHERE NOT (tag)-[:HAS_TYPE]->() RETURN count(tag) = 0;
-MATCH (organisation:Organisation) WHERE NOT (organisation)-[:IS_LOCATED_IN]->() count(RETURN) = 0 organisation;
+MATCH (organisation:Organisation) WHERE NOT (organisation)-[:IS_LOCATED_IN]->() RETURN count(organisation) = 0;
 MATCH (message:Message) WHERE NOT (message)-[:IS_LOCATED_IN]->() RETURN count(message) = 0;
 MATCH (person:Person) WHERE NOT (person)-[:IS_LOCATED_IN]->() RETURN count(person) = 0;
 MATCH (city:City) WHERE NOT (city)-[:IS_PART_OF]->() RETURN count(city) = 0;

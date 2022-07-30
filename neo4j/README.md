@@ -14,7 +14,7 @@ docker run \
     -v $HOME/neo4j/logs:/logs \
     -v $HOME/neo4j/import:/var/lib/neo4j/import \
     -v $HOME/neo4j/plugins:/plugins \
-    -v $HOME/Development/thesis:$HOME/thesis \
+    -v $HOME/Development/thesis:/thesis \
     -e NEO4JLABS_PLUGINS=\[\"apoc\"\] \
     -e NEO4J_ACCEPT_LICENSE_AGREEMENT=yes \
     -it \
@@ -103,7 +103,7 @@ neo4j start
 
 5. Run the queries in `snb/load-properties.cypher` to load the multi-valued properties:
 ```bash
-cat thesis/neo4j/snb/load-properties.cypher | cypher-shell -u neo4j -p neo4j
+cat /thesis/neo4j/snb/load-properties.cypher | cypher-shell -u neo4j -p neo4j
 ```
 
 ### Schema validation
