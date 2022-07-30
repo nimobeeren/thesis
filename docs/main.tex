@@ -1003,20 +1003,26 @@ violatingActors =
 
 \section{Results}
 
-\begin{table}[b]
+\begin{table}[H]
   \centering
   \begin{tabular}{|l|l|r|r|r|}
     \hline
     \textbf{Dataset}                & \textbf{Variant} & \textbf{Neo4j} & \textbf{JanusGraph} & \textbf{TigerGraph} \\
     \hline
-    \multirow{2}{*}{Recomendations} & Boolean          & 0              & 0                   & 0                   \\
-    \cline{2-5}                     & Full             & 0              & 5808 ms             & 67 ms               \\
+    \multirow{2}{*}{Recomendations} & Boolean          & 663            & TODO                & TODO                \\
+    \cline{2-5}                     & Full             & 7,494          & 5,808               & 67                  \\
     \hline
-    \multirow{2}{*}{SNB}            & Boolean          & 0              & 0                   & 0                   \\
-    \cline{2-5}                     & Full             & 0              & 0                   & 0                   \\
+    \multirow{2}{*}{SNB (SF0.1)}    & Boolean          & 6,680          & TODO                & TODO                \\
+    \cline{2-5}                     & Full             & 27,876         & TODO                & TODO                \\
+    \hline
+    \multirow{2}{*}{SNB (SF0.3)}    & Boolean          & TODO           & TODO                & TODO                \\
+    \cline{2-5}                     & Full             & TODO           & TODO                & TODO                \\
+    \hline
+    \multirow{2}{*}{SNB (SF1)}      & Boolean          & TODO           & TODO                & TODO                \\
+    \cline{2-5}                     & Full             & TODO           & TODO                & TODO                \\
     \hline
   \end{tabular}
-  \caption{TODO}
+  \caption{Total execution time of validation queries in milliseconds.}
   \label{tbl:results}
 \end{table}
 
