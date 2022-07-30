@@ -799,7 +799,7 @@ Next, we look at the properties. The functions \texttt{db.schema.nodeTypePropert
 \begin{figure}[H]
   \begin{lstlisting}[
     language=Cypher,
-    caption={A query to check if there are any \texttt{User} nodes with properties that are not allowed or have the wrong datatype. If the result is empty, there are no violations.},
+    caption={A query to check if there are any \texttt{User} nodes with properties that are not allowed or have the wrong datatype. If the result is \texttt{true}, there are no violations.},
     label=lst:neo4j-allowed-props-boolean
   ]
 CALL db.schema.nodeTypeProperties() YIELD nodeLabels, propertyName, propertyTypes
@@ -808,7 +808,7 @@ WHERE "User" IN nodeLabels AND (
     OR propertyName = "userId" AND propertyTypes <> ["String"]
     OR propertyName = "name" AND propertyTypes <> ["String"]
 )
-RETURN nodeLabels, propertyName, propertyTypes
+RETURN count(nodeLabels) = 0
   \end{lstlisting}
 \end{figure}
 \vspace*{-8pt}
