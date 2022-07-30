@@ -70,6 +70,8 @@
 \newtheorem{definition}{Definition}
 \newcommand{\definitionautorefname}{Definition}
 
+\renewcommand{\sectionautorefname}{Section}
+
 % Natural numbers
 \newcommand{\N}{\mathbb{N}}
 
@@ -591,7 +593,6 @@ In \autoref{fig:subtyping}, a constraint is specified which we can express in wo
 \end{figure}
 
 \chapter{Experimental Study}
-\label{sec:experiment}
 
 We have defined a property graph schema formalism which is capable of expressing constraints in commonly used conceptual data modeling methods. Next, we analyze the practical feasibility of our approach. We aim to answer the question: what is the cost of determining property graph schema conformance using currently available graph database systems? First, we investigate the schema capabilities of three existing graph database sytems. Second, we describe how these systems can be extended to support all kinds of constraints that can be specified in our schema formalism. Third, we analyze the performance of our prototypical implementation in several realistic scenarios.
 
