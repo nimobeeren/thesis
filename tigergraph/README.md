@@ -96,6 +96,6 @@ bash thesis/tigergraph/snb/mangle.sh | jq
 bash thesis/tigergraph/snb/validate.sh | jq
 ```
 
-### Time measuring
+## Time measuring
 
 TigerGraph stores a log of all queries in `tigergraph/log/gpe/log.INFO`. We provide a script `measure.sh` which sums up the execution times of all queries in that log and returns the total (in milliseconds). Just be sure to empty the log before starting the workload with `echo > tigergraph/log/gpe/log.INFO`.
