@@ -13,6 +13,7 @@ docker run \
   --name janusgraph \
   -v ~/Development/thesis:/opt/janusgraph/thesis \
   -v ~/janusgraph/data:/opt/janusgraph/mydata \
+  -m 6g \
   -it \
   janusgraph/janusgraph:0.6.2 \
   bash

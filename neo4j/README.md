@@ -15,6 +15,9 @@ docker run \
     -v $HOME/neo4j/import:/var/lib/neo4j/import \
     -v $HOME/neo4j/plugins:/plugins \
     -v $HOME/Development/thesis:/thesis \
+    -e NEO4J_dbms_memory_heap_initial__size=6G \
+    -e NEO4J_dbms_memory_heap_max__size=6G \
+    -e NEO4J_dbms_memory_pagecache_size=3G \
     -e NEO4JLABS_PLUGINS=\[\"apoc\"\] \
     -e NEO4J_ACCEPT_LICENSE_AGREEMENT=yes \
     -it \

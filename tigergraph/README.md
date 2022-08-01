@@ -14,6 +14,7 @@ docker run \
   --ulimit nofile=1000000:1000000 \
   -v ~/tigergraph/data:/home/tigergraph/mydata \
   -v ~/Development/thesis:/home/tigergraph/thesis \
+  -m 6g \
   -t docker.tigergraph.com/tigergraph:3.6.0
 ```
 
