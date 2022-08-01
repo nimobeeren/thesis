@@ -29,6 +29,7 @@ public class JanusGraphSchema {
                                                     // of explicit schema
     this.graphConfig.set("schema.constraints", "true"); // enable property and edge connection
                                                         // constraints
+    this.graphConfig.set("cache.db-cache", "false"); // disable caching
   }
 
   @Command

@@ -18,6 +18,7 @@ docker run \
     -e NEO4J_dbms_memory_heap_initial__size=6G \
     -e NEO4J_dbms_memory_heap_max__size=6G \
     -e NEO4J_dbms_memory_pagecache_size=3G \
+    -e NEO4J_dbms_query__cache__size=0 \
     -e NEO4JLABS_PLUGINS=\[\"apoc\"\] \
     -e NEO4J_ACCEPT_LICENSE_AGREEMENT=yes \
     -it \
