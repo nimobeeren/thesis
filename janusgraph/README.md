@@ -33,9 +33,9 @@ If you want to use the container you created with `docker run` after ending the 
 docker start -i janusgraph
 ```
 
-## Usage
+## Data loading
 
-### Data loading
+### Recommendations
 
 1. Download the [recommendations data](https://drive.google.com/drive/folders/17byMzP_Ux7DloJsYuNdk07-mjC9PbMbF?usp=sharing) and place all CSV files in a directory `~/janusgraph/data/recomendations`.
 
@@ -48,7 +48,23 @@ mvn package
 3. Run the app (in the container) with the `load` command and passnig the path to the directory containing the CSV files. Note that the `--drop` flag drops all existing data!
 
 ```bash
-java -jar thesis/janusgraph/target/janusgraph-schema-0.1.jar load (snb|recommendations) mydata/directory --drop
+java -jar thesis/janusgraph/target/janusgraph-schema-0.1.jar load recommendations mydata/directory --drop
+```
+
+### SNB
+
+1. Download the Social Network Benchmark dataset file `social_network-csv_basic-sf$SCALE_FACTOR.tar.zst` (where `$SCALE_FACTOR` is `0.1`, `0.3`, `1` etc.) from [this repository](https://github.com/ldbc/data-sets-surf-repository) and extract the CSV files using the instructions.
+
+2. Package the app (locally):
+
+```bash
+mvn package
+```
+
+3. Run the app (in the container) with the `load` command and passnig the path to the directory containing the CSV files. Note that the `--drop` flag drops all existing data!
+
+```bash
+java -jar thesis/janusgraph/target/janusgraph-schema-0.1.jar load snb mydata/directory --drop
 ```
 
 ### Schema validation
