@@ -290,6 +290,20 @@ public class SNBModel extends DataModel {
         hasLabel("WORK_AT").hasNot("workFrom"));
   }
 
+  void mangle() {
+    GraphTraversalSource g = graph.traversal();
+    Long numV = g.V().count().next();
+
+    // Remove the id property from 50% of all nodes
+    g.V().sample((int) (numV / 2)).property("id", null);
+  }
+
+  void mangleSingle() {
+    GraphTraversalSource g = graph.traversal();
+    // Remove the id property from one random node
+    g.V().sample(1).property("id", null);
+  }
+
   public void loadData(File dataDir) throws Exception {
     // Ensure all data files exist
     Set<String> filePaths = new HashSet<String>();

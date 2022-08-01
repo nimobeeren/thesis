@@ -23,6 +23,12 @@ public abstract class DataModel {
 
   abstract void loadSchema();
 
+  abstract void loadData(File dataDir) throws Exception;
+
+  abstract void mangle();
+
+  abstract void mangleSingle();
+
   abstract GraphTraversal<Vertex, Vertex> findViolatingVertices();
 
   abstract GraphTraversal<Edge, Edge> findViolatingEdges();
@@ -37,6 +43,4 @@ public abstract class DataModel {
   boolean validateBoolean() {
     return !(findViolatingVertices().hasNext() || findViolatingEdges().hasNext());
   }
-
-  abstract void loadData(File dataDir) throws Exception;
 }
