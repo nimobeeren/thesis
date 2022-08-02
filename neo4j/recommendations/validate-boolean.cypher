@@ -7,8 +7,15 @@
 
 // Check if there are any nodes that have a label set that is not allowed
 // NOTE: this depends on the order of labels in the list, but it seems to be consistent
-WITH [["Movie"], ["Genre"], ["User"], ["Actor", "Person"], ["Director", "Person"], ["Actor", "Director", "Person"]] AS allowedLabelSets
-MATCH (n) WHERE NOT labels(n) IN allowedLabelSets RETURN count(n) = 0;
+WITH
+[
+    ["Movie"], ["Genre"], ["User"], ["Actor", "Person"], ["Director", "Person"],
+    ["Actor", "Director", "Person"]
+] AS allowedLabelSets
+MATCH (n)
+WHERE NOT labels(n) IN allowedLabelSets
+RETURN count(n) = 0;
+
 // Check if there are any edge labels that are not allowed
 CALL db.relationshipTypes() YIELD relationshipType AS allTypes
 RETURN all(type IN collect(allTypes) WHERE type IN ["IN_GENRE", "RATED", "ACTED_IN", "DIRECTED"]);

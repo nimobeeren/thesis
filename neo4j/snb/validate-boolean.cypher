@@ -7,10 +7,21 @@
 
 // Check if there are any nodes that have a label set that is not allowed
 // NOTE: this depends on the order of labels in the list, but it seems to be consistent
-WITH [["Comment", "Message"], ["Company", "Organisation"], ["Organisation", "University"], ["Message", "Post"], ["TagClass"], ["Tag"], ["Person"], ["Place", "City"], ["Country", "Place"], ["Place", "Continent"], ["Forum"]] AS allowedNodeLabelSets
-MATCH (n) WHERE NOT labels(n) IN allowedNodeLabelSets RETURN count(n) = 0;
+WITH
+[
+    ["Comment", "Message"], ["Company", "Organisation"], ["Organisation", "University"], ["Message", "Post"], ["TagClass"],
+    ["Tag"], ["Person"], ["Place", "City"], ["Country", "Place"], ["Place", "Continent"], ["Forum"]
+] AS allowedNodeLabelSets
+MATCH (n)
+WHERE NOT labels(n) IN allowedNodeLabelSets
+RETURN count(n) = 0;
+
 // Check if there are any edge labels that are not allowed
-WITH ["CONTAINER_OF", "HAS_CREATOR", "HAS_INTEREST", "HAS_MEMBER", "HAS_MODERATOR", "HAS_TAG", "HAS_TYPE", "IS_LOCATED_IN", "IS_PART_OF", "IS_SUBCLASS_OF", "KNOWS", "LIKES", "REPLY_OF", "STUDY_AT", "WORK_AT"] AS allowedEdgeLabels
+WITH
+[
+    "CONTAINER_OF", "HAS_CREATOR", "HAS_INTEREST", "HAS_MEMBER", "HAS_MODERATOR", "HAS_TAG", "HAS_TYPE", "IS_LOCATED_IN",
+    "IS_PART_OF", "IS_SUBCLASS_OF", "KNOWS", "LIKES", "REPLY_OF", "STUDY_AT", "WORK_AT"
+] AS allowedEdgeLabels
 CALL db.relationshipTypes() YIELD relationshipType AS allTypes
 RETURN all(type IN collect(allTypes) WHERE type IN allowedEdgeLabels);
 
