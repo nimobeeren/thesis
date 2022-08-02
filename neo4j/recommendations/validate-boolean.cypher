@@ -1,7 +1,7 @@
 // This set of queries can be used to check if the graph conforms to the
 // recommendations schema.
-// Most queries don't return the objects that violate the rules, instead they
-// return an empty result or `true` if the graph conforms.
+// These queries don't return the objects that violate the rules, instead they
+// return `true` if the graph conforms.
 // It does not check for things that can be avoided using Neo4j's built-in
 // constraints, such as missing mandatory properties.
 
@@ -13,38 +13,21 @@ MATCH (n) WHERE NOT labels(n) IN allowedLabelSets RETURN count(n) = 0;
 CALL db.relationshipTypes() YIELD relationshipType AS allTypes
 RETURN all(type IN collect(allTypes) WHERE type IN ["IN_GENRE", "RATED", "ACTED_IN", "DIRECTED"]);
 
-// Find node properties that are not allowed
-// Note that this doesn't work if a node has more than one of these labels
 WITH {
     Movie: ["budget", "countries", "imdbId", "imdbRating", "imdbVotes", "languages", "movieId", "plot", "poster", "released", "revenue", "runtime", "title", "tmdbId", "url", "year"],
     Person: ["bio", "born", "bornIn", "died", "imdbId", "name", "poster", "tmdbId", "url"],
     User: ["userId", "name"],
     Genre: ["name"]
 } AS allowedNodeProperties
-CALL db.schema.nodeTypeProperties() YIELD nodeLabels, propertyName
+CALL db.schema.nodeTypeProperties() YIELD nodeLabels, propertyName, propertyTypes
+// Find node properties that are not allowed
+// Note that this doesn't work if a node has more than one of these labels
 WHERE "Movie" IN nodeLabels AND NOT propertyName IN allowedNodeProperties.Movie
 OR "Person" IN nodeLabels AND NOT propertyName IN allowedNodeProperties.Person
 OR "User" IN nodeLabels AND NOT propertyName IN allowedNodeProperties.User
 OR "Genre" IN nodeLabels AND NOT propertyName IN allowedNodeProperties.Genre
-RETURN count(nodeLabels) = 0;
-
-// Find edge properties that are not allowed
-WITH {
-    ACTED_IN: ["role"],
-    DIRECTED: ["role"],
-    RATED: ["rating", "timestamp"],
-    IN_GENRE: [null]
-} AS allowedEdgeProperties
-CALL db.schema.relTypeProperties() YIELD relType, propertyName
-WHERE relType = ":`ACTED_IN`" AND NOT propertyName IN allowedEdgeProperties.ACTED_IN
-OR relType = ":`DIRECTED`" AND NOT propertyName IN allowedEdgeProperties.DIRECTED
-OR relType = ":`RATED`" AND NOT propertyName IN allowedEdgeProperties.RATED
-OR relType = ":`IN_GENRE`" AND NOT propertyName IN allowedEdgeProperties.IN_GENRE
-RETURN count(relType) = 0;
-
 // Find node properties with the wrong datatype
-CALL db.schema.nodeTypeProperties() YIELD nodeLabels, propertyName, propertyTypes
-WHERE "Movie" IN nodeLabels AND (
+OR "Movie" IN nodeLabels AND (
     propertyName = "budget" AND propertyTypes <> ["Long"]
     OR propertyName = "countries" AND propertyTypes <> ["StringArray"]
     OR propertyName = "imdbId" AND propertyTypes <> ["String"]
@@ -80,27 +63,42 @@ OR "User" IN nodeLabels AND (
 OR "Genre" IN nodeLabels AND (
     propertyName = "name" AND propertyTypes <> ["String"]
 )
-RETURN count(nodeLabels) = 0;
+RETURN count(propertyName) = 0;
 
-// Find edge properties with the wrong datatype
+// Find edge properties that are not allowed
+WITH {
+    ACTED_IN: ["role"],
+    DIRECTED: ["role"],
+    RATED: ["rating", "timestamp"],
+    IN_GENRE: [null]
+} AS allowedEdgeProperties
 CALL db.schema.relTypeProperties() YIELD relType, propertyName, propertyTypes
-WHERE relType = ":`ACTED_IN`" AND propertyName = "role" AND propertyTypes <> ["String"]
+WHERE relType = ":`ACTED_IN`" AND NOT propertyName IN allowedEdgeProperties.ACTED_IN
+OR relType = ":`DIRECTED`" AND NOT propertyName IN allowedEdgeProperties.DIRECTED
+OR relType = ":`RATED`" AND NOT propertyName IN allowedEdgeProperties.RATED
+OR relType = ":`IN_GENRE`" AND NOT propertyName IN allowedEdgeProperties.IN_GENRE
+// Find edge properties with the wrong datatype
+OR relType = ":`ACTED_IN`" AND propertyName = "role" AND propertyTypes <> ["String"]
 OR relType = ":`DIRECTED`" AND propertyName = "role" AND propertyTypes <> ["String"]
 OR relType = ":`RATED`" AND (
     propertyName = "rating" AND propertyTypes <> ["Double"]
     OR propertyName = "timestamp" AND propertyTypes <> ["Long"]
 )
-RETURN count(relType) = 0;
+RETURN count(propertyName) = 0;
 
 // Check for edges between wrong types of nodes
 // We can't do this with the schema statistics, because this finds that some Actors have DIRECTED eges,
 // which is allowed, but only when they are also Directors
-MATCH (n)-[e:ACTED_IN]->(m) WHERE NOT "Actor" IN labels(n) OR NOT labels(m) = ["Movie"] RETURN count(e) = 0;
-MATCH (n)-[e:DIRECTED]->(m) WHERE NOT "Director" IN labels(n) OR NOT labels(m) = ["Movie"] RETURN count(e) = 0;
-MATCH (n)-[e:IN_GENRE]->(m) WHERE NOT labels(n) = ["Movie"] OR NOT labels(m) = ["Genre"] RETURN count(e) = 0;
-MATCH (n)-[e:RATED]->(m) WHERE NOT labels(n) = ["User"] OR NOT labels(m) = ["Movie"] RETURN count(e) = 0;
+MATCH (n)-[e]->(m)
+WHERE type(e) = "ACTED_IN" AND (NOT "Actor" IN labels(n) OR NOT labels(m) = ["Movie"])
+OR type(e) = "DIRECTED" AND (NOT "Director" IN labels(n) OR NOT labels(m) = ["Movie"])
+OR type(e) = "IN_GENRE" AND (NOT labels(n) = ["Movie"] OR NOT labels(m) = ["Genre"])
+OR type(e) = "RATED" AND (NOT labels(n) = ["User"] OR NOT labels(m) = ["Movie"])
+RETURN count(e) = 0;
 
 // Check for missing mandatory edges
-MATCH (a:Actor) WHERE NOT (a)-[:ACTED_IN]->(:Movie) RETURN count(a) = 0;
-MATCH (d:Director) WHERE NOT (d)-[:DIRECTED]->(:Movie) RETURN count(d) = 0;
-MATCH (m:Movie) WHERE NOT (m)-[:IN_GENRE]->(:Genre) RETURN count(m) = 0;
+MATCH (n)
+WHERE "Actor" IN labels(n) AND NOT (n)-[:ACTED_IN]->(:Movie)
+OR "Director" IN labels(n) AND NOT (n)-[:DIRECTED]->(:Movie)
+OR "Movie" IN labels(n) AND NOT (n)-[:IN_GENRE]->(:Genre)
+RETURN count(n) = 0;
