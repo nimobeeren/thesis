@@ -111,4 +111,9 @@ docker run \
 :remote console
 ```
 
-4. Run queries like `g.V().hasLabel("Movie").count()` or do [whatever you want](https://tinkerpop.apache.org/docs/3.6.0/tutorials/the-gremlin-console/).
+3. Open the graph
+```
+graph = JanusGraphFactory.open("conf/janusgraph-berkeleyje-server.properties")
+```
+
+4. Run queries like `g = graph.traversal()`, `g.V().hasLabel("Movie").count()` or do [whatever you want](https://tinkerpop.apache.org/docs/3.6.0/tutorials/the-gremlin-console/).
