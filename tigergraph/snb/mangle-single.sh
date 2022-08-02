@@ -2,6 +2,7 @@
 set -euo pipefail
 
 # Sets a mandatory property from a specific vertex to the null value
+# TODO: use a node somewhere in the middle
 curl -Ss -d '{
   "vertices": {
     "Post": {

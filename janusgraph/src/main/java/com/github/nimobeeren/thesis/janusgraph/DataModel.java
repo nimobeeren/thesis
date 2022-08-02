@@ -25,10 +25,6 @@ public abstract class DataModel {
 
   abstract void loadData(File dataDir) throws Exception;
 
-  abstract void mangle();
-
-  abstract void mangleSingle();
-
   abstract GraphTraversal<Vertex, Vertex> findViolatingVertices();
 
   abstract GraphTraversal<Edge, Edge> findViolatingEdges();

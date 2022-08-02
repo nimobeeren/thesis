@@ -76,32 +76,6 @@ public class JanusGraphSchema {
   }
 
   @Command
-  void mangle(@Parameters(paramLabel = "dataset",
-  description = "One of the dataset names: ${COMPLETION-CANDIDATES}") Dataset dataset, @Option(names = {"-s", "--single"}, description = "Only mangle a single object") boolean isSingle) {
-    System.out.println("Opening graph...");
-    JanusGraph graph = graphConfig.open();
-
-    System.out.println("Mangling...");
-    DataModel model;
-    switch (dataset) {
-      case recommendations:
-        model = new RecommendationsModel(graph);
-        break;
-      case snb:
-        model = new SNBModel(graph);
-        break;
-      default:
-        throw new NotImplementedException();
-    }
-
-    if (isSingle) {
-      model.mangleSingle();
-    } else {
-      model.mangle();
-    }
-  }
-
-  @Command
   void validate(
       @Parameters(paramLabel = "dataset",
           description = "One of the dataset names: ${COMPLETION-CANDIDATES}") Dataset dataset,

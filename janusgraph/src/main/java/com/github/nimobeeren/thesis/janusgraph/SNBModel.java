@@ -290,20 +290,6 @@ public class SNBModel extends DataModel {
         hasLabel("WORK_AT").hasNot("workFrom"));
   }
 
-  void mangle() {
-    GraphTraversalSource g = graph.traversal();
-    Long numV = g.V().count().next();
-
-    // Remove the id property from 50% of all nodes
-    g.V().sample((int) (numV / 2)).property("id", null);
-  }
-
-  void mangleSingle() {
-    GraphTraversalSource g = graph.traversal();
-    // Remove the id property from one random node
-    g.V().sample(1).property("id", null);
-  }
-
   public void loadData(File dataDir) throws Exception {
     // Ensure all data files exist
     Set<String> filePaths = new HashSet<String>();
@@ -383,7 +369,7 @@ public class SNBModel extends DataModel {
       int numRecordsLoaded = 0;
       for (CSVRecord record : records) {
         // Find the vertex for which to set the property
-        // Multi-valued properites only exist on the Person vertices, so we can hardcode this
+        // Multi-valued properties only exist on the Person vertices, so we can hardcode this
         String vertexId = record.get("Person.id");
         Traversal<Vertex, Vertex> traversal = g.V().has("Person", "id", vertexId);
         if (!traversal.hasNext()) {

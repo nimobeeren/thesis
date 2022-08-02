@@ -174,24 +174,6 @@ public class RecommendationsModel extends DataModel {
     mgmt.commit();
   }
 
-  void mangle() {
-    GraphTraversalSource g = graph.traversal();
-    Long numMovies = g.V().hasLabel("Movie").count().next();
-    Long numActors = g.V().hasLabel("Actor").count().next();
-    Long numUsers = g.V().hasLabel("User").count().next();
-
-    // Remove a mandatory property from 50% of nodes that have mandatory properties
-    g.V().hasLabel("Movie").sample((int) (numMovies / 2)).property("imdbId", null);
-    g.V().hasLabel("Actor").sample((int) (numActors / 2)).property("name", null);
-    g.V().hasLabel("User").sample((int) (numUsers / 2)).property("name", null);
-  }
-
-  void mangleSingle() {
-    GraphTraversalSource g = graph.traversal();
-    // Remove a mandatory property from a single node
-    g.V().hasLabel("Movie").sample(1).property("imdbId", null);
-  }
-
   GraphTraversal<Vertex, Vertex> findViolatingVertices() {
     GraphTraversalSource g = graph.traversal();
 
