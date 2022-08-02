@@ -34,32 +34,27 @@ and enter password `tigergraph`.
 
 2. Drop the existing database and create the schema:
 ```bash
-gsql thesis/tigergraph/recommendations/schema.gsql
+gsql ~/thesis/tigergraph/recommendations/schema.gsql
 ```
 
 3. Prepare jobs for loading the data:
 ```bash
-gsql thesis/tigergraph/recommendations/preload.gsql
+gsql ~/thesis/tigergraph/recommendations/preload.gsql
 ```
 
 4. Execute the loading jobs:
 ```bash
-gsql thesis/tigergraph/recommendations/load.gsql
+gsql ~/thesis/tigergraph/recommendations/load.gsql
 ```
 
 5. Install the validation queries:
 ```bash
-gsql thesis/tigergraph/recommendations/prevalidate.gsql
+gsql ~/thesis/tigergraph/recommendations/prevalidate.gsql
 ```
 
-6. (Optional) Introduce errors in the data by running the `mangle.sh` script:
+6. Run the validation queries:
 ```bash
-bash thesis/tigergraph/recommendations/mangle.sh | jq
-```
-
-7. Run the validation queries:
-```bash
-bash thesis/tigergraph/recommendations/validate.sh | jq
+bash ~/thesis/tigergraph/recommendations/validate.sh | jq
 ```
 
 ### SNB
@@ -68,34 +63,29 @@ bash thesis/tigergraph/recommendations/validate.sh | jq
 
 2. Drop the existing database and create the schema:
 ```bash
-gsql thesis/tigergraph/snb/schema.gsql
+gsql ~/thesis/tigergraph/snb/schema.gsql
 ```
 
 3. Prepare jobs for loading the data:
 ```bash
-gsql thesis/tigergraph/snb/preload.gsql
+gsql ~/thesis/tigergraph/snb/preload.gsql
 ```
 
-4. Adjust the `LDBC_SNB_DATA_DIR` variable in the `load.sh` script and execute it:
+4. Adjust the `LDBC_SNB_DATA_DIR` variable in the `load.sh` script if necessary and execute it:
 ```bash
-bash thesis/tigergraph/snb/load.sh
+bash ~/thesis/tigergraph/snb/load.sh
 ```
 
 5. Install the validation queries:
 ```bash
-gsql thesis/tigergraph/snb/prevalidate.gsql
+gsql ~/thesis/tigergraph/snb/prevalidate.gsql
 ```
 
-6. (Optional) Introduce errors in the data by running the `mangle.sh` script:
+6. Run the validation queries:
 ```bash
-bash thesis/tigergraph/snb/mangle.sh | jq
-```
-
-7. Run the validation queries:
-```bash
-bash thesis/tigergraph/snb/validate.sh | jq
+bash ~/thesis/tigergraph/snb/validate.sh | jq
 ```
 
 ## Time measuring
 
-TigerGraph stores a log of all queries in `tigergraph/log/gpe/log.INFO`. We provide a script `measure.sh` which sums up the execution times of all queries in that log and returns the total (in milliseconds). Just be sure to empty the log before starting the workload with `echo > tigergraph/log/gpe/log.INFO`.
+TigerGraph stores a log of all queries in `~/tigergraph/log/gpe/log.INFO`. We provide a script `measure.sh` which sums up the execution times of all queries in that log and returns the total (in milliseconds). Just be sure to empty the log before starting the workload with `echo > ~/tigergraph/log/gpe/log.INFO`.
