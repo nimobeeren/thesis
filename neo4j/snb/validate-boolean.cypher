@@ -45,19 +45,19 @@ RETURN count(nodeLabels) = 0;
 
 // Find edge properties that are not allowed
 WITH {
-    CONTAINER_OF: [],
-    HAS_CREATOR: [],
-    HAS_INTEREST: [],
+    CONTAINER_OF: [null],
+    HAS_CREATOR: [null],
+    HAS_INTEREST: [null],
     HAS_MEMBER: ["creationDate"],
-    HAS_MODERATOR: [],
-    HAS_TAG: [],
-    HAS_TYPE: [],
-    IS_LOCATED_IN: [],
-    IS_PART_OF: [],
-    IS_SUBCLASS_OF: [],
+    HAS_MODERATOR: [null],
+    HAS_TAG: [null],
+    HAS_TYPE: [null],
+    IS_LOCATED_IN: [null],
+    IS_PART_OF: [null],
+    IS_SUBCLASS_OF: [null],
     KNOWS: ["creationDate"],
     LIKES: ["creationDate"],
-    REPLY_OF: [],
+    REPLY_OF: [null],
     STUDY_AT: ["classYear"],
     WORK_AT: ["workFrom"]
 } AS allowedEdgeProperties
