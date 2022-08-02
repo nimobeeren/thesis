@@ -1,0 +1,19 @@
+USE GRAPH ldbc_snb
+
+CREATE QUERY mangleSingle () SYNTAX v2 {
+    tmp =
+        SELECT comment
+        FROM Comment:comment
+        LIMIT 1
+        POST-ACCUM comment.length = -1;
+}
+
+CREATE QUERY mangleHalf () SYNTAX v2 {
+    tmp =
+        SELECT message
+        FROM (Comment|Post):message
+        WHERE rand() > 0.5
+        POST-ACCUM message.length = -1;
+}
+
+INSTALL QUERY mangleSingle, mangleHalf
