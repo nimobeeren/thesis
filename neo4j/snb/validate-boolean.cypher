@@ -110,7 +110,7 @@ OR relType = ":`WORK_AT`" AND NOT propertyName IN allowedEdgeProperties.WORK_AT
 OR propertyName = "creationDate" AND propertyTypes <> ["DateTime"]
 OR propertyName = "classYear" AND propertyTypes <> ["Long"]
 OR propertyName = "workFrom" AND propertyTypes <> ["Long"]
-RETURN count(relType) = 0;
+RETURN count(propertyName) = 0;
 
 // Check for edges between wrong types of nodes
 // TODO: do this with schema statistics? db.schema.visualization() or apoc.meta.schema()
