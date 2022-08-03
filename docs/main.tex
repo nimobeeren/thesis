@@ -857,9 +857,11 @@ RETURN a;
   \end{lstlisting}
 \end{figure}
 
+To give the database engine the best opportunity to perform query optimization, the queries described here are merged as much as possible. These merged queries are then executed sequentially. This is particularly relevant for the Boolean variant, since it can terminate as soon as a single violation is found. For \texttt{MATCH} queries, we always return a value using \texttt{count(variable) = 0}. This theoretically allows the query to terminate early, but it is up to the query engine to implement this optimization.
+
 \paragraph{JanusGraph.} The additional schema features that JanusGraph provides allow us to enforce most conformance rules at the time of schema definition, preventing any non-conforming data from being inserted. The complete set of allowed node and edge labels (\autoref{rule:simp-node-labels} and \ref{rule:simp-edge-labels}) are defined using \texttt{makeVertexLabel()} and \texttt{makeEdgeLabel()}. If a schema object has more than one label, we concatenate them to form a single label. This does not affect the semantics (as long as the order of concatenation is consistent), since we only ever check for equality of label sets.
 
-For each edge label, the method \texttt{addConnection()} lets us specify the allowed labels of the edge endpoints (\autoref{rule:simp-edge-endpoints}). The maximum cardinality for an edge label is can be set with \texttt{multiplicity()}, but this does not provide any guarantees on minimum cardinality.
+For each edge label, the method \texttt{addConnection()} lets us specify the allowed labels of the edge endpoints (\autoref{rule:simp-edge-endpoints}). The maximum cardinality for an edge label is set with \texttt{multiplicity()}, but this does not provide any guarantees on minimum cardinality.
 
 The complete set of allowed property names is defined using \texttt{makePropertyKey()}. Next, each label is mapped to a set of property names using \texttt{addProperties()}. This prevents objects from having properties that are not allowed (\autoref{rule:simp-node-allowed-props} and \ref{rule:simp-edge-allowed-props}). The data type of each property is defined using \texttt{dataType()} (\autoref{rule:simp-node-datatype} and \ref{rule:simp-edge-datatype}). In JanusGraph, there cannot exist two properties with the same name and different data type. If this is desired, the property name must be disambiguated, which could be achieved by prefixing it with the object label.
 
@@ -868,7 +870,7 @@ For an example of all of JanusGraph's built-in schema functions working together
 \begin{figure}[H]
   \begin{lstlisting}[
     language=Java,
-    caption={A fragment of the Recommendations schema, expressed using JanusGraph's schema methods. Mandatory properties and cardinality constraints cannot be validated this way. The \texttt{Multiplicity.SIMPLE} configuration ensures there is no more than one \texttt{ACTED\_IN} edge between any given actor and movie.},
+    caption={A fragment of the Recommendations schema, expressed using JanusGraph's schema methods. Mandatory properties and cardinality constraints cannot be validated in this way. The \texttt{Multiplicity.SIMPLE} configuration ensures there is no more than one \texttt{ACTED\_IN} edge between any given actor and movie.},
     label=lst:janusgraph-schema
   ]
 // Vertex labels
@@ -895,7 +897,7 @@ The remaining rules cannot be fully enforced by JanusGraph's schema, so we write
 \begin{figure}[H]
   \begin{lstlisting}[
     language=Java,
-    caption={A query to find \texttt{User} nodes which are missing a mandatory property.},
+    caption={A query to find \texttt{User} nodes which are missing a mandatory \texttt{name} or \texttt{userId} property.},
     label=lst:janusgraph-mandatory-props
   ]
 g.V().hasLabel("User").or(hasNot("name"), hasNot("userId"))
@@ -913,9 +915,9 @@ g.V().hasLabel(P.within("Actor", "ActorDirector"))
   \end{lstlisting}
 \end{figure}
 
-If we are only interested in the Boolean validation problem, we do not need to enumerate all query results. To give the query engine the best chance of terminating early, we write the entire validation as a single disjunctive query. JanusGraph unfortunately does not allow a single query to range over all nodes and all edges, so instead we execute one query for nodes and one for edges, in sequence.
+If we are only interested in the Boolean validation problem, we only need to determine whether the query result is empty. This is achieved using Java's \texttt{hasNext()} iterator method, which tells the query engine to stop traversing the graph as soon as one result has been found. To give the query engine the best chance of terminating early, we write the entire validation as a single disjunctive query. JanusGraph unfortunately does not allow a single query to range over all nodes and all edges, so instead we execute one query for nodes and one for edges, in sequence.
 
-\paragraph{TigerGraph.} Before any data is loaded, TigerGraph requires the user to specify a schema describing all nodes, edges and their properties. This is done with a series of \texttt{CREATE VERTEX} and \texttt{CREATE EDGE} statements. Using these built-in schema capabilities, we can already guarantee conformance to some of our rules. Every node and edge has a label (\autoref{rule:simp-node-labels} and \ref{rule:simp-edge-labels}) and a fixed set of properties (\autoref{rule:simp-node-allowed-props} and \ref{rule:simp-edge-allowed-props}). Every property has a datatype (\autoref{rule:simp-node-datatype} and \ref{rule:simp-edge-datatype}). Furthermore, every node type has a primary key. Finally, every edge type must specify a source and target node types (\autoref{rule:simp-edge-endpoints}).
+\paragraph{TigerGraph.} Before any data is loaded, TigerGraph requires specification of a schema describing all nodes, edges and their properties. This is done with a series of \texttt{CREATE VERTEX} and \texttt{CREATE EDGE} statements. Using these built-in schema capabilities, we can already guarantee conformance to some of our rules. Every node and edge has a label that appears in the schema (\autoref{rule:simp-node-labels} and \ref{rule:simp-edge-labels}) and has a fixed set of properties associated with that label (\autoref{rule:simp-node-allowed-props} and \ref{rule:simp-edge-allowed-props}). Every property has a fixed datatype (\autoref{rule:simp-node-datatype} and \ref{rule:simp-edge-datatype}). Furthermore, every node type has a primary key. Finally, every edge type must specify a source and target node types (\autoref{rule:simp-edge-endpoints}).
 
 \begin{figure}[H]
   \begin{lstlisting}[
@@ -940,7 +942,7 @@ CREATE DIRECTED EDGE ACTED_IN (
   \end{lstlisting}
 \end{figure}
 
-In TigerGraph, all properties must have a value as soon as the object is instantiated (there are no null values). When a value is missing, it is set to a default value, such as the empty string, the number 0, or the first of January 1970. While it is possible to prevent objects with missing values from being loaded, in some cases we may want to check for missing values on an existing graph. To this end, we use a query that finds all objects which have a mandatory property with the default value (validating \autoref{rule:simp-node-mandatory-props} and \ref{rule:simp-edge-mandatory-props}). If the default value naturally appears in valid data, then we use another indicator value. The query consists of a set of simple \texttt{SELECT-FROM-WHERE} patterns which range over all nodes and edges, as in \autoref{lst:tigergraph-mandatory-props}.
+In TigerGraph, all properties must have a value as soon as the object is instantiated (there are no null values). When a value is missing, it is set to a default value, such as the empty string, the number 0, or the first of January 1970. While it is possible to prevent objects with missing values from being loaded, in some cases we may want to check for missing values in an existing database. To this end, we use a query to find all objects which have a mandatory property with the default value (validating \autoref{rule:simp-node-mandatory-props} and \ref{rule:simp-edge-mandatory-props}). If the default value naturally appears in valid data, then we use another indicator value. The query consists of a set of simple \texttt{SELECT-FROM-WHERE} patterns which range over all nodes and edges, as in \autoref{lst:tigergraph-mandatory-props}.
 
 \begin{figure}[H]
   \begin{lstlisting}[
@@ -967,7 +969,7 @@ PRINT @@violatingNodes;
   \end{lstlisting}
 \end{figure}
 
-To cover the final remaining rules, cardinality constraints are also validated using a query. For outgoing edges (\autoref{rule:simp-card-out}), we use the built-in \texttt{outdegree()} function, which returns the number of outgoing edges with a particular label for a given node (see \autoref{lst:tigergraph-mandatory-edges-out}). By default, TigerGraph maintains an index that stores these statistics for every node. For incoming edges (\autoref{rule:simp-card-in}), we use another TigerGraph feature known as an accumulator. This lets us compute the number of incoming edges for all relevant nodes in a single pass over the graph. Afterwards, the violating nodes are picked out (see \autoref{lst:tigergraph-mandatory-edges-in}).
+To cover the final remaining rules, cardinality constraints are validated using another query. For outgoing edges (\autoref{rule:simp-card-out}), we use the built-in \texttt{outdegree()} function, which returns the number of outgoing edges with a particular label for a given node (see \autoref{lst:tigergraph-mandatory-edges-out}). By default, TigerGraph maintains an index that stores these statistics for every node. For incoming edges (\autoref{rule:simp-card-in}), we use another TigerGraph feature known as an accumulator. This lets us compute the number of incoming edges for all relevant nodes in a single pass over the graph. Afterwards, the violating nodes are picked out (see \autoref{lst:tigergraph-mandatory-edges-in}).
 
 \begin{figure}[H]
   \begin{lstlisting}[
@@ -999,32 +1001,9 @@ violatingActors =
   \end{lstlisting}
 \end{figure}
 
-% TODO: tigergraph boolean version?
+All TigerGraph queries are \emph{installed} before execution, which allows the query engine to prepare various optimizations for efficient execution. In the Boolean variant queries, we always return something of the form \texttt{@@accumulator.size() == 0}, which indicates that the query could terminate before iterating over the entire graph. Again, it is up to the query engine to recognize this and optimize accordingly.
 
 \section{Results}
-
-\begin{table}[H]
-  \centering
-  \begin{tabular}{|l|l|r|r|r|}
-    \hline
-    \textbf{Dataset}                & \textbf{Variant} & \textbf{Neo4j} & \textbf{JanusGraph} & \textbf{TigerGraph} \\
-    \hline
-    \multirow{2}{*}{Recomendations} & Boolean          & 663            & TODO                & TODO                \\
-    \cline{2-5}                     & Full             & 7,494          & 5,808               & 67                  \\
-    \hline
-    \multirow{2}{*}{SNB (SF0.1)}    & Boolean          & 6,680          & TODO                & TODO                \\
-    \cline{2-5}                     & Full             & 27,876         & TODO                & TODO                \\
-    \hline
-    \multirow{2}{*}{SNB (SF0.3)}    & Boolean          & TODO           & TODO                & TODO                \\
-    \cline{2-5}                     & Full             & TODO           & TODO                & TODO                \\
-    \hline
-    \multirow{2}{*}{SNB (SF1)}      & Boolean          & TODO           & TODO                & TODO                \\
-    \cline{2-5}                     & Full             & TODO           & TODO                & TODO                \\
-    \hline
-  \end{tabular}
-  \caption{Total execution time of validation queries in milliseconds.}
-  \label{tbl:results}
-\end{table}
 
 % How are different databases affected by variant and schema? (3 grouped bar charts)
 % - databases: all (separate charts)
