@@ -662,11 +662,11 @@ TigerGraph's schema is strict, in the sense that every node label, edge label, a
 \paragraph{Objective.} We consider two variants of the schema validation problem:
 
 \begin{itemize}
-  \item \textbf{Boolean validation:} given a graph and a schema, determine whether the graph conforms to the schema or not.
+  \item \textbf{Binary validation:} given a graph and a schema, determine whether the graph conforms to the schema or not.
   \item \textbf{Full validation:} given a graph and a schema, find all graph objects which cause a violation of at least one of the rules of schema conformance.
 \end{itemize}
 
-While a Boolean validation method may be sufficient in some situations, full validation is required when we want to explain why a graph does not conform. Boolean validation is a strictly easier problem because we can stop as soon as we find a single violation, while full validation always requires at least one full scan of the graph.
+While a binary validation method may be sufficient in some situations, full validation is required when we want to explain why a graph does not conform. Binary validation is a strictly easier problem because we can stop as soon as we find a single violation, while full validation always requires at least one full scan of the graph.
 
 \paragraph{Datasets.} Our schema validation methods are applied to two datasets:
 
@@ -766,7 +766,7 @@ CREATE CONSTRAINT FOR (m:Movie) REQUIRE m.title IS NOT NULL;
   \end{lstlisting}
 \end{figure}
 
-Next, we tackle the validation of the node and edge labels (\autoref{rule:simp-node-labels} and \ref{rule:simp-edge-labels}) using Cypher queries. Neo4j provides functions \texttt{db.labels()} and \texttt{db.relationshipTypes()}, which respectively return a list of all node and edge labels that exist in the database. Unfortunately, these functions do not tell us which \emph{combinations} of labels exist. Since nodes can have multiple labels, we must fall back to a \texttt{MATCH} query which checks that every node has one of the allowed combinations of labels (see \autoref{lst:neo4j-node-labels}). Since edges in Neo4j can only have one label (called a \emph{relationship type}), we can use \texttt{db.relationshipTypes()} to determine if there exist any edges with a label that is not allowed (see \autoref{lst:neo4j-edge-labels}). This is sufficient for Boolean validation, but if we want to find out precisely which edges have an illegal label, we again need to use a \texttt{MATCH} query.
+Next, we tackle the validation of the node and edge labels (\autoref{rule:simp-node-labels} and \ref{rule:simp-edge-labels}) using Cypher queries. Neo4j provides functions \texttt{db.labels()} and \texttt{db.relationshipTypes()}, which respectively return a list of all node and edge labels that exist in the database. Unfortunately, these functions do not tell us which \emph{combinations} of labels exist. Since nodes can have multiple labels, we must fall back to a \texttt{MATCH} query which checks that every node has one of the allowed combinations of labels (see \autoref{lst:neo4j-node-labels}). Since edges in Neo4j can only have one label (called a \emph{relationship type}), we can use \texttt{db.relationshipTypes()} to determine if there exist any edges with a label that is not allowed (see \autoref{lst:neo4j-edge-labels}). This is sufficient for binary validation, but if we want to find out precisely which edges have an illegal label, we again need to use a \texttt{MATCH} query.
 
 \begin{figure}[H]
   \begin{lstlisting}[
@@ -793,13 +793,13 @@ RETURN all(type IN collect(allTypes) WHERE type IN allowedEdgeLabels)
   \end{lstlisting}
 \end{figure}
 
-Next, we look at the properties. The functions \texttt{db.schema.nodeTypeProperties()} and \texttt{db.schema.relTypeProperties()} provide useful information about the properties that exist on nodes and edges, as well as their data types. This allows us to determine if there are any nodes or edges that have properties that are not allowed (\autoref{rule:simp-node-allowed-props} and \ref{rule:simp-edge-allowed-props}), or have the wrong data type (\autoref{rule:simp-node-datatype} and \ref{rule:simp-edge-datatype}). See \autoref{lst:neo4j-allowed-props-boolean} for an example of such a query. Again, if we want to find the violating objects, we need to use a \texttt{MATCH} query that scans all properties of all objects in the database. In that case, we use the \texttt{apoc.meta.type()} function (provided by the APOC library\footnote{\url{https://neo4j.com/labs/apoc/}}) to get the data type of a property at query-time. \autoref{lst:neo4j-allowed-props-full} shows an example.
+Next, we look at the properties. The functions \texttt{db.schema.nodeTypeProperties()} and \texttt{db.schema.relTypeProperties()} provide useful information about the properties that exist on nodes and edges, as well as their data types. This allows us to determine if there are any nodes or edges that have properties that are not allowed (\autoref{rule:simp-node-allowed-props} and \ref{rule:simp-edge-allowed-props}), or have the wrong data type (\autoref{rule:simp-node-datatype} and \ref{rule:simp-edge-datatype}). See \autoref{lst:neo4j-allowed-props-binary} for an example of such a query. Again, if we want to find the violating objects, we need to use a \texttt{MATCH} query that scans all properties of all objects in the database. In that case, we use the \texttt{apoc.meta.type()} function (provided by the APOC library\footnote{\url{https://neo4j.com/labs/apoc/}}) to get the data type of a property at query-time. \autoref{lst:neo4j-allowed-props-full} shows an example.
 
 \begin{figure}[H]
   \begin{lstlisting}[
     language=Cypher,
     caption={A query to check if there are any \texttt{User} nodes with properties that are not allowed or have the wrong datatype. If the result is \texttt{true}, there are no violations.},
-    label=lst:neo4j-allowed-props-boolean
+    label=lst:neo4j-allowed-props-binary
   ]
 CALL db.schema.nodeTypeProperties() YIELD nodeLabels, propertyName, propertyTypes
 WHERE "User" IN nodeLabels AND (
@@ -857,7 +857,7 @@ RETURN a;
   \end{lstlisting}
 \end{figure}
 
-To give the database engine the best opportunity to perform query optimization, the queries described here are merged as much as possible. These merged queries are then executed sequentially. This is particularly relevant for the Boolean variant, since it can terminate as soon as a single violation is found. For \texttt{MATCH} queries, we always return a value using \texttt{count(variable) = 0}. This theoretically allows the query to terminate early, but it is up to the query engine to implement this optimization.
+To give the database engine the best opportunity to perform query optimization, the queries described here are merged as much as possible. These merged queries are then executed sequentially. This is particularly relevant for the binary variant, since it can terminate as soon as a single violation is found. For \texttt{MATCH} queries, we always return a value using \texttt{count(variable) = 0}. This theoretically allows the query to terminate early, but it is up to the query engine to implement this optimization.
 
 \paragraph{JanusGraph.} The additional schema features that JanusGraph provides allow us to enforce most conformance rules at the time of schema definition, preventing any non-conforming data from being inserted. The complete set of allowed node and edge labels (\autoref{rule:simp-node-labels} and \ref{rule:simp-edge-labels}) are defined using \texttt{makeVertexLabel()} and \texttt{makeEdgeLabel()}. If a schema object has more than one label, we concatenate them to form a single label. This does not affect the semantics (as long as the order of concatenation is consistent), since we only ever check for equality of label sets.
 
@@ -915,7 +915,7 @@ g.V().hasLabel(P.within("Actor", "ActorDirector"))
   \end{lstlisting}
 \end{figure}
 
-If we are only interested in the Boolean validation problem, we only need to determine whether the query result is empty. This is achieved using Java's \texttt{hasNext()} iterator method, which tells the query engine to stop traversing the graph as soon as one result has been found. To give the query engine the best chance of terminating early, we write the entire validation as a single disjunctive query. JanusGraph unfortunately does not allow a single query to range over all nodes and all edges, so instead we execute one query for nodes and one for edges, in sequence.
+If we are only interested in the binary validation problem, we only need to determine whether the query result is empty. This is achieved using Java's \texttt{hasNext()} iterator method, which tells the query engine to stop traversing the graph as soon as one result has been found. To give the query engine the best chance of terminating early, we write the entire validation as a single disjunctive query. JanusGraph unfortunately does not allow a single query to range over all nodes and all edges, so instead we execute one query for nodes and one for edges, in sequence.
 
 \paragraph{TigerGraph.} Before any data is loaded, TigerGraph requires specification of a schema describing all nodes, edges and their properties. This is done with a series of \texttt{CREATE VERTEX} and \texttt{CREATE EDGE} statements. Using these built-in schema capabilities, we can already guarantee conformance to some of our rules. Every node and edge has a label that appears in the schema (\autoref{rule:simp-node-labels} and \ref{rule:simp-edge-labels}) and has a fixed set of properties associated with that label (\autoref{rule:simp-node-allowed-props} and \ref{rule:simp-edge-allowed-props}). Every property has a fixed datatype (\autoref{rule:simp-node-datatype} and \ref{rule:simp-edge-datatype}). Furthermore, every node type has a primary key. Finally, every edge type must specify a source and target node types (\autoref{rule:simp-edge-endpoints}).
 
@@ -1001,7 +1001,7 @@ violatingActors =
   \end{lstlisting}
 \end{figure}
 
-All TigerGraph queries are \emph{installed} before execution, which allows the query engine to prepare various optimizations for efficient execution. In the Boolean variant queries, we always return something of the form \texttt{@@accumulator.size() == 0}, which indicates that the query could terminate before iterating over the entire graph. Again, it is up to the query engine to recognize this and optimize accordingly.
+All TigerGraph queries are \emph{installed} before execution, which allows the query engine to prepare various optimizations for efficient execution. In the binary variant queries, we always return something of the form \texttt{@@accumulator.size() == 0}, which indicates that the query could terminate before iterating over the entire graph. Again, it is up to the query engine to recognize this and optimize accordingly.
 
 \section{Results}
 
@@ -1016,7 +1016,7 @@ All TigerGraph queries are \emph{installed} before execution, which allows the q
 % - databases: all (separate charts)
 % - datasets: snb
 % - scales: 0.1
-% - variant: boolean
+% - variant: binary
 % - error rates: all (bars)
 
 % How are different databases affected by different scales? (3 line charts)
