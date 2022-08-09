@@ -113,7 +113,7 @@ OR propertyName = "workFrom" AND propertyTypes <> ["Long"]
 RETURN count(propertyName) = 0;
 
 // Check for edges between wrong types of nodes
-// TODO: do this with schema statistics? db.schema.visualization() or apoc.meta.schema()
+// This could perhaps be done with schema statistics? db.schema.visualization() or apoc.meta.schema()
 MATCH (n)-[e]->(m)
 WHERE type(e) = "CONTAINER_OF" AND (NOT "Forum" IN labels(n) OR NOT "Post" IN labels(m))
 OR type(e) = "HAS_CREATOR" AND (NOT "Message" IN labels(n) OR NOT "Person" IN labels(m))
