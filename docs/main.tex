@@ -170,11 +170,13 @@ The property graph data model has been adopted by numerous contemporary graph da
 
 \citet{lei2021thesis} proposes a semi-automated method for schema extraction which incorporates expert knowledge. The user can adjust parameters and similarity measures which affect how the schema is generated. An implementation and experimental results are given. Cardinality constraints are not covered.
 
+% TODO: comparison table for theoretical PG schema works?
+
 \section{Property Graph Databases}
 
 Current property graph database systems vary in their support and philosophy around schema. Some require the user to specify a schema, while others infer a schema from data. In this section, we take a closer look at three of the most popular property graph databases: \emph{Neo4j}, \emph{JanusGraph}, and \emph{TigerGraph}.
 
-The schema features of these three databases in are summarized in \autoref{tab:schema-comparison}, and they are compared to our schema formalism which is detailed in \autoref{ch:pg-schema}. We elaborate here on the meaning of the listed features. Mandatory property constraints express that some property must exist on an object. Allowed property constraints express that no properties may exist, other than the ones explicitly specified. Endpoint constraints express that edges may not connect nodes which do not conform to some specified types. Data type constraints express that the value of a property must be of a particular data type. Maximum and mimumum cardinality constraints express that a node must have some number of incoming or outgoing edges of a particular type. Property uniqueness constraints express that no two nodes may have the same value for a particular property. Note that if a property is a key, then it is mandatory and unique.
+The schema features of these three databases in are summarized in \autoref{tab:schema-comparison}, and they are compared to our schema formalism which is detailed in \autoref{ch:pg-schema}. We elaborate here on the meaning of the listed features. Mandatory property constraints express that some property must exist on a node or edge. Allowed property constraints express that no properties may exist, other than the ones explicitly specified. Endpoint constraints express that edges may not connect nodes which do not conform to some specified types. Data type constraints express that the value of a property must be of a particular data type. Maximum and mimumum cardinality constraints express that a node must have some number of incoming or outgoing edges of a particular type. Property uniqueness constraints express that no two nodes may have the same value for a particular property. Note that if a property is a key, then it is mandatory and unique.
 
 % TODO: center the symbols in their cells and color the background. Maybe don't draw all the lines. Tighten the line spacing and increase the padding?
 \begin{table}[t]
@@ -654,8 +656,10 @@ In \autoref{fig:subtyping}, a constraint is specified which we can express in wo
 
 \chapter{Experimental Study}
 
+We have defined a property graph schema formalism which is capable of expressing constraints in commonly used conceptual data modeling methods. In this chapter, we analyze the practical feasibility of our approach. We aim to answer the question: what is the cost of determining property graph schema conformance using currently available graph database systems?
+
 % TODO: update this
-We have defined a property graph schema formalism which is capable of expressing constraints in commonly used conceptual data modeling methods. Next, we analyze the practical feasibility of our approach. We aim to answer the question: what is the cost of determining property graph schema conformance using currently available graph database systems? First, we investigate the schema capabilities of three existing graph database sytems. Second, we describe how these systems can be extended to support all kinds of constraints that can be specified in our schema formalism. Third, we analyze the performance of our prototypical implementation in several realistic scenarios.
+First, we investigate the schema capabilities of three existing graph database sytems. Second, we describe how these systems can be extended to support all kinds of constraints that can be specified in our schema formalism. Third, we analyze the performance of our prototypical implementation in several realistic scenarios.
 
 \section{Workloads}
 \label{sec:workloads}
@@ -673,12 +677,11 @@ While a binary validation method may be sufficient in some situations, full vali
 
 \begin{itemize}
   \item The \textbf{Recommendations Graph}\footnote{\url{https://github.com/neo4j-graph-examples/recommendations}} is a relatively small dataset with a simple schema, provided by Neo4j. It contains movies, actors, directors, and users who rate movies. The schema is given in \autoref{fig:schema-recommendations}. This dataset is intended as a working example for people who want to explore the functionality of a graph database. The small size makes it suitable as a proof-of-concept for our schema validation methods.
-  \item The \textbf{LDBC Social Network Benchmark} (SNB) \citep{angles2020snb} was designed to evaluate graph-like data management technologies in a realistic setting. The dataset consists of users, messages, likes, and other concepts that can be found in the domain of social networks. The schema is of moderate size, and is given in \autoref{fig:schema-snb}. The data is made available at various scales, ranging from less than a gigabyte to a terrabyte of raw data. We run multiple tests with scale factor 0.1, 0.3, and 1. This lets us study how our solution scales with the size of the data.
+  \item The \textbf{LDBC Social Network Benchmark} (SNB) \citep{angles2020snb} was designed to evaluate graph-like data management technologies in a realistic setting. The dataset consists of users, messages, likes, and other concepts that can be found in the domain of social networks. The schema is of moderate size, and is given in \autoref{fig:schema-snb}. The data is made available at various scales, ranging from less than a gigabyte up to a terrabyte of raw data. We run multiple tests with scale factor 0.1, 0.3, and 1. This lets us analyze how our solution scales with the size of the data.
 \end{itemize}
 
 A comparison of the datasets is given in \autoref{tab:dataset-comparison}.
 
-% TODO: SF0.3 and 1 statistics
 \begin{table}[t]
   \centering
   \begin{tabular}{|l|r|r|r|r|r|}
