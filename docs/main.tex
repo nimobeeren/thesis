@@ -246,6 +246,7 @@ For a formal definition, we assume the existence of the following countably infi
   A \emph{record} is a finite partial function $r : \mathcal{N} \pto \mathcal{V}$ that maps some property names to property values. The set of all records is denoted as $\mathcal{R}$.
 \end{definition}
 
+% TODO: rename "node" -> "data node"? also edges and objects
 \begin{definition}[Property graph]
   \label{def:pg}
   A \emph{property graph} is a tuple $$G = (N, E, \rho, \lambda, \pi)$$ where
@@ -655,85 +656,19 @@ In \autoref{fig:subtyping}, a constraint is specified which we can express in wo
   \caption{A schema consisting of a supertype with two subtypes which cannot be modeled using our schema formalism. Any property graph that conforms to~(a) also conforms to~(b), but not the other way around.}
 \end{figure}
 
-\chapter{Experimental Study}
+\chapter{Extending Property Graph Databases}
 
-We have defined a property graph schema formalism which is capable of expressing constraints in commonly used conceptual data modeling methods. In this chapter, we analyze the practical feasibility of our approach.
+Our property graph schema formalism is capable of expressing constraints in common conceptual data modeling methods. However, in \autoref{ch:related-work}, we found that existing property graph database systems are limited in the kinds of constraints they can enforce, in particular cardinality constraints.
 
-% TODO: update this
-First, we investigate the schema capabilities of three existing graph database sytems. Second, we describe how these systems can be extended to support all kinds of constraints that can be specified in our schema formalism. Third, we analyze the performance of our prototypical implementation in several realistic scenarios.
+In this chapter, we describe how existing database systems can be extended to support all kinds of constraints that can be expressed with our schema formalism. We cover \emph{Neo4j}, \emph{JanusGraph}, and \emph{TigerGraph}. Where possible, we make use of the schema functionality exposed by the database engine. For constraints that cannot be validated in this way, we provide queries. The full source code is available on GitHub\footnote{\url{https://github.com/nimobeeren/thesis}}.
 
-\section{Goals}
+% TODO: why queries instead of in-engine implementation?
 
-We consider two variants of the schema validation problem:
+\section{Assumptions}
 
-\begin{itemize}
-  \item \textbf{Binary validation:} given a graph and a schema, determine whether the graph conforms to the schema or not.
-  \item \textbf{Full validation:} given a graph and a schema, find all graph objects which cause a violation of at least one of the rules of schema conformance.
-\end{itemize}
+To reduce the complexity of the implementation, we assume that the set of labels of a schema object functionally determines the record type of that schema object. Recall from \autoref{ch:pg-schema} that every object must conform to a schema object (\autoref{rule:node} and \ref{rule:edge}). This implies that if an object has the same set of labels as a schema object, it must conform to that schema object (since there exists no schema object with the same label set and a different record type). We find that this assumption holds in many domains, including the datasets we study in \autoref{ch:experiment}.
 
-While a binary validation method may be sufficient in some situations, full validation is required when we want to explain why a graph does not conform. Binary validation is a strictly easier problem because we can stop as soon as we find a single violation, while full validation always requires at least one full scan of the graph.
-
-% TODO: explain what it means for a graph object to "cause" a violation
-
-The overarching question we aim to answer is: what is the cost of validating property graph schema conformance using currently available graph database systems? We divide this into subquestions:
-
-\begin{enumerate}[label=\bfseries RQ\arabic*]
-  \item How is validation time affected by the choice between binary and full validation?
-  \item How is validation time affected when introducing errors in the data?
-  \item How is validation time affected by the scale of the data?
-\end{enumerate}
-
-\section{Methodology}
-
-\subsection{Datasets}
-  
-Our schema validation methods are applied to two datasets:
-
-\begin{itemize}
-  \item The \textbf{Recommendations Graph}\footnote{\url{https://github.com/neo4j-graph-examples/recommendations}} is a relatively small dataset with a simple schema, provided by Neo4j. It contains movies, actors, directors, and users who rate movies. The schema is given in \autoref{fig:schema-recommendations}. This dataset is intended as a working example for people who want to explore the functionality of a graph database. The small size makes it suitable as a proof-of-concept for our schema validation methods.
-  \item The \textbf{LDBC Social Network Benchmark} (SNB) \citep{angles2020snb} was designed to evaluate graph-like data management technologies in a realistic setting. The dataset consists of users, messages, likes, and other concepts that can be found in the domain of social networks. The schema is of moderate size, and is given in \autoref{fig:schema-snb}. The data is made available at various scales, ranging from less than a gigabyte up to a terrabyte of raw data. We run multiple tests with scale factor 0.1, 0.3, and 1. This lets us analyze how our solution scales with the size of the data.
-\end{itemize}
-
-A comparison of the datasets is given in \autoref{tab:dataset-comparison}.
-
-\begin{table}[t]
-  \centering
-  \begin{tabular}{|l|r|r|r|r|r|}
-    \hline
-    \textbf{Dataset}  & $\bf{|N|}$ & $\bf{|E|}$ & $\bf{|N'|}$ & $\bf{|E'|}$ & \textbf{Raw (MB)} \\
-    \hline
-    Recommendations   & 28,863     & 166,261    & 6           & 6           & 22                \\
-    \hline
-    SNB (SF0.1)       & 327,588    & 1,477,965  & 14          & 20          & 100               \\
-    \hline
-    SNB (SF0.3)       & 908,224    & 4,583,118  & 14          & 20          & 295               \\
-    \hline
-    SNB (SF1)         & 3,181,724  & 17,256,038 & 14          & 20          & 1109              \\
-    \hline
-  \end{tabular}
-  \caption{Comparison of the datasets used in the experiment. $|N|$ and $|E|$ represent the number of nodes and edges. $|N'|$ and $|E'|$ represent the number of schema nodes and schema edges. The raw size is measured as the combined size of all CSV files.}
-  \label{tab:dataset-comparison}
-\end{table}
-
-\begin{figure}[t]
-  \centering
-  \includegraphics[width=\textwidth]{figures/schema-recommendations.pdf}
-  \caption{Schema of the Recommendations Graph dataset. This schema was constructed manually by analyzing the data.}
-  \label{fig:schema-recommendations}
-\end{figure}
-
-\begin{figure}[t]
-  \centering
-  \includegraphics[width=\textwidth]{figures/schema-snb.png}
-  \caption{Schema of the SNB dataset (source: \citet{angles2020snb}). TODO: redraw this without subtype relations (using our notation).}
-  \label{fig:schema-snb}
-\end{figure}
-
-\subsection{Assumptions}
-
-To reduce the complexity of the implementation, we assume that the set of labels of a schema object functionally determines the record type of that schema object. Recall that every object must conform to a schema object (\autoref{rule:node} and \ref{rule:edge}). This implies that if an object has the same set of labels as a schema object, it must conform to that schema object (since there exists no schema object with the same label set and a different record type). We find that this assumption holds in many domains, including the datasets we study.
-
-Under this assumption, we can simplify the rules of conformance. Informally:
+Under this assumption, we can simplify the conformance rules. Informally:
 
 % TODO: formalize this?
 \begin{enumerate}
@@ -767,11 +702,23 @@ Under this assumption, we can simplify the rules of conformance. Informally:
         Every node has the right number of incoming edges with the right labels.
 \end{enumerate}
 
+\section{Problem Variants}
+\label{sec:variants}
+
+We consider two variants of the schema validation problem:
+
+\begin{itemize}
+  \item \textbf{Binary validation:} given a graph and a schema, determine whether the graph conforms to the schema or not.
+  \item \textbf{Full validation:} given a graph and a schema, find all graph objects which cause a violation of at least one of the rules of schema conformance.
+\end{itemize}
+
+While a binary validation method may be sufficient for some use cases, full validation is required when we want to explain why a graph does not conform. Binary validation is a strictly easier problem because we can stop as soon as we find a single violation, while full validation always requires at least one full scan of the graph.
+
+% TODO: explain what it means for a graph object to "cause" a violation
+
+In the following, we detail how each conformance rule can be validated using the three databases in our scope. We discuss both the binary and full validation variants.
+
 \section{Implementation}
-
-Having investigated existing property graph database systems, we find that none are currently able to enforce all kinds of constraints that can be expressed with our schema formalism, in particular cardinality constraints. In this section, we describe how these systems can be extended to support all schema features. Where possible, we make use of the schema functionality exposed by the database engine. For conformance rules that cannot be checked this way, we provide queries. The full source code is available on GitHub\footnote{\url{https://github.com/nimobeeren/thesis}}.
-
-% TODO: why queries instead of in-engine implementation?
 
 \paragraph{Neo4j.} We start by using the built-in schema functionality that Neo4j offers. To ensure the existence of mandatory properties (\autoref{rule:simp-node-mandatory-props} and \ref{rule:simp-edge-mandatory-props}), we use Neo4j's \texttt{CONSTRAINT} functionality, which lets us specify which properties are mandatory for nodes and edges with a particular label set (Enterprise edition only). An example is given in \autoref{lst:neo4j-mandatory-props}.
 
@@ -1024,7 +971,91 @@ violatingActors =
 
 All TigerGraph queries are \emph{installed} before execution, which allows the query engine to prepare various optimizations for efficient execution. In the binary variant queries, we always return something of the form \texttt{@@accumulator.size() == 0}, which indicates that the query could terminate before iterating over the entire graph. Again, it is up to the query engine to recognize this and optimize accordingly.
 
+\chapter{Experimental Study}
+\label{ch:experiment}
+
+% TODO: introductory paragraph
+In this chapter, we analyze the performance of our prototypical implementation in several realistic scenarios. We investigate the impact of the scale of the data, the choice between binary and full validation, and the number of errors in the data. In this way, we aim to help the reader determine whether an approach such as ours is feasible for their use case.
+
+\section{Research Questions}
+
+The overarching question we aim to answer is: what is the cost of validating property graph schema conformance using currently available graph database systems? We divide this into subquestions:
+
+\begin{enumerate}[label=\bfseries RQ\arabic*]
+  \item How is validation time affected by the scale of the data?
+  \item How is validation time affected by the choice between binary and full validation?
+  \item How is validation time affected when introducing errors in the data?
+\end{enumerate}
+
+% TODO: make it clear that comparing databases is not really a goal because the comparison is never "fair"
+
+\section{Methodology}
+
+\paragraph{Datasets.} To determine the impact of different schemas and scales on the performance of our implementation, we apply our methods to two datasets:
+
+\begin{itemize}
+  \item The \textbf{Recommendations Graph}\footnote{\url{https://github.com/neo4j-graph-examples/recommendations}} is a relatively small dataset with a simple schema, provided by Neo4j. It contains movies, actors, directors, and users who rate movies. The schema is given in \autoref{fig:schema-recommendations}. This dataset is intended as a working example for people who want to explore the functionality of a graph database. The small size makes it suitable as a proof-of-concept for our schema validation methods.
+  \item The \textbf{LDBC Social Network Benchmark} (SNB) \citep{angles2020snb} was designed to evaluate graph-like data management technologies in a realistic setting. The dataset consists of users, messages, likes, and other concepts that can be found in the domain of social networks. The schema is of moderate size, and is visualized in \autoref{fig:schema-snb}. The data is made available at various scales, ranging from less than a gigabyte up to a terrabyte of raw data. We run multiple tests with scale factor 0.1, 0.3, and 1. This lets us analyze how our solution scales with the size of the data.
+\end{itemize}
+
+A comparison of the datasets is given in \autoref{tab:dataset-comparison}.
+
+\begin{table}[t]
+  \centering
+  \begin{tabular}{|l|r|r|r|r|r|}
+    \hline
+    \textbf{Dataset}  & $\bf{|N|}$ & $\bf{|E|}$ & $\bf{|N'|}$ & $\bf{|E'|}$ & \textbf{Raw (MB)} \\
+    \hline
+    Recommendations   & 28,863     & 166,261    & 6           & 6           & 22                \\
+    \hline
+    SNB (SF0.1)       & 327,588    & 1,477,965  & 14          & 20          & 100               \\
+    \hline
+    SNB (SF0.3)       & 908,224    & 4,583,118  & 14          & 20          & 295               \\
+    \hline
+    SNB (SF1)         & 3,181,724  & 17,256,038 & 14          & 20          & 1109              \\
+    \hline
+  \end{tabular}
+  \caption{Comparison of the datasets used in the experiment. $|N|$ and $|E|$ represent the number of nodes and edges. $|N'|$ and $|E'|$ represent the number of schema nodes and schema edges. The raw size is measured as the combined size of all CSV files.}
+  \label{tab:dataset-comparison}
+\end{table}
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\textwidth]{figures/schema-recommendations.pdf}
+  \caption{Schema of the Recommendations Graph dataset. This schema was constructed manually by analyzing the data.}
+  \label{fig:schema-recommendations}
+\end{figure}
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\textwidth]{figures/schema-snb.png}
+  \caption{Schema of the SNB dataset (source: \citet{angles2020snb}). TODO: redraw this without subtype relations (using our notation).}
+  \label{fig:schema-snb}
+\end{figure}
+
+\paragraph{Problem variant.} As described in \autoref{sec:variants}, we consider two variants of the validation problem: binary and full validation. For binary validation, we measure the time until the first violation is found. For the full variant, we measure until the last query has finished.
+
+\paragraph{Error rate.} We expect the validation time of the binary variant to be affected by the number of errors in the data. If the data graph conforms to the schema, the entire graph needs to be scanned. However, as soon as a single error is found, it can terminate. The higher the error rate, the sooner we expect to terminate.
+
+We consider three levels of errors rate:
+
+\begin{itemize}
+  \item \emph{None:} the graph conforms to the schema.
+  \item \emph{Single:} a single node violates a constraint.
+  \item \emph{Half:} 50\% of all nodes violate a constraint.
+\end{itemize}
+
+\paragraph{Time measuring.} For Neo4j and TigerGraph, we use the execution time as listed in the internal query logs. For JanusGraph, we use Java's \texttt{System.currentTimeMillis()} method. Every test is run 3 times, from which we take the average.
+
+\paragraph{Indexing and caching.} We use only indexes that the database system creates by default. These default indexes are typically not useful for us, because our schema validation queries need to scan the entire graph, rather than finding a specific set of objects. The exception is TigerGraph's outdegree index, which benefits the validation of cardinality constraints.
+
+Caching is disabled for Neo4j and JanusGraph, while TigerGraph does not provide any caching functionality to the best of our knowledge.
+
+\paragraph{Hardware.} All tests are run on a single machine with an 8-core CPU, 6 gigabytes of dedicated memory, and a solid-state drive with enough capacity to store all data.
+
 \section{Results}
+
+The full dataset of results is available on GitHub\footnote{\url{https://github.com/nimobeeren/thesis/blob/main/analysis/results.csv}}.
 
 % How are different databases affected by variant and schema? (3 grouped bar charts)
 % - databases: all (separate charts)
