@@ -15,6 +15,7 @@
 \usepackage{multirow}
 \usepackage{xcolor}
 \usepackage{float}
+\usepackage{enumitem}
 
 % Fonts
 \usepackage{pxfonts}
@@ -656,15 +657,14 @@ In \autoref{fig:subtyping}, a constraint is specified which we can express in wo
 
 \chapter{Experimental Study}
 
-We have defined a property graph schema formalism which is capable of expressing constraints in commonly used conceptual data modeling methods. In this chapter, we analyze the practical feasibility of our approach. We aim to answer the question: what is the cost of determining property graph schema conformance using currently available graph database systems?
+We have defined a property graph schema formalism which is capable of expressing constraints in commonly used conceptual data modeling methods. In this chapter, we analyze the practical feasibility of our approach.
 
 % TODO: update this
 First, we investigate the schema capabilities of three existing graph database sytems. Second, we describe how these systems can be extended to support all kinds of constraints that can be specified in our schema formalism. Third, we analyze the performance of our prototypical implementation in several realistic scenarios.
 
-\section{Workloads}
-\label{sec:workloads}
+\section{Goals}
 
-\paragraph{Objective.} We consider two variants of the schema validation problem:
+We consider two variants of the schema validation problem:
 
 \begin{itemize}
   \item \textbf{Binary validation:} given a graph and a schema, determine whether the graph conforms to the schema or not.
@@ -673,7 +673,21 @@ First, we investigate the schema capabilities of three existing graph database s
 
 While a binary validation method may be sufficient in some situations, full validation is required when we want to explain why a graph does not conform. Binary validation is a strictly easier problem because we can stop as soon as we find a single violation, while full validation always requires at least one full scan of the graph.
 
-\paragraph{Datasets.} Our schema validation methods are applied to two datasets:
+% TODO: explain what it means for a graph object to "cause" a violation
+
+The overarching question we aim to answer is: what is the cost of validating property graph schema conformance using currently available graph database systems? We divide this into subquestions:
+
+\begin{enumerate}[label=\bfseries RQ\arabic*]
+  \item How is validation time affected by the choice between binary and full validation?
+  \item How is validation time affected when introducing errors in the data?
+  \item How is validation time affected by the scale of the data?
+\end{enumerate}
+
+\section{Methodology}
+
+\subsection{Datasets}
+  
+Our schema validation methods are applied to two datasets:
 
 \begin{itemize}
   \item The \textbf{Recommendations Graph}\footnote{\url{https://github.com/neo4j-graph-examples/recommendations}} is a relatively small dataset with a simple schema, provided by Neo4j. It contains movies, actors, directors, and users who rate movies. The schema is given in \autoref{fig:schema-recommendations}. This dataset is intended as a working example for people who want to explore the functionality of a graph database. The small size makes it suitable as a proof-of-concept for our schema validation methods.
@@ -715,10 +729,13 @@ A comparison of the datasets is given in \autoref{tab:dataset-comparison}.
   \label{fig:schema-snb}
 \end{figure}
 
-\paragraph{Assumptions.} To reduce the complexity of the implementation, we assume that the set of labels of a schema object functionally determines the record type of that schema object. Recall that every object must conform to a schema object (\autoref{rule:node} and \ref{rule:edge}). This implies that if an object has the same set of labels as a schema object, it must conform to that schema object (since there exists no schema object with the same label set and a different record type). We find that this assumption holds in many domains, including the datasets we study.
+\subsection{Assumptions}
+
+To reduce the complexity of the implementation, we assume that the set of labels of a schema object functionally determines the record type of that schema object. Recall that every object must conform to a schema object (\autoref{rule:node} and \ref{rule:edge}). This implies that if an object has the same set of labels as a schema object, it must conform to that schema object (since there exists no schema object with the same label set and a different record type). We find that this assumption holds in many domains, including the datasets we study.
 
 Under this assumption, we can simplify the rules of conformance. Informally:
 
+% TODO: formalize this?
 \begin{enumerate}
   \item
         \begin{enumerate}
