@@ -177,7 +177,7 @@ The property graph data model has been adopted by numerous contemporary graph da
 
 Current property graph database systems vary in their support and philosophy around schema. Some require the user to specify a schema, while others infer a schema from data. In this section, we take a closer look at three of the most popular property graph databases: \emph{Neo4j}, \emph{JanusGraph}, and \emph{TigerGraph}.
 
-The schema features of these three databases in are summarized in \autoref{tab:schema-comparison}, and they are compared to our schema formalism which is detailed in \autoref{ch:pg-schema}. We elaborate here on the meaning of the listed features. Mandatory property constraints express that some property must exist on a node or edge. Allowed property constraints express that no properties may exist, other than the ones explicitly specified. Endpoint constraints express that edges may not connect nodes which do not conform to some specified types. Data type constraints express that the value of a property must be of a particular data type. Maximum and mimumum cardinality constraints express that a node must have some number of incoming or outgoing edges of a particular type. Property uniqueness constraints express that no two nodes may have the same value for a particular property. Note that if a property is a key, then it is mandatory and unique.
+The schema features of these three databases in are summarized in \autoref{tab:schema-comparison}, and they are compared to our schema formalism which is detailed in \autoref{ch:pg-schema}. We elaborate here on the meaning of the listed features. Mandatory property constraints express that some property must exist on a node or edge. Allowed property constraints express that no properties may exist, other than the ones explicitly specified. Endpoint constraints express that edges may not connect nodes which do not conform to some specified types. Data type constraints express that the value of a property must be of a particular data type. Maximum and mimumum cardinality constraints express that a node must have some number of incoming or outgoing edges of a particular type. Property uniqueness constraints express that no two nodes may have the same value for a particular property.
 
 % TODO: center the symbols in their cells and color the background. Maybe don't draw all the lines. Tighten the line spacing and increase the padding?
 \begin{table}[t]
@@ -219,21 +219,21 @@ Next, we detail the differences between the three database systems in our scope 
 
 \paragraph{Neo4j.} Being one of the first to adopt the property graph data model, Neo4j has grown to become the most popular graph database engine today\footnote{\url{https://db-engines.com/en/ranking/graph+dbms} (accessed July 2022)}. Neo4j supports the Cypher query language \citep{francis2018cypher}. Their data model differs from ours in that edges can only have a single label, while nodes can have multiple.
 
-Neo4j's approach to schema is primarily implicit: after inserting data, the user can construct a schema that describes the data using built-in functions. In addition, some constraints can be explicitly specified, namely existence of mandatory properties (enterprise edition only), uniqueness of property values, and key constraints.
+Neo4j's approach to schema is primarily implicit: after inserting data, a schema that describes the data can be automatically constructed using built-in functions. In addition, some constraints can be explicitly specified, namely existence of mandatory properties and key constraints (enterprise edition only), and uniqueness of property values. Note that if a property is a key, then it is mandatory and unique.
 
-\paragraph{JanusGraph.} Originating from the open source Titan project, JanusGraph is a continuation of the effort to create a distributed and highly scalable graph database. The query language Gremlin \citep{rodriguez2015gremlin} enables graph pattern matching through traversals. In JanusGraph's data model, nodes and edges always have one label. Properties can have sets and lists as values, and there may exist multiple properties with the same key on the same node. Furthermore, properties themselves can have properties. In this sense, the data model is like a blend of property graphs and RDF \citep{pan2009rdf}.
+\paragraph{JanusGraph.} Originating from the open source Titan project, JanusGraph is a continuation of the effort to create a distributed and highly scalable graph database. The Gremlin query language \citep{rodriguez2015gremlin} enables pattern matching by means of graph traversals. In JanusGraph's data model, nodes and edges always have one label. Properties can have sets and lists as values, and there may exist multiple properties with the same key on the same node. Furthermore, properties themselves can have properties. In this sense, the data model is like a blend of property graphs and RDF \citep{pan2009rdf}.
 
-JanusGraph has the largest set of schema features among all systems we came across. Similarly to Neo4j, JanusGraph can automatically generate a schema during operation. However, this functionality can be disabled, in which case the schema must be explicitly defined. There is built-in support for specifying which node labels, edge labels, and property names may exist. Furthermore, it can be specified which properties may exist depending on the label of a node or edge. Property values are restricted to a data type and may be single-valued or multi-valued (lists or sets). In addition, the types of the source and target nodes that may be connected by an edge with a particular label can be constrained. Edge cardinality can be constrained to one-to-one, one-to-many, many-to-one, many-to-many, or ``simple'' (at most one edge of a particular label between any pair of nodes). Finally, there are features to support static (immutable) nodes, time-to-live (TTL), and unidrectional edges which can only be traversed from source to target.
+JanusGraph has the largest set of schema features among all systems we have investigated. Similarly to Neo4j, JanusGraph can automatically generate a schema during operation. However, this functionality can be disabled, in which case the schema must be explicitly defined. There is built-in support for specifying which node labels, edge labels, and property names may exist. Furthermore, it can be specified which properties may exist depending on the label of a node or edge. Property values are restricted to a data type and may be single-valued or multi-valued (lists or sets). In addition, the types of the source and target nodes that may be connected by an edge with a particular label can be constrained. Edge cardinality can be constrained to one-to-one, one-to-many, many-to-one, many-to-many, or ``simple'' (at most one edge of a particular label between any pair of nodes). Finally, there are features to support static (immutable) nodes, time-to-live (TTL), and unidrectional edges which can only be traversed from source to target.
 
 All of JanusGraph's schema features are centered around specifying what is allowed in the graph, but mandatory properties and edges are not supported. Cardinality constraints are supported, but not to the full extent of our definition. To be precise, JanusGraph can impose constraints on the maximum edge cardinality, but not the minimum. For example, a many-to-one schema edge ensures that every target node has at most one incoming edge of a particular type, but does not prevent a target node from having no incoming edges.
 
 \paragraph{TigerGraph.} A unique aspect of TigerGraph \citep{deutsch2019tigergraph} is that it is schema-first: the entire schema must be specified before a database is instantiated. This allows for more powerful optimizations, building on decades of research on relational databases. The query language is GSQL: an extension of SQL with graph pattern matching capabilities. In TigerGraph's data model, nodes and edges have exactly one label, but nodes can be associated with any number of \emph{tags}, which are conceptually similar to labels. Edges can be directed or undirected.
 
-TigerGraph's schema is strict, in the sense that every node label, edge label, and property must be explicitly defined. All properties are mandatory and have a fixed data type, which may be singular or multi-valued. There are no null values; if a property value is missing during insertion, a default value is set. All nodes have a primary key, which may be a single property or a composite key. Schema edges must specify a source and target node type, though it is possible to specify multiple types on either side. By default, directed edges can only be traversed from source to target, though a reverse edge can be automatically constructed if desired.
+TigerGraph's schema is strict, in the sense that every node label, edge label, and property must be explicitly defined. All properties are mandatory and have a fixed data type, which may be singular or multi-valued. There are no null values; if a property value is missing during insertion, a default value is used. All nodes have a primary key, which may be a single property or a composite key. Schema edges must specify a source and target node type, though it is possible to specify multiple types on either side. By default, directed edges can only be traversed from source to target, though a reverse edge can be automatically constructed if desired.
 
 \chapter{Property Graphs}
 
-We start by introducing our data model, which is based on the definition of \emph{property graph} established by the Working Group for Database Languages~(WG3) as part of ISO/IEC JTC1/SC32 \citep{deutsch2021gpml}. We use this data model in the rest of this document.
+We start by introducing our data model, which is based on the definition of \emph{property graph} established by the Working Group for Database Languages~(WG3) as part of ISO/IEC JTC1/SC32 \citep{deutsch2021gpml}. We use this data model throughout the rest of this document.
 
 Our notion of property graph represents data as a directed attributed multigraph. Nodes and edges carry data in the form of a set of labels and a set of key--value pairs, called \emph{properties}. We use the umbrella term \emph{objects} to refer to nodes and edges. Being a \emph{multigraph}, a property graph allows the existence of multiple edges between two nodes $u$ and $v$. Furthermore, we allow $u = v$, in which case the edge is called a \emph{self-loop}. For ease of notation, we do not consider undirected edges, although they could be simulated by attaching a special label or property to an edge.
 
@@ -304,7 +304,7 @@ In this section, we define a notion of property graph schema which incorporates 
   \label{tab:er-pg}
 \end{table}
 
-An example of a basic property graph schema is given in \autoref{fig:pg-schema-basic}. The similarity between property graphs and schemas allows us to visualize and think about them using the same mental model. Schema nodes and edges are drawn in the same way as for data graphs, but properties are associated with types rather than concrete values.
+An example of a basic property graph schema is given in \autoref{fig:pg-schema-basic}. The similarity between property graphs and schemas allows us to visualize and think about them using the same mental model. Schema nodes and edges are drawn in the same way as data graphs, but properties are associated with types rather than concrete values.
 
 \begin{figure}[t]
   \centering
@@ -320,7 +320,7 @@ To formally define property graph schemas and schema conformance, we first assum
   For each property type $\ptype \in \ptypes$ there is a set $\sem{\ptype} \subseteq \mathcal{V}$ that contains all property values that \emph{conform} to the type $\ptype$.
 \end{definition}
 
-The concept of property type is similar to a \emph{value set} in the ER model. Value sets and property types are used to specify which values may be associated with an attribute, or which values a property is allowed to have\footnote{Note the subtle difference in terminology: an ER attribute is associated with a value, whereas a property has a name and a value}. A minor difference is that \citet{chen1976entity} postulates that values from different value sets can be equivalent, while we do not have a notion of value equivalence.
+The concept of property type is similar to a \emph{value set} in the ER model. Value sets and property types are used to specify which values may be associated with an attribute, or which values a property is allowed to have\footnote{Note the subtle difference in terminology: an ER attribute has a value, whereas a property has a name and a value.}. A minor difference is that \citet{chen1976entity} postulates that values from different value sets can be equivalent, while we do not have a notion of value equivalence.
 
 \begin{definition}[Basic record type]
   \label{def:record-type-basic}
@@ -357,12 +357,12 @@ The concept of property type is similar to a \emph{value set} in the ER model. V
 \end{definition}
 
 \begin{definition}[Conformance relation]
-  Given a property graph $$G = (N, E, \rho, \lambda, \pi)$$ and a property graph schema $$S = (N', E', \rho', \omega)$$ we define the binary \emph{conformance relation} $$\conf \; = \{(o, o') \mid o \in (N \cup E) \wedge o' \in (N' \cup E') \wedge o \in \sem{\omega(o')}\}$$ In words, we say that an object $o$ conforms to the schema object $o'$ if and only if $o \conf o'$.
+  Given a property graph $$G = (N, E, \rho, \lambda, \pi)$$ and a property graph schema $$S = (N', E', \rho', \omega)$$ we define the binary \emph{conformance relation} $$\conf \; = \{(o, o') \in (N \cup E) \times (N' \cup E') \mid o \in \sem{\omega(o')}\}$$ We say that an object $o$ \emph{conforms} to a schema object $o'$ if and only if $o \conf o'$.
 \end{definition}
 
-Note that a property graph schema can be simulated by a property graph if we allow properties to take property types as values, i.e. $\ptypes \subseteq \mathcal{V}$. Then we let $\lambda$ and $\pi$ take the role of $\omega$, in the sense that $\lambda(o) = L$ and $\pi(o) = \rtype$ if $\omega(o) = (L, \rtype)$ for all objects $o$ in the property graph.
+Note that a property graph schema can be simulated by a property graph if we allow properties to take property types as values, i.e. $\ptypes \subseteq \mathcal{V}$. Then we let $\lambda$ and $\pi$ take the role of $\omega$: for all objects $o$ in the property graph, if $\omega(o) = (L, \rtype)$ then $\lambda(o) = L$ and $\pi(o) = \rtype$.
 
-We can relate our formalism to the ER model once again. Our definitions of schema nodes and schema edges are analogous to the concepts of \emph{entity set} and \emph{relationship set}, respectively. Entity sets and schema nodes represent classes of entities that have something in common, whereas relationship sets and schema edges represent classes of relationships. \autoref{tab:er-pg-schema} summarizes the relationship between the ER model and our schema formalism.
+We can relate our schema formalism to the ER model once again. Our definitions of schema nodes and schema edges are analogous to the concepts of \emph{entity set} and \emph{relationship set}, respectively. Entity sets and schema nodes represent classes of entities that have something in common, whereas relationship sets and schema edges represent classes of relationships. \autoref{tab:er-pg-schema} summarizes the relationship between the ER model and our schema formalism.
 
 \begin{table}[t]
   \centering
@@ -634,7 +634,7 @@ Our schema formalism comes with a number of limitations. First, it is not possib
 
 % TODO: It's also not possible to say that there may only exist one edge between the same two nodes, or to enforce that a node has two edges to different nodes (mutual exclusion?)
 
-Furthermore, subtype relations cannot be expressed in general. To see the problem, consider the schema depicted in \autoref{fig:subtyping}. How could we express this using our schema formalism? An attempt is given in \autoref{fig:subtyping-ours}, where properties of the supertype \texttt{Message} are copied and distributed over all its subtypes, and the edge from \texttt{Comment} to \texttt{Message} is accompanied by an edge from \texttt{Comment} to Post and from \texttt{Comment} to itself. While the properties are modeled correctly in this case, it breaks down when we look at the cardinalities.
+Furthermore, subtype relations generally cannot be expressed. The problem is illustrated by the schema depicted in \autoref{fig:subtyping}. How could we express this using our schema formalism? An attempt is given in \autoref{fig:subtyping-ours}, where properties of the supertype \texttt{Message} are copied and distributed over all its subtypes, and the edge from \texttt{Comment} to \texttt{Message} is accompanied by an edge from \texttt{Comment} to Post and from \texttt{Comment} to itself. While the properties are modeled correctly in this case, it breaks down when we look at the cardinalities.
 
 In \autoref{fig:subtyping}, a constraint is specified which we can express in words as ``every \texttt{Comment} is a reply of exactly one \texttt{Message} (or a subtype of \texttt{Message})''. However, it is not possible to specifiy such a constraint without subtype relations, as illustrated by \autoref{fig:subtyping-ours}. This solution allows \texttt{Comment}s which are not a reply to anything, or which are a reply to more than one thing. Then again, if we disregard the cardinality constraints, the two schemas are equivalent. This example shows that our schema formalism can be used to model some but not all subtype relations.
 
@@ -656,11 +656,11 @@ In \autoref{fig:subtyping}, a constraint is specified which we can express in wo
   \caption{A schema consisting of a supertype with two subtypes which cannot be modeled using our schema formalism. Any property graph that conforms to~(a) also conforms to~(b), but not the other way around.}
 \end{figure}
 
-\chapter{Extending Property Graph Databases}
+\chapter{Schema Validation in Practice}
 
 Our property graph schema formalism is capable of expressing constraints in common conceptual data modeling methods. However, in \autoref{ch:related-work}, we found that existing property graph database systems are limited in the kinds of constraints they can enforce, in particular cardinality constraints.
 
-In this chapter, we describe how existing database systems can be extended to support all kinds of constraints that can be expressed with our schema formalism. We cover \emph{Neo4j}, \emph{JanusGraph}, and \emph{TigerGraph}. Where possible, we make use of the schema functionality exposed by the database engine. For constraints that cannot be validated in this way, we provide queries. The full source code is available on GitHub\footnote{\url{https://github.com/nimobeeren/thesis}}.
+In this chapter, we describe how existing database systems can be extended to support all kinds of constraints that can be expressed with our schema formalism. We cover \emph{Neo4j}, \emph{JanusGraph}, and \emph{TigerGraph}. Where possible, we make use of the schema functionality exposed by the database engine. For constraints that cannot be validated in this way, we provide queries.
 
 % TODO: why queries instead of in-engine implementation?
 
@@ -716,9 +716,9 @@ While a binary validation method may be sufficient for some use cases, full vali
 
 % TODO: explain what it means for a graph object to "cause" a violation
 
-In the following, we detail how each conformance rule can be validated using the three databases in our scope. We discuss both the binary and full validation variants.
-
 \section{Implementation}
+
+We describe how each conformance rule can be validated using the three databases in our scope. Both the binary and full validation variants are discussed. The full source code is available on GitHub\footnote{\url{https://github.com/nimobeeren/thesis}}.
 
 \paragraph{Neo4j.} We start by using the built-in schema functionality that Neo4j offers. To ensure the existence of mandatory properties (\autoref{rule:simp-node-mandatory-props} and \ref{rule:simp-edge-mandatory-props}), we use Neo4j's \texttt{CONSTRAINT} functionality, which lets us specify which properties are mandatory for nodes and edges with a particular label set (Enterprise edition only). An example is given in \autoref{lst:neo4j-mandatory-props}.
 
@@ -975,13 +975,14 @@ All TigerGraph queries are \emph{installed} before execution, which allows the q
 \label{ch:experiment}
 
 % TODO: introductory paragraph
-In this chapter, we analyze the performance of our prototypical implementation in several realistic scenarios. We investigate the impact of the scale of the data, the choice between binary and full validation, and the number of errors in the data. In this way, we aim to help the reader determine whether an approach such as ours is feasible for their use case.
+In this chapter, we analyze the performance of our prototypical implementation in several realistic scenarios. This way, we aim to help the reader in determining whether our approach is feasible for their use case.
 
 \section{Research Questions}
 
 The overarching question we aim to answer is: what is the cost of validating property graph schema conformance using currently available graph database systems? We divide this into subquestions:
 
 \begin{enumerate}[label=\bfseries RQ\arabic*]
+  % \item How is validation time affected by the types of constraints in the schema?
   \item How is validation time affected by the scale of the data?
   \item How is validation time affected by the choice between binary and full validation?
   \item How is validation time affected when introducing errors in the data?
@@ -991,6 +992,8 @@ The overarching question we aim to answer is: what is the cost of validating pro
 
 \section{Methodology}
 
+% TODO: general description of methodology and describe what's coming next
+
 \paragraph{Datasets.} To determine the impact of different schemas and scales on the performance of our implementation, we apply our methods to two datasets:
 
 \begin{itemize}
@@ -998,7 +1001,7 @@ The overarching question we aim to answer is: what is the cost of validating pro
   \item The \textbf{LDBC Social Network Benchmark} (SNB) \citep{angles2020snb} was designed to evaluate graph-like data management technologies in a realistic setting. The dataset consists of users, messages, likes, and other concepts that can be found in the domain of social networks. The schema is of moderate size, and is visualized in \autoref{fig:schema-snb}. The data is made available at various scales, ranging from less than a gigabyte up to a terrabyte of raw data. We run multiple tests with scale factor 0.1, 0.3, and 1. This lets us analyze how our solution scales with the size of the data.
 \end{itemize}
 
-A comparison of the datasets is given in \autoref{tab:dataset-comparison}.
+Some statistics of the datasets are given in \autoref{tab:dataset-statistics}.
 
 \begin{table}[t]
   \centering
@@ -1015,8 +1018,8 @@ A comparison of the datasets is given in \autoref{tab:dataset-comparison}.
     SNB (SF1)         & 3,181,724  & 17,256,038 & 14          & 20          & 1109              \\
     \hline
   \end{tabular}
-  \caption{Comparison of the datasets used in the experiment. $|N|$ and $|E|$ represent the number of nodes and edges. $|N'|$ and $|E'|$ represent the number of schema nodes and schema edges. The raw size is measured as the combined size of all CSV files.}
-  \label{tab:dataset-comparison}
+  \caption{Statistics of the datasets used in the experiment. $|N|$ and $|E|$ represent the number of nodes and edges. $|N'|$ and $|E'|$ represent the number of schema nodes and schema edges. The raw size is measured as the combined size of all CSV files.}
+  \label{tab:dataset-statistics}
 \end{table}
 
 \begin{figure}[t]
@@ -1051,11 +1054,11 @@ We consider three levels of errors rate:
 
 Caching is disabled for Neo4j and JanusGraph, while TigerGraph does not provide any caching functionality to the best of our knowledge.
 
-\paragraph{Hardware.} All tests are run on a single machine with an 8-core CPU, 6 gigabytes of dedicated memory, and a solid-state drive with enough capacity to store all data.
+\paragraph{Hardware.} All tests are run on a single machine with 4 CPU cores, 6 gigabytes of dedicated memory, and a solid-state drive with enough capacity to store all data.
 
 \section{Results}
 
-The full dataset of results is available on GitHub\footnote{\url{https://github.com/nimobeeren/thesis/blob/main/analysis/results.csv}}.
+The complete set of results is available on GitHub\footnote{\url{https://github.com/nimobeeren/thesis/blob/main/analysis/results.csv}}.
 
 % How are different databases affected by variant and schema? (3 grouped bar charts)
 % - databases: all (separate charts)
