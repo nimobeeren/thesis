@@ -982,11 +982,11 @@ In this chapter, we analyze the performance of our prototypical implementation i
 
 The overarching question we aim to answer is: what is the cost of validating property graph schema conformance using currently available graph database systems? We divide this into subquestions:
 
-\begin{enumerate}[label=\bfseries RQ\arabic*]
-  \item How is validation time affected by the kinds of constraints in the schema?
-  \item How is validation time affected by the scale of the data?
-  \item How is validation time affected by the choice between binary and full validation?
-  \item How is validation time affected by errors in the data?
+\begin{enumerate}[label=\bfseries RQ\arabic*,ref=RQ\arabic*]
+  % \item How is validation time affected by the kinds of constraints in the schema?
+  \item\label{rq:variant} How is validation time affected by the choice between binary and full validation?
+  \item\label{rq:scale} How is validation time affected by the scale of the data?
+  \item\label{rq:errors} How is validation time affected by errors in the data?
 \end{enumerate}
 
 It should be made clear that our goal is not to compare the performance of database systems. The main reason is that each database needs to do a different amount of work, depending on the supported schema capabilities and data model. Next to that, we spent more time optimizing some queries than others. Therefore, a direct comparison would not be fair, and potentially misleading. While we try to control for the variables we can, it is up to the reader to evaluate their needs and interpret the results accordingly.
@@ -1047,7 +1047,7 @@ Some statistics of the datasets are given in \autoref{tab:dataset-statistics}.
 
 \paragraph{Error rate.} We expect the validation time of the binary variant to be affected by the number of errors in the data. If the data graph conforms to the schema, the entire graph needs to be scanned. However, as soon as a single error is found, it can terminate. The higher the error rate, the sooner we expect to terminate.
 
-We consider three levels of error rate:
+We consider three error rate levels:
 
 \begin{itemize}
   \item \emph{None:} the graph conforms to the schema.
@@ -1059,7 +1059,7 @@ The way errors are introduced depends on the database system under test, due to 
 
 \subsection{Parameters}
 
-We try to control the following parameters so that they have as little impact on the results as possible.
+We try to control the following parameters so that their impact on the results is as small as possible.
 
 \paragraph{Indexing and caching.} We use only indexes that the database system creates by default. These default indexes are typically not useful for us, because our schema validation queries need to scan the entire graph, rather than finding a specific set of objects. The exception is TigerGraph's outdegree index, which benefits the validation of cardinality constraints. Caching is disabled for Neo4j and JanusGraph, while TigerGraph does not provide any caching functionality to the best of our knowledge.
 
@@ -1069,26 +1069,50 @@ We try to control the following parameters so that they have as little impact on
 
 The complete set of results is available on GitHub\footnote{\url{https://github.com/nimobeeren/thesis/blob/main/analysis/results.csv}}.
 
-% How are different databases affected by variant and schema? (3 grouped bar charts)
-% - databases: all (separate charts)
-% - datasets: all (groups)
-% - scales: all (groups)
-% - variant: both (bars within groups)
-% - error rates: 0
+\subsection{\ref*{rq:variant}: Validation Variant}
 
-% How are different databases affected by different error rates? (3 bar charts)
-% - databases: all (separate charts)
-% - datasets: snb
-% - scales: 0.1
-% - variant: binary
-% - error rates: all (bars)
+We run both the binary and full validation queries on all datasets. For these workloads, no errors are introduced, so both variants have to scan the entire graph. The results for each database system are shown in \autoref{fig:results-variant}. The queries for JanusGraph on the SNB dataset with scale factor larger than 0.1 did not complete within an hour, and are not shown here.
 
-% How are different databases affected by different scales? (3 line charts)
-% - databases: all (separate charts)
-% - scales: all (x-axis)
-% - datasets: all (distinguishable by scale)
-% - variant: both (dashed vs solid line)
-% - error rates: 0
+\begin{figure}[t]
+  \centering
+  \includegraphics[scale=0.5]{figures/results-variant.pdf}
+  \caption{Validation time for binary and full variants on all datasets with no errors.}
+  \label{fig:results-variant}
+\end{figure}
+
+Comparing the validation time for binary and full variants, we see that they are not significantly different for JanusGraph and TigerGraph, while for Neo4j there is a clear difference. The difference for Neo4j could be explained by the use of Neo4j's schema statistics, which are retrieved in constant time and eliminate the need for some of the queries used in the full variant. However, on the smaller recommendations dataset, this advantage is no longer apparent. The lack of difference for JanusGraph and TigerGraph is expected, since they do the same amount of work for both variants.
+
+There is a clear difference between database systems, spanning at least an order of magnitude. We are hesitant to draw conclusions from this, since indexes and other optimizations can have a large impact on performance. However, this difference gives an indication of the level of performance that can be expected from a basic implementation.
+
+\subsection{\ref*{rq:scale}: Scale}
+
+To further illustrate the relationship between validation time and the scale of the data, \autoref{fig:results-scale} plots the validation time against the number of objects in the data graph. To keep the schema and structure constant, we only consider the SNB dataset, but at different scale factors. We do not plot the results for JanusGraph, because only the smallest scale factor could be tested.
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[scale=0.5]{figures/results-scale.pdf}
+  \caption{Validation time against number of objects in the data graph for the SNB dataset with no errors.}
+  \label{fig:results-scale}
+\end{figure}
+
+These results suggest a linear relationship between number of objects and validation time. This is expected, since all of our queries perform a linear scan of the nodes and edges in the data graph.
+
+\subsection{\ref*{rq:errors}: Error Rate}
+
+The workloads so far have all been on data that does not contain any errors, i.e. the the data conforms to the schema. For this research question, we use the SNB dataset at SF0.1 and introduce some errors into the data. We only test the binary validation variant, because full validation requires a full scan of the graph, regardless of the number of errors. The results are shown in \autoref{fig:results-errors}.
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[scale=0.5]{figures/results-errors.pdf}
+  \caption{Validation time against error rate for binary validation of the SNB dataset at SF0.1.}
+  \label{fig:results-errors}
+\end{figure}
+
+The results show significantly different patterns for each database system. For Neo4j, increasing the error rate decreases validation time somewhat, but not significantly. For JanusGraph, even a single error has a significant impact, and when half of all nodes violate a constraint, validation time is cut by another order of magnitude. For TigerGraph, increasing the error rate does not seem to reduce validation time.
+
+The different patterns between Neo4j and JanusGraph could be explained by the order in which different kinds of violations are checked in our queries. Recall that in Neo4j, we introduce errors by removing mandatory edges. This happens to be the last thing that is checked in our validation queries, hence all other checks still need to be completed. The fact that there is any improvement at all does suggest that Neo4j recognizes it can terminate the query as soon as it finds a violation. By contrast, for JanusGraph we only need two queries: the first checks all nodes and the second checks all edges.
+% TODO: JanusGraph short-circuit, ~5x more edges than nodes
+% TODO: TigerGraph
 
 \bibliography{main}
 
