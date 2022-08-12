@@ -1072,7 +1072,7 @@ The complete set of results is available on GitHub\footnote{\url{https://github.
 
 \subsection{\ref*{rq:variant}: Validation Variant}
 
-We run both the binary and full validation queries on all datasets. For these workloads, no errors are introduced, so both variants have to scan the entire graph. We perform a two-sided T-test to test for a difference between the mean validation time for the full and binary variant. The results for each database system are shown in \autoref{fig:results-variant} and \autoref{tab:results-variant}. The queries for JanusGraph on the SNB dataset with scale factor larger than 0.1 did not complete within an hour, and are not shown here.
+We run both the binary and full validation queries on all datasets. For these workloads, no errors are introduced, so both variants have to scan the entire graph. We perform a two-sided T-test to test the null hypothesis that the mean validation time is the same for the full and binary variant. The results for each database system are shown in \autoref{fig:results-variant} and \autoref{tab:results-variant}. The queries for JanusGraph on the SNB dataset with scale factor larger than 0.1 did not complete within an hour, and are not shown here.
 
 \begin{figure}[t]
   \centering
@@ -1125,9 +1125,7 @@ These results suggest a linear relationship between number of objects and valida
 
 \subsection{\ref*{rq:errors}: Error Rate}
 
-The workloads so far have all been on data that does not contain any errors, i.e. the the data conforms to the schema. For this research question, we use the SNB dataset at SF0.1 and introduce some errors into the data. We only test the binary validation variant, because full validation requires a full scan of the graph, regardless of the number of errors.
-% TODO: explain stats test
-The results are shown in \autoref{fig:results-errors} and \autoref{tab:results-errors}.
+The workloads so far have all been on data that does not contain any errors, i.e. the the data conforms to the schema. For this research question, we use the SNB dataset at SF0.1 and introduce some errors into the data. We only test the binary validation variant, because full validation requires a full scan of the graph, regardless of the number of errors. A one-way ANOVA is performed to test the null hypothesis that the mean validation time is the same for all error rates for a particular database. The results are shown in \autoref{fig:results-errors} and \autoref{tab:results-errors}.
 
 \begin{figure}[t]
   \centering
@@ -1140,19 +1138,19 @@ The results are shown in \autoref{fig:results-errors} and \autoref{tab:results-e
   \centering
   \begin{tabular}{lrrrrrrrrr}
     \hline
-    \textbf{Database} & \multicolumn{3}{c}{\textbf{Mean valid. time (s)}} & \multicolumn{2}{c}{\textbf{0 vs. 1}} & \multicolumn{2}{c}{\textbf{1 vs. 50\%}} & \multicolumn{2}{c}{\textbf{0 vs. 50\%}}                                                                                                                           \\
-                      & \textbf{None}                                     & \textbf{Single}                      & \textbf{Half}                           & \textbf{t}                              & \textbf{p}                    & \textbf{t} & \textbf{p}                    & \textbf{t} & \textbf{p}                    \\
+    \textbf{Database} & \multicolumn{3}{c}{\textbf{Mean validation time (s)}} & \textbf{F}      & \textbf{p}            \\
+                      & \textbf{None}                                         & \textbf{Single} & \textbf{Half} &       \\
     \hline
-    Neo4j             & 7.38                                              & 7.10                                 & 6.37                                    & 1.27                                    & 0.272                         & 3.74       & \textbf{0.020*}               & 6.06       & \textbf{0.004*}               \\
-    JanusGraph        & 56.74                                             & 6.87                                 & 0.21                                    & 153                                     & $\mathbf{< 0.0001}$\textbf{*} & 39         & $\mathbf{< 0.0001}$\textbf{*} & 204        & $\mathbf{< 0.0001}$\textbf{*} \\
-    TigerGraph        & 0.14                                              & 0.11                                 & 0.15                                    & 0.82                                    & 0.460                         & -1.18      & 0.304                         & -0.26      & 0.806                         \\
+    Neo4j             & 7.38                                                  & 7.10            & 6.37          & 14.21 & \textbf{0.005*} \\
+    JanusGraph        & 56.74                                                 & 6.87            & 0.21          & 27152 & $\mathbf{<0.0001}\textbf{*}$ \\
+    TigerGraph        & 0.14                                                  & 0.11            & 0.15          & 0.55 & 0.601 \\
     \hline
   \end{tabular}
-  \caption{Mean validation at different error rates for binary validation of the SNB (SF0.1) dataset. The labels 0, 1, and 50\% represent the error levels \emph{None}, \emph{Single}, and \emph{Half} respectively. A two-sided T-test is performed to test for a difference between the mean validation time for different error rates. Significant results (p $< 0.05$) are marked with a *.}
+  \caption{Mean validation at different error rates for binary validation of the SNB (SF0.1) dataset. A one-way ANOVA is used to test for a difference between the mean validation time among all error rates. Significant results (p $< 0.05$) are marked with a *.}
   \label{tab:results-errors}
 \end{table}
 
-The results show different patterns for each database system. For Neo4j, increasing the error rate decreases validation time somewhat, but not significantly. For JanusGraph, even a single error has a significant impact, and when half of all nodes violate a constraint, validation time is cut by another order of magnitude. For TigerGraph, increasing the error rate does not seem to reduce validation time.
+The results show different patterns for each database system. For Neo4j, increasing the error rate decreases validation time, but not by a large amount. For JanusGraph, even a single error cuts the validation time by an order of magnitude, and when half of all nodes violate a constraint, validation time is again significantly reduced. For TigerGraph, we found no evidence that increasing the error rate reduces validation time.
 
 The different patterns could be explained by the order in which different kinds of violations are checked in our queries. Recall that in Neo4j, we introduce errors by removing mandatory edges. This happens to be the last thing that is checked in our validation queries, hence all other checks still need to be completed. The fact that there is any improvement at all does suggest that Neo4j recognizes it can terminate the query as soon as it finds a violation. For JanusGraph, we only need two queries: the first checks all nodes and the second checks all edges. Since the violation always appears in one of the nodes, the edge query can be skipped. This yields significant time gains, since there are roughly 5 times more edges than nodes. By constrast, TigerGraph shows no indication of improvement when introducing errors, which suggests that it does not terminate early.
 
