@@ -1156,6 +1156,26 @@ The results show different patterns for each database system. For Neo4j, increas
 
 The different patterns could be explained by the order in which different kinds of violations are checked in our queries. Recall that in Neo4j, we introduce errors by removing mandatory edges. This happens to be the last thing that is checked in our validation queries, hence all other checks still need to be completed. The fact that there is any improvement at all does suggest that Neo4j recognizes it can terminate the query as soon as it finds a violation. For JanusGraph, we only need two queries: the first checks all nodes and the second checks all edges. Since the violation always appears in one of the nodes, the edge query can be skipped. This yields significant time gains, since there are roughly 5 times more edges than nodes. By constrast, TigerGraph shows no indication of improvement when introducing errors, which suggests that it does not terminate early.
 
+\chapter{Future Work}
+
+\begin{itemize}
+  \item Generalized validation queries / query generation
+  \item Effect of schema with fixed scale
+  \item Implementation of exact cardinality constraints
+  \item Relation with simulation
+  \item In-engine implementation / efficient validation algorithms / indexes
+  \item More constraints:
+        \begin{itemize}
+          \item Key constraints
+          \item Mutual exclusivity
+          \item Larger graph patterns
+          \item Subtyping
+        \end{itemize}
+  \item Query type checking / inference
+  \item Schema inference
+  \item Parallelization
+\end{itemize}
+
 \bibliography{main}
 
 \end{document}
