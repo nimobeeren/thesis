@@ -1110,9 +1110,7 @@ The workloads so far have all been on data that does not contain any errors, i.e
 
 The results show significantly different patterns for each database system. For Neo4j, increasing the error rate decreases validation time somewhat, but not significantly. For JanusGraph, even a single error has a significant impact, and when half of all nodes violate a constraint, validation time is cut by another order of magnitude. For TigerGraph, increasing the error rate does not seem to reduce validation time.
 
-The different patterns between Neo4j and JanusGraph could be explained by the order in which different kinds of violations are checked in our queries. Recall that in Neo4j, we introduce errors by removing mandatory edges. This happens to be the last thing that is checked in our validation queries, hence all other checks still need to be completed. The fact that there is any improvement at all does suggest that Neo4j recognizes it can terminate the query as soon as it finds a violation. By contrast, for JanusGraph we only need two queries: the first checks all nodes and the second checks all edges.
-% TODO: JanusGraph short-circuit, ~5x more edges than nodes
-% TODO: TigerGraph
+The different patterns could be explained by the order in which different kinds of violations are checked in our queries. Recall that in Neo4j, we introduce errors by removing mandatory edges. This happens to be the last thing that is checked in our validation queries, hence all other checks still need to be completed. The fact that there is any improvement at all does suggest that Neo4j recognizes it can terminate the query as soon as it finds a violation. For JanusGraph, we only need two queries: the first checks all nodes and the second checks all edges. Since the violation always appears in one of the nodes, the edge query can be skipped. This yields significant time gains, since there are roughly 5 times more edges than nodes. By constrast, TigerGraph shows no indication of improvement when introducing errors, which suggests that it does not terminate early.
 
 \bibliography{main}
 
