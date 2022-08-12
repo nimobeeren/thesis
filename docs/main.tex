@@ -9,6 +9,7 @@
 \usepackage{amsthm}
 \usepackage{graphicx}
 % TODO: style captions (bold name, de-emphasized description, horizontal margin)
+% TODO: style tables (fewer lines)
 \usepackage{caption}
 \usepackage{subcaption}
 \usepackage{tabularx}
@@ -1090,18 +1091,18 @@ We run both the binary and full validation queries on all datasets. For these wo
     \multirow{4}{*}{Neo4j}      & SNB (SF1)        & 171.89                                                & 68.17           & 49.9       & $\mathbf{<0.0001}\textbf{*}$ \\
                                 & SNB (SF0.3)      & 47.13                                                 & 20.18           & 28.9       & $\mathbf{<0.0001}\textbf{*}$ \\
                                 & SNB (SF0.1)      & 17.71                                                 & 7.38            & 31.3       & $\mathbf{<0.0001}\textbf{*}$ \\
-                                & Recommendations  & 1.48                                                  & 1.55            & -0.37     & 0.731                        \\
+                                & Recommendations  & 1.48                                                  & 1.55            & -0.37      & 0.731                        \\
     \hline
-    \multirow{2}{*}{JanusGraph} & SNB (SF0.1)      & 56.41                                                 & 56.74           & -0.56     & 0.608                        \\
-                                & Recommendations  & 6.05                                                  & 6.11            & -0.37     & 0.731                        \\
+    \multirow{2}{*}{JanusGraph} & SNB (SF0.1)      & 56.41                                                 & 56.74           & -0.56      & 0.608                        \\
+                                & Recommendations  & 6.05                                                  & 6.11            & -0.37      & 0.731                        \\
     \hline
-    \multirow{4}{*}{TigerGraph} & SNB (SF1)        & 1.01                                                 & 1.02           & -0.66     & 0.546                        \\
-                                & SNB (SF0.3)      & 0.29                                                 & 0.38           & -1.34     & 0.252                        \\
-                                & SNB (SF0.1)      & 0.11                                                 & 0.14           & -0.79     & 0.478                        \\
-                                & Recommendations  & 0.02                                                 & 0.02           & 0.32      & 0.768                        \\
+    \multirow{4}{*}{TigerGraph} & SNB (SF1)        & 1.01                                                  & 1.02            & -0.66      & 0.546                        \\
+                                & SNB (SF0.3)      & 0.29                                                  & 0.38            & -1.34      & 0.252                        \\
+                                & SNB (SF0.1)      & 0.11                                                  & 0.14            & -0.79      & 0.478                        \\
+                                & Recommendations  & 0.02                                                  & 0.02            & 0.32       & 0.768                        \\
     \hline
   \end{tabular}
-  \caption{Mean validation time for binary and full variants on all datasets with no errors. A two-sided T-test is used to test for a difference between the mean validation time for the full and binary variant. Significant results (p $< 0.05$) are marked with *.}
+  \caption{Mean validation time for binary and full variants on all datasets with no errors. A two-sided T-test is performed to test for a difference between the mean validation time for the full and binary variant. Significant results (p $< 0.05$) are marked with a *.}
   \label{tab:results-variant}
 \end{table}
 
@@ -1120,18 +1121,36 @@ To further illustrate the relationship between validation time and the scale of 
   \label{fig:results-scale}
 \end{figure}
 
-These results suggest a linear relationship between number of objects and validation time. This hypothesis is supported by fitting a simple linear regression model using the least squares method. We use the number of objects as the explanatory variable and the validation time as the response variable. The high $R^2$ values in \autoref{fig:results-scale} suggest a good fit. This relationship is expected, since our queries perform a linear scan of the nodes and edges in the data graph.
+These results suggest a linear relationship between number of objects and validation time. This hypothesis is supported by fitting a simple linear regression model using the least squares method. We use the number of objects as the explanatory variable and the validation time as the response variable. The high $R^2$ values in \autoref{fig:results-scale} suggest a good fit. This linear relationship is expected, since our queries perform a linear scan of the nodes and edges in the data graph.
 
 \subsection{\ref*{rq:errors}: Error Rate}
 
-The workloads so far have all been on data that does not contain any errors, i.e. the the data conforms to the schema. For this research question, we use the SNB dataset at SF0.1 and introduce some errors into the data. We only test the binary validation variant, because full validation requires a full scan of the graph, regardless of the number of errors. The results are shown in \autoref{fig:results-errors}.
+The workloads so far have all been on data that does not contain any errors, i.e. the the data conforms to the schema. For this research question, we use the SNB dataset at SF0.1 and introduce some errors into the data. We only test the binary validation variant, because full validation requires a full scan of the graph, regardless of the number of errors.
+% TODO: explain stats test
+The results are shown in \autoref{fig:results-errors} and \autoref{tab:results-errors}.
 
 \begin{figure}[t]
   \centering
   \includegraphics[scale=0.5]{figures/results-errors.pdf}
-  \caption{Validation time against error rate for binary validation of the SNB dataset at SF0.1.}
+  \caption{Mean validation at different error rates for binary validation of the SNB (SF0.1) dataset.}
   \label{fig:results-errors}
 \end{figure}
+
+\begin{table}[t]
+  \centering
+  \begin{tabular}{lrrrrrrrrr}
+    \hline
+    \textbf{Database} & \multicolumn{3}{c}{\textbf{Mean valid. time (s)}} & \multicolumn{2}{c}{\textbf{0 vs. 1}} & \multicolumn{2}{c}{\textbf{1 vs. 50\%}} & \multicolumn{2}{c}{\textbf{0 vs. 50\%}}                                                                                                                           \\
+                      & \textbf{None}                                     & \textbf{Single}                      & \textbf{Half}                           & \textbf{t}                              & \textbf{p}                    & \textbf{t} & \textbf{p}                    & \textbf{t} & \textbf{p}                    \\
+    \hline
+    Neo4j             & 7.38                                              & 7.10                                 & 6.37                                    & 1.27                                    & 0.272                         & 3.74       & \textbf{0.020*}               & 6.06       & \textbf{0.004*}               \\
+    JanusGraph        & 56.74                                             & 6.87                                 & 0.21                                    & 153                                     & $\mathbf{< 0.0001}$\textbf{*} & 39         & $\mathbf{< 0.0001}$\textbf{*} & 204        & $\mathbf{< 0.0001}$\textbf{*} \\
+    TigerGraph        & 0.14                                              & 0.11                                 & 0.15                                    & 0.82                                    & 0.460                         & -1.18      & 0.304                         & -0.26      & 0.806                         \\
+    \hline
+  \end{tabular}
+  \caption{Mean validation at different error rates for binary validation of the SNB (SF0.1) dataset. The labels 0, 1, and 50\% represent the error levels \emph{None}, \emph{Single}, and \emph{Half} respectively. A two-sided T-test is performed to test for a difference between the mean validation time for different error rates. Significant results (p $< 0.05$) are marked with a *.}
+  \label{tab:results-errors}
+\end{table}
 
 The results show different patterns for each database system. For Neo4j, increasing the error rate decreases validation time somewhat, but not significantly. For JanusGraph, even a single error has a significant impact, and when half of all nodes violate a constraint, validation time is cut by another order of magnitude. For TigerGraph, increasing the error rate does not seem to reduce validation time.
 
