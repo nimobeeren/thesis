@@ -178,7 +178,7 @@ The property graph data model has been adopted by numerous contemporary graph da
 
 Current property graph database systems vary in their support and philosophy around schema. Some require the user to specify a schema, while others infer a schema from data. In this section, we take a closer look at three of the most popular property graph databases: \emph{Neo4j}, \emph{JanusGraph}, and \emph{TigerGraph}.
 
-The schema features of these three databases in are summarized in \autoref{tab:schema-comparison}, and they are compared to our schema formalism which is detailed in \autoref{ch:pg-schema}. We elaborate here on the meaning of the listed features. Mandatory property constraints express that some property must exist on a node or edge. Allowed property constraints express that no properties may exist, other than the ones explicitly specified. Endpoint constraints express that edges may not connect nodes which do not conform to some specified types. Data type constraints express that the value of a property must be of a particular data type. Maximum and mimumum cardinality constraints express that a node must have some number of incoming or outgoing edges of a particular type. Property uniqueness constraints express that no two nodes may have the same value for a particular property.
+The schema features of these three databases in are summarized in \autoref{tab:schema-comparison}, where they are compared to our schema formalism which is detailed in \autoref{ch:pg-schema}. We elaborate here on the meaning of the listed features. Mandatory property constraints express that some property must exist on a node or edge. Allowed property constraints express that no properties may exist, other than the ones explicitly specified. Endpoint constraints express that edges may not connect nodes which do not conform to some specified types. Data type constraints express that the value of a property must be of a particular data type. Maximum and mimumum cardinality constraints express that a node must have some number of incoming or outgoing edges of a particular type. Property uniqueness constraints express that no two nodes may have the same value for a particular property.
 
 % TODO: center the symbols in their cells and color the background. Maybe don't draw all the lines. Tighten the line spacing and increase the padding?
 \begin{table}[t]
@@ -234,7 +234,7 @@ TigerGraph's schema is strict, in the sense that every node label, edge label, a
 
 \chapter{Property Graphs}
 
-We start by introducing our data model, which is based on the definition of \emph{property graph} established by the Working Group for Database Languages~(WG3) as part of ISO/IEC JTC1/SC32 \citep{deutsch2021gpml}. We use this data model throughout the rest of this document.
+We start by introducing our data model, which is based on the definition of \emph{property graph} established by the Working Group for Database Languages~(WG3) as part of ISO/IEC JTC1/SC32 \citep{deutsch2021gpml}. The data model we define next is used throughout this thesis.
 
 Our notion of property graph represents data as a directed attributed multigraph. Nodes and edges carry data in the form of a set of labels and a set of key--value pairs, called \emph{properties}. We use the umbrella term \emph{objects} to refer to nodes and edges. Being a \emph{multigraph}, a property graph allows the existence of multiple edges between two nodes $u$ and $v$. Furthermore, we allow $u = v$, in which case the edge is called a \emph{self-loop}. For ease of notation, we do not consider undirected edges, although they could be simulated by attaching a special label or property to an edge.
 
@@ -262,7 +262,7 @@ For a formal definition, we assume the existence of the following countably infi
 
 Given a node $u$, the set of \emph{outgoing} edges is given by $\{e \in E \mid \exists v \in N : \rho(e) = (u, v)\}$, and the set of \emph{incoming} edges is given by $\{e \in E \mid \exists v \in N : \rho(e) = (v, u)\}$.
 
-The functions $\src$ and $\trg$ map pairs to their first and second element, i.e. $\src((u, v)) = u$ and $\trg((u, v)) = v$. To refer to the source and target \emph{endpoints} of an edge $e$, we may write $\src(\rho(e))$ and $\trg(\rho(e))$ respectively.
+The functions $\src$ and $\trg$ map ordered pairs to their first and second element, i.e. $\src((u, v)) = u$ and $\trg((u, v)) = v$. To refer to the source and target \emph{endpoints} of an edge $e$, we may write $\src(\rho(e))$ and $\trg(\rho(e))$ respectively.
 
 \begin{figure}[t]
   \centering
@@ -276,7 +276,7 @@ The functions $\src$ and $\trg$ map pairs to their first and second element, i.e
 
 A schema should allow modeling of real-world entities and their relationships. A more expressive schema language enables the specification of more complex constraints, but may come at a cost of greater research and engineering effort, as well as worse runtime performance. This needs to be balanced in our choice of schema language.
 
-To explore the schema features that are commonly used in practice, let us look at some existing data modeling techniques. As a baseline, we consider the Entity--Relationship (ER) model as proposed by~\citet{chen1976entity}. This model incorporates entities, relationships, attributes, and values. An \emph{entity} is a ``thing'' that can be uniquely identified, a \emph{relationship} is an association between entities, and an \emph{attribute--value} pair represents information about an entity or relationship. Furthermore, an entity may have a \emph{role} in a relationship, such as ``wife'' or ``husband'' in a marriage relationship. These are the concepts underlying many conceptual data modeling methods in use today.
+To explore the schema features that are commonly used in practice, let us look at some existing data modeling techniques. As a baseline, we consider the Entity--Relationship (ER) model as proposed by~\citet{chen1976entity}. This model incorporates entities, relationships, attributes, and values. An \emph{entity} is a ``thing'' that can be uniquely identified, a \emph{relationship} is an association between entities, and an \emph{attribute--value} pair represents information about an entity or relationship. Furthermore, an entity may have a \emph{role} in a relationship, such as ``white'' or ``black'' in a chess match relationship. These are the concepts underlying many conceptual data modeling methods in use today.
 
 After the original specification, the ER model has been extended in various ways. For example, a notation which introduced cardinality constraints, optionality, and subtype relations was developed by~\citet{barker1990entity}. With these additions, we can create a more nuanced data model which fits the real world more closely.
 
@@ -572,7 +572,7 @@ Compared to \autoref{def:schema-conformance-basic}, \autoref{rule:node} and \ref
 \section{Optional properties}
 \label{sec:optional-properties}
 
-We revise the definition of record by adding a special property value $\undefined$, which indicates that the value of a property is not defined. The following definitions subsume Definition~\ref{def:record-basic}, \ref{def:property-conformance-basic}, \ref{def:record-type-basic}, and \ref{def:record-conformance-basic}.
+We revise the definition of record by adding a special property value $\undefined$, which indicates that the value of a property is not defined. The following definitions subsume \autoref{def:record-basic}, \ref{def:property-conformance-basic}, \ref{def:record-type-basic}, and \ref{def:record-conformance-basic}.
 
 \begin{definition}[Record]
   \label{def:record}
@@ -662,7 +662,7 @@ In \autoref{fig:subtyping}, a constraint is specified which we can express in wo
 
 Our property graph schema formalism is capable of expressing constraints in common conceptual data modeling methods. However, in \autoref{ch:related-work}, we found that existing property graph database systems are limited in the kinds of constraints they can enforce, in particular cardinality constraints.
 
-In this chapter, we describe how existing database systems can be extended to support all kinds of constraints that can be expressed with our schema formalism. We cover \emph{Neo4j}, \emph{JanusGraph}, and \emph{TigerGraph}. Where possible, we make use of the schema functionality exposed by the database engine. For constraints that cannot be validated in this way, we provide queries.
+In this chapter, we describe how existing database systems can be extended to support all kinds of constraints that can be expressed with our schema formalism. We cover \emph{Neo4j}, \emph{JanusGraph}, and \emph{TigerGraph}. Where possible, we make use of the schema functionality exposed by the database engine. For constraints that cannot be validated in this way, we provide graph queries.
 
 % TODO: why queries instead of in-engine implementation?
 
@@ -998,11 +998,11 @@ To answer our research questions, we experimentally evaluate the performance of 
 
 \subsection{Dependent Variable}
 
-\paragraph{Validation time.} We are interested in the time it takes to validate conformance of a graph to a schema. For Neo4j and TigerGraph, we measure this using the execution time as listed in the internal query logs. For JanusGraph, we use Java's \texttt{System.currentTimeMillis()} method. Every workload is run 3 times, from which we take the average.
+\paragraph{Validation time.} We are interested in the time it takes to validate conformance of a graph to a schema. For Neo4j and TigerGraph, we measure this using the execution time as listed in the internal query logs. For JanusGraph, we use Java's \texttt{System.currentTimeMillis()} method. If multiple queries are needed, we take the sum of their execution times.
 
 \subsection{Independent Variables}
 
-\paragraph{Datasets.} To determine the impact of different schemas and scales on the performance of our implementation, we apply our methods to two datasets:
+\paragraph{Dataset.} To determine the impact of different schemas and scales on the performance of our implementation, we apply our methods to two datasets:
 
 \begin{itemize}
   \item The \textbf{Recommendations Graph}\footnote{\url{https://github.com/neo4j-graph-examples/recommendations}} is a relatively small dataset with a simple schema, provided by Neo4j. It contains movies, actors, directors, and users who rate movies. The schema is given in \autoref{fig:schema-recommendations}. This dataset is intended as a working example for people who want to explore the functionality of a graph database. The small size makes it suitable as a proof-of-concept for our schema validation methods.
@@ -1061,6 +1061,7 @@ The way errors are introduced depends on the database system under test, due to 
 \subsection{Parameters}
 
 We try to control the following parameters so that their impact on the results is as small as possible.
+% TODO: is this true? We could disable TigerGraph's indexes if we wanted to.
 
 \paragraph{Indexing and caching.} We use only indexes that the database system creates by default. These default indexes are typically not useful for us, because our schema validation queries need to scan the entire graph, rather than finding a specific set of objects. The exception is TigerGraph's outdegree index, which benefits the validation of cardinality constraints. Caching is disabled for Neo4j and JanusGraph, while TigerGraph does not provide any caching functionality to the best of our knowledge.
 
@@ -1068,11 +1069,12 @@ We try to control the following parameters so that their impact on the results i
 
 \section{Results}
 
-The complete set of results is available on GitHub\footnote{\url{https://github.com/nimobeeren/thesis/blob/main/analysis/results.csv}}.
+% TODO: improve wording
+In this section, we show the results of our experiments. For each research question, we draw plots that help to answer them, and we back up our conclusions with statistical tests. The complete set of results is available on GitHub\footnote{\url{https://github.com/nimobeeren/thesis/blob/main/analysis/results.csv}}.
 
 \subsection{\ref*{rq:variant}: Validation Variant}
 
-We run both the binary and full validation queries on all datasets. For these workloads, no errors are introduced, so both variants have to scan the entire graph. We perform a two-sided T-test to test the null hypothesis that the mean validation time is the same for the full and binary variant. The results for each database system are shown in \autoref{fig:results-variant} and \autoref{tab:results-variant}. The queries for JanusGraph on the SNB dataset with scale factor larger than 0.1 did not complete within an hour, and are not shown here.
+We run both the binary and full validation queries on all datasets. For these workloads, no errors are introduced, so both variants have to scan the entire graph. We perform a two-sided T-test to test the null hypothesis that the mean validation time is the same for the full and binary variant, with all other variables fixed. The results for each database are shown in \autoref{fig:results-variant} and \autoref{tab:results-variant}. The queries for JanusGraph on the SNB dataset with scale factor larger than 0.1 did not complete within an hour, and are not shown here.
 
 \begin{figure}[t]
   \centering
@@ -1138,12 +1140,12 @@ The workloads so far have all been on data that does not contain any errors, i.e
   \centering
   \begin{tabular}{lrrrrrrrrr}
     \hline
-    \textbf{Database} & \multicolumn{3}{c}{\textbf{Mean validation time (s)}} & \textbf{F}      & \textbf{p}            \\
-                      & \textbf{None}                                         & \textbf{Single} & \textbf{Half} &       \\
+    \textbf{Database} & \multicolumn{3}{c}{\textbf{Mean validation time (s)}} & \textbf{F}      & \textbf{p}                                           \\
+                      & \textbf{None}                                         & \textbf{Single} & \textbf{Half} &                                      \\
     \hline
-    Neo4j             & 7.38                                                  & 7.10            & 6.37          & 14.21 & \textbf{0.005*} \\
+    Neo4j             & 7.38                                                  & 7.10            & 6.37          & 14.21 & \textbf{0.005*}              \\
     JanusGraph        & 56.74                                                 & 6.87            & 0.21          & 27152 & $\mathbf{<0.0001}\textbf{*}$ \\
-    TigerGraph        & 0.14                                                  & 0.11            & 0.15          & 0.55 & 0.601 \\
+    TigerGraph        & 0.14                                                  & 0.11            & 0.15          & 0.55  & 0.601                        \\
     \hline
   \end{tabular}
   \caption{Mean validation at different error rates for binary validation of the SNB (SF0.1) dataset. A one-way ANOVA is used to test for a difference between the mean validation time among all error rates. Significant results (p $< 0.05$) are marked with a *.}
