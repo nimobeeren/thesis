@@ -1076,13 +1076,13 @@ We run both the binary and full validation queries on all datasets. For these wo
 \begin{figure}[t]
   \centering
   \includegraphics[scale=0.5]{figures/results-variant.pdf}
-  \caption{Validation time for binary and full variants on all datasets with no errors.}
+  \caption{Mean validation time for binary and full variants on all datasets with no errors.}
   \label{fig:results-variant}
 \end{figure}
 
-Comparing the validation time for binary and full variants, we see that they are not significantly different for JanusGraph and TigerGraph, while for Neo4j there is a clear difference. The difference for Neo4j could be explained by the use of Neo4j's schema statistics, which are retrieved in constant time and eliminate the need for some of the queries used in the full variant. However, on the smaller recommendations dataset, this advantage is no longer apparent. The lack of difference for JanusGraph and TigerGraph is expected, since they do the same amount of work for both variants.
+Comparing the mean validation time for binary and full variants, we see that they are not significantly different for JanusGraph and TigerGraph, while for Neo4j there is a clear difference. The difference for Neo4j could be explained by the use of Neo4j's schema statistics, which are retrieved in constant time and eliminate the need for some of the queries used in the full variant. However, on the smaller recommendations dataset this advantage is no longer apparent. The lack of difference for JanusGraph and TigerGraph is expected, since they do the same amount of work for both variants.
 
-There is a clear difference between database systems, spanning at least an order of magnitude. We are hesitant to draw conclusions from this, since indexes and other optimizations can have a large impact on performance. However, this difference gives an indication of the level of performance that can be expected from a basic implementation.
+There is a clear difference between database systems, spanning roughly two orders of magnitude. We are hesitant to draw conclusions from, since indexes and other optimizations can have a large impact on performance. However, these results give an indication of the level of performance that can be expected from an initial implementation.
 
 \subsection{\ref*{rq:scale}: Scale}
 
@@ -1091,11 +1091,11 @@ To further illustrate the relationship between validation time and the scale of 
 \begin{figure}[t]
   \centering
   \includegraphics[scale=0.5]{figures/results-scale.pdf}
-  \caption{Validation time against number of objects in the data graph for the SNB dataset with no errors.}
+  \caption{Validation time against number of objects in the data graph for the SNB dataset with no errors. The markers represent individual measurements and the lines represent the fitted models.}
   \label{fig:results-scale}
 \end{figure}
 
-These results suggest a linear relationship between number of objects and validation time. This is expected, since all of our queries perform a linear scan of the nodes and edges in the data graph.
+These results suggest a linear relationship between number of objects and validation time. This hypothesis is supported by fitting a simple linear regression model using the least squares method. We use the number of objects as the explanatory variable and the validation time as the response variable. The high $R^2$ values in \autoref{fig:results-scale} suggest a good fit. This relationship is expected, since our queries perform a linear scan of the nodes and edges in the data graph.
 
 \subsection{\ref*{rq:errors}: Error Rate}
 
