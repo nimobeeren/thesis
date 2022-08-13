@@ -9,12 +9,11 @@
 \usepackage{amsthm}
 \usepackage{graphicx}
 % TODO: style captions (bold name, de-emphasized description, horizontal margin)
-% TODO: style tables (fewer lines)
 \usepackage{caption}
 \usepackage{subcaption}
-\usepackage{tabularx}
+\usepackage{makecell}
 \usepackage{multirow}
-\usepackage{xcolor}
+\usepackage[table]{xcolor}
 \usepackage{float}
 \usepackage{enumitem}
 
@@ -29,7 +28,9 @@
 \definecolor{purple}{rgb}{0.435,0.259,0.757}
 \definecolor{orange}{rgb}{0.890,0.384,0.035}
 \definecolor{green}{rgb}{0.102,0.498,0.216}
+\definecolor{lightgreen}{rgb}{0.855,0.984,0.822}
 \definecolor{red}{rgb}{0.812,0.133,0.180}
+\definecolor{lightred}{rgb}{1.000,0.922,0.914}
 
 % References
 \usepackage{hyperref}
@@ -111,8 +112,8 @@
 \newcommand{\undefined}{\mathbf{undef}}
 
 % Yes/No
-\newcommand{\yes}{\color{green}\checkmark}
-\newcommand{\no}{\color{red}$\times$}
+\newcommand{\yes}{\cellcolor{lightgreen}\color{green}\checkmark}
+\newcommand{\no}{\cellcolor{lightred}\color{red}$\times$}
 
 \renewcommand{\itemautorefname}{Rule}
 
@@ -180,38 +181,30 @@ Current property graph database systems vary in their support and philosophy aro
 
 The schema features of these three databases in are summarized in \autoref{tab:schema-comparison}, where they are compared to our schema formalism which is detailed in \autoref{ch:pg-schema}. We elaborate here on the meaning of the listed features. Mandatory property constraints express that some property must exist on a node or edge. Allowed property constraints express that no properties may exist, other than the ones explicitly specified. Endpoint constraints express that edges may not connect nodes which do not conform to some specified types. Data type constraints express that the value of a property must be of a particular data type. Maximum and mimumum cardinality constraints express that a node must have some number of incoming or outgoing edges of a particular type. Property uniqueness constraints express that no two nodes may have the same value for a particular property.
 
-% TODO: center the symbols in their cells and color the background. Maybe don't draw all the lines. Tighten the line spacing and increase the padding?
 \begin{table}[t]
   \centering
-  \begin{tabularx}{\textwidth}{|X|l|l|l|l|l|}
+  \begin{tabular}{lccccc}
     \hline
-                & \textbf{Neo4j}     & \textbf{Neo4j}      & \textbf{JanusGraph} & \textbf{TigerGraph} & \textbf{Ours} \\
-                & \textbf{Community} & \textbf{Enterprise} &                     &                     &               \\
+     & \textbf{Neo4j}     & \textbf{Neo4j}      & \textbf{JanusGraph} & \textbf{TigerGraph} & \textbf{Ours} \\
+     & \textbf{Community} & \textbf{Enterprise} &                     &                     &               \\
     \hline
-    Mandatory   & \no                & \yes                & \no                 & \yes                & \yes          \\
-    properties  &                    &                     &                     &                     &               \\
+    \makecell{Mandatory                                                                                     \\properties}   & \no                & \yes                & \no                 & \yes                & \yes          \\
     \hline
-    Allowed     & \no                & \no                 & \yes                & \no                 & \yes          \\
-    properties  &                    &                     &                     &                     &               \\
+    \makecell{Allowed                                                                                       \\properties}     & \no                & \no                 & \yes                & \no                 & \yes          \\
     \hline
-    Endpoint    & \no                & \no                 & \yes                & \yes                & \yes          \\
-    constraints &                    &                     &                     &                     &               \\
+    \makecell{Endpoint                                                                                      \\constraints}    & \no                & \no                 & \yes                & \yes                & \yes          \\
     \hline
-    Data type   & \no                & \no                 & \yes                & \yes                & \yes          \\
-    constraints &                    &                     &                     &                     &               \\
+    \makecell{Data type                                                                                     \\constraints}   & \no                & \no                 & \yes                & \yes                & \yes          \\
     \hline
-    Maximum     & \no                & \no                 & \yes*               & \no                 & \yes          \\
-    cardinality &                    &                     &                     &                     &               \\
+    \makecell{Maximum                                                                                       \\cardinality}     & \no                & \no                 & \yes*               & \no                 & \yes          \\
     \hline
-    Minimum     & \no                & \no                 & \no                 & \no                 & \yes          \\
-    cardinality &                    &                     &                     &                     &               \\
+    \makecell{Minimum                                                                                       \\cardinality}     & \no                & \no                 & \no                 & \no                 & \yes          \\
     \hline
-    Property    & \yes               & \yes                & \no                 & \yes                & \no           \\
-    uniqueness  &                    &                     &                     &                     &               \\
+    \makecell{Property                                                                                      \\uniqueness}    & \yes               & \yes                & \no                 & \yes                & \no           \\
     % \hline
     % Subtyping   & \no & \no & \no & \no & \no \\
     \hline
-  \end{tabularx}
+  \end{tabular}
   \caption{Comparison of schema capabilities of property graph database systems and our schema formalism from \autoref{ch:pg-schema}. *: only one-to-one, one-to-many, etc.}
   \label{tab:schema-comparison}
 \end{table}
@@ -1085,21 +1078,21 @@ We run both the binary and full validation queries on all datasets. For these wo
   \centering
   \begin{tabular}{llrrrr}
     \hline
-    \textbf{Database}           & \textbf{Dataset} & \multicolumn{2}{c}{\textbf{Mean validation time (s)}} & \textbf{t}      & \textbf{p}                                \\
-                                &                  & \textbf{Full}                                         & \textbf{Binary} &            &                              \\
+    \textbf{Database}           & \textbf{Dataset} & \multicolumn{2}{c}{\textbf{Mean validation time (s)}} & \textbf{t}      & \textbf{p}                      \\
+                                &                  & \textbf{Full}                                         & \textbf{Binary} &            &                    \\
     \hline
     \multirow{4}{*}{Neo4j}      & SNB (SF1)        & 171.89                                                & 68.17           & 49.9       & $\textbf{0.0003*}$ \\
                                 & SNB (SF0.3)      & 47.13                                                 & 20.18           & 28.9       & $\textbf{0.0001*}$ \\
                                 & SNB (SF0.1)      & 17.71                                                 & 7.38            & 31.3       & $\textbf{0.0001*}$ \\
-                                & Recommendations  & 1.48                                                  & 1.55            & -0.37      & 0.737                        \\
+                                & Recommendations  & 1.48                                                  & 1.55            & -0.37      & 0.737              \\
     \hline
-    \multirow{2}{*}{JanusGraph} & SNB (SF0.1)      & 56.41                                                 & 56.74           & -0.56      & 0.617                        \\
-                                & Recommendations  & 6.05                                                  & 6.11            & -0.42      & 0.697                        \\
+    \multirow{2}{*}{JanusGraph} & SNB (SF0.1)      & 56.41                                                 & 56.74           & -0.56      & 0.617              \\
+                                & Recommendations  & 6.05                                                  & 6.11            & -0.42      & 0.697              \\
     \hline
-    \multirow{4}{*}{TigerGraph} & SNB (SF1)        & 1.01                                                  & 1.02            & -0.66      & 0.563                        \\
-                                & SNB (SF0.3)      & 0.29                                                  & 0.38            & -1.34      & 0.307                        \\
-                                & SNB (SF0.1)      & 0.11                                                  & 0.14            & -0.79      & 0.513                        \\
-                                & Recommendations  & 0.02                                                  & 0.02            & 0.32       & 0.768                        \\
+    \multirow{4}{*}{TigerGraph} & SNB (SF1)        & 1.01                                                  & 1.02            & -0.66      & 0.563              \\
+                                & SNB (SF0.3)      & 0.29                                                  & 0.38            & -1.34      & 0.307              \\
+                                & SNB (SF0.1)      & 0.11                                                  & 0.14            & -0.79      & 0.513              \\
+                                & Recommendations  & 0.02                                                  & 0.02            & 0.32       & 0.768              \\
     \hline
   \end{tabular}
   \caption{Mean validation time for binary and full variants on all datasets with no errors. A two-sided T-test is performed to test for a difference between the mean validation time for the full and binary variant. Significant results (p $< 0.05$) are marked with a *.}
