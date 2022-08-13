@@ -1071,7 +1071,7 @@ In this section, we show the results of our experiments. For each research quest
 
 \subsection{\ref*{rq:variant}: Validation Variant}
 
-We run both the binary and full validation queries on all datasets. For these workloads, no errors are introduced, so both variants have to scan the entire graph. We perform a two-sided T-test to test the null hypothesis that the mean validation time is the same for the full and binary variant, with all other variables fixed. The results for each database are shown in \autoref{fig:results-variant} and \autoref{tab:results-variant}. The queries for JanusGraph on the SNB dataset with scale factor larger than 0.1 did not complete within an hour, and are not shown here.
+We run both the binary and full validation queries on all datasets. For these workloads, no errors are introduced, so both variants have to scan the entire graph. We perform Welch's two-sided T-test to test the null hypothesis that the mean validation time is the same for the full and binary variant, with all other variables fixed. The results for each database are shown in \autoref{fig:results-variant} and \autoref{tab:results-variant}. The queries for JanusGraph on the SNB dataset with scale factor larger than 0.1 did not complete within an hour, and are not shown here.
 
 \begin{figure}[t]
   \centering
@@ -1087,17 +1087,17 @@ We run both the binary and full validation queries on all datasets. For these wo
     \textbf{Database}           & \textbf{Dataset} & \multicolumn{2}{c}{\textbf{Mean validation time (s)}} & \textbf{t}      & \textbf{p}                                \\
                                 &                  & \textbf{Full}                                         & \textbf{Binary} &            &                              \\
     \hline
-    \multirow{4}{*}{Neo4j}      & SNB (SF1)        & 171.89                                                & 68.17           & 49.9       & $\mathbf{<0.0001}\textbf{*}$ \\
-                                & SNB (SF0.3)      & 47.13                                                 & 20.18           & 28.9       & $\mathbf{<0.0001}\textbf{*}$ \\
-                                & SNB (SF0.1)      & 17.71                                                 & 7.38            & 31.3       & $\mathbf{<0.0001}\textbf{*}$ \\
-                                & Recommendations  & 1.48                                                  & 1.55            & -0.37      & 0.731                        \\
+    \multirow{4}{*}{Neo4j}      & SNB (SF1)        & 171.89                                                & 68.17           & 49.9       & $\textbf{0.0003*}$ \\
+                                & SNB (SF0.3)      & 47.13                                                 & 20.18           & 28.9       & $\textbf{0.0001*}$ \\
+                                & SNB (SF0.1)      & 17.71                                                 & 7.38            & 31.3       & $\textbf{0.0001*}$ \\
+                                & Recommendations  & 1.48                                                  & 1.55            & -0.37      & 0.737                        \\
     \hline
-    \multirow{2}{*}{JanusGraph} & SNB (SF0.1)      & 56.41                                                 & 56.74           & -0.56      & 0.608                        \\
-                                & Recommendations  & 6.05                                                  & 6.11            & -0.37      & 0.731                        \\
+    \multirow{2}{*}{JanusGraph} & SNB (SF0.1)      & 56.41                                                 & 56.74           & -0.56      & 0.617                        \\
+                                & Recommendations  & 6.05                                                  & 6.11            & -0.42      & 0.697                        \\
     \hline
-    \multirow{4}{*}{TigerGraph} & SNB (SF1)        & 1.01                                                  & 1.02            & -0.66      & 0.546                        \\
-                                & SNB (SF0.3)      & 0.29                                                  & 0.38            & -1.34      & 0.252                        \\
-                                & SNB (SF0.1)      & 0.11                                                  & 0.14            & -0.79      & 0.478                        \\
+    \multirow{4}{*}{TigerGraph} & SNB (SF1)        & 1.01                                                  & 1.02            & -0.66      & 0.563                        \\
+                                & SNB (SF0.3)      & 0.29                                                  & 0.38            & -1.34      & 0.307                        \\
+                                & SNB (SF0.1)      & 0.11                                                  & 0.14            & -0.79      & 0.513                        \\
                                 & Recommendations  & 0.02                                                  & 0.02            & 0.32       & 0.768                        \\
     \hline
   \end{tabular}
@@ -1105,7 +1105,7 @@ We run both the binary and full validation queries on all datasets. For these wo
   \label{tab:results-variant}
 \end{table}
 
-For Neo4j, we find a statistically significant difference (p $< 0.0001$) between the full and binary variants, for all datasets except the Recommendations. This difference could be explained by the use of Neo4j's schema statistics, which are retrieved in constant time and eliminate the need for some of the queries used in the full variant. However, on the smaller Recommendations dataset this advantage is no longer apparent, possibly because the constant lookup time outweighs the time saved by skipping some queries. We do not find evidence to suggest any difference between the two variants for JanusGraph and TigerGraph. This is expected, since the queries for both variants are very similar, and the binary variant cannot terminate early because there are no errors in the data.
+For Neo4j, we find a statistically significant difference (p $< 0.05$) between the full and binary variants, for all datasets except the Recommendations. This difference could be explained by the use of Neo4j's schema statistics, which are retrieved in constant time and eliminate the need for some of the queries used in the full variant. However, on the smaller Recommendations dataset this advantage is no longer apparent, possibly because the constant lookup time outweighs the time saved by skipping some queries. We do not find evidence to suggest any difference between the two variants for JanusGraph and TigerGraph. This is expected, since the queries for both variants are very similar, and the binary variant cannot terminate early because there are no errors in the data.
 
 There is a clear difference between database systems, spanning roughly two orders of magnitude. In all scenarios, TigerGraph is fastest, followed by Neo4j, and finally JanusGraph. We are hesitant to draw conclusions about the level performance of that could be achieved with better optimizations, since indexes and other optimizations can have a large impact on execution time. However, these results give an indication of the level of performance that can be expected from an initial implementation.
 
@@ -1149,7 +1149,7 @@ The workloads so far have all been on data that does not contain any errors, i.e
   \label{tab:results-errors}
 \end{table}
 
-The results show different patterns for each database system. For Neo4j, increasing the error rate decreases validation time, but not by a large amount. For JanusGraph, even a single error cuts the validation time by an order of magnitude, and when half of all nodes violate a constraint, validation time is again significantly reduced. For TigerGraph, we found no evidence that increasing the error rate reduces validation time.
+The results show different patterns for each database. For Neo4j, increasing the error rate decreases validation time, but not by a large amount. For JanusGraph, even a single error cuts the validation time by an order of magnitude, and when half of all nodes violate a constraint, validation time is again significantly reduced. For TigerGraph, we found no evidence that increasing the error rate reduces validation time.
 
 The different patterns could be explained by the order in which different kinds of violations are checked in our queries. Recall that in Neo4j, we introduce errors by removing mandatory edges. This happens to be the last thing that is checked in our validation queries, hence all other checks still need to be completed. The fact that there is any improvement at all does suggest that Neo4j recognizes it can terminate the query as soon as it finds a violation. For JanusGraph, we only need two queries: the first checks all nodes and the second checks all edges. Since the violation always appears in one of the nodes, the edge query can be skipped. This yields significant time gains, since there are roughly 5 times more edges than nodes. By constrast, TigerGraph shows no indication of improvement when introducing errors, which suggests that it does not terminate early.
 
