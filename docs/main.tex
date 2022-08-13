@@ -137,7 +137,6 @@
 \tableofcontents
 \listoffigures
 \listoftables
-% TODO: use short captions for list of figures/tables
 
 \chapter{Introduction}
 \setcounter{page}{1}
@@ -212,11 +211,11 @@ The schema features of these three databases in are summarized in \autoref{tab:s
     % Subtyping   & \no & \no & \no & \no & \no \\
     \hline
   \end{tabular}
-  \caption{Comparison of schema capabilities of property graph database systems and our schema formalism from \autoref{ch:pg-schema}. *: only one-to-one, one-to-many, etc.}
+  \caption[Comparison of schema capabilities of state-of-the-art property graph databases and our schema formalism]{Comparison of schema capabilities of state-of-the-art property graph databases and our schema formalism from \autoref{ch:pg-schema}. *: only one-to-one, one-to-many, etc.}
   \label{tab:schema-comparison}
 \end{table}
 
-Next, we detail the differences between the three database systems in our scope with respect to their data models and schema capabilities.
+Next, we detail the differences between the three databases in our scope with respect to their data models and schema capabilities.
 
 \paragraph{Neo4j.} Being one of the first to adopt the property graph data model, Neo4j has grown to become the most popular graph database engine today\footnote{\url{https://db-engines.com/en/ranking/graph+dbms} (accessed July 2022)}. Neo4j supports the Cypher query language \citep{francis2018cypher}. Their data model differs from ours in that edges can only have a single label, while nodes can have multiple.
 
@@ -301,7 +300,7 @@ In this section, we define a notion of property graph schema which incorporates 
     Role         & Edge direction* \\
     \hline
   \end{tabular}
-  \caption{Mapping between entity--relationship and property graph concepts. Roles and edge direction can be used for similar purposes, but are not equivalent.}
+  \caption[Mapping between entity--relationship and property graph concepts]{Mapping between entity--relationship and property graph concepts. Roles and edge direction can be used for similar purposes, but are not equivalent.}
   \label{tab:er-pg}
 \end{table}
 
@@ -376,7 +375,7 @@ We can relate our schema formalism to the ER model once again. Our definitions o
     Value set        & Property type*     \\
     \hline
   \end{tabular}
-  \caption{Mapping between entity--relationship and property graph schema concepts. Strictly speaking, a property type $\ptype$ is not a set, but $\sem{\ptype}$ is.}
+  \caption[Mapping between entity--relationship and property graph schema concepts]{Mapping between entity--relationship and property graph schema concepts. Strictly speaking, a property type $\ptype$ is not a set, but $\sem{\ptype}$ is.}
   \label{tab:er-pg-schema}
 \end{table}
 
@@ -441,7 +440,7 @@ Under these definitions, it is not possible to specify that an edge is mandatory
     \label{fig:conformance-basic-in}
   \end{subfigure}
 
-  \caption{Examples of property graphs validated against the schema of \autoref{fig:pg-schema-basic}. Violating nodes and edges have a red dotted outline.}
+  \caption[Property graphs validated against \autoref{fig:pg-schema-basic}]{Examples of property graphs validated against the schema of \autoref{fig:pg-schema-basic}. Violating nodes and edges have a red dotted outline.}
   \label{fig:conformance-basic}
 \end{figure}
 
@@ -488,7 +487,7 @@ An example of a property graph schema with cardinality constraints is given in \
 \begin{figure}[t]
   \centering
   \includegraphics{figures/pg-schema.pdf}
-  \caption{A property graph schema with cardinality constraints.}
+  \caption[A property graph schema with cardinality constraints]{A property graph schema with cardinality constraints.}
   \label{fig:pg-schema}
 \end{figure}
 
@@ -565,7 +564,7 @@ Compared to \autoref{def:schema-conformance-basic}, \autoref{rule:node} and \ref
     \label{fig:conformance-out}
   \end{subfigure}
 
-  \caption{Examples of property graphs validated against the schema of \autoref{fig:pg-schema}. Violating nodes and edges have a red dotted outline.}
+  \caption[Property graphs validated against \autoref{fig:pg-schema}]{Examples of property graphs validated against the schema of \autoref{fig:pg-schema}. Violating nodes and edges have a red dotted outline.}
   \label{fig:conformance}
 \end{figure}
 
@@ -619,7 +618,7 @@ Our schema formalism comes with a number of limitations. First, it is not possib
 \begin{figure}[t]
   \centering
   \includegraphics{figures/drivers-license.pdf}
-  \caption{A schema consisting of three nodes and two edges. While we can specify constraints on edge cardinalities, we cannot ensure that a person only drives a car if they have a driver's license.}
+  \caption[A schema that fails to capture a larger graph pattern constraint]{A schema that fails to capture a constraint that could be expressed as a larger graph pattern. While we can specify constraints on edge cardinalities, we cannot ensure that a person only drives a car if they have a driver's license.}
   \label{fig:drivers-license}
 \end{figure}
 
@@ -655,7 +654,7 @@ In \autoref{fig:subtyping}, a constraint is specified which we can express in wo
     \caption{An attempt to express the same schema without subtype relations. Note that this schema is strictly more permissive than~(a).}
     \label{fig:subtyping-ours}
   \end{subfigure}
-  \caption{A schema consisting of a supertype with two subtypes which cannot be modeled using our schema formalism. Any property graph that conforms to~(a) also conforms to~(b), but not the other way around.}
+  \caption[A schema containing a subtype relation]{A schema containing a subtype relation, which cannot be modeled using our schema formalism. Any property graph that conforms to~(a) also conforms to~(b), but not the other way around.}
 \end{figure}
 
 \chapter{Schema Validation in Practice}
@@ -1024,21 +1023,21 @@ Some statistics of the datasets are given in \autoref{tab:dataset-statistics}.
     SNB (SF1)        & 3,181,724  & 17,256,038 & 14          & 20          & 1109              \\
     \hline
   \end{tabular}
-  \caption{Statistics of the datasets used in the experiment. $|N|$ and $|E|$ represent the number of nodes and edges. $|N'|$ and $|E'|$ represent the number of schema nodes and schema edges. The raw size is measured as the combined size of all CSV files.}
+  \caption[Statistics of the datasets used in our experiments]{Statistics of the datasets used in our experiments. $|N|$ and $|E|$ represent the number of nodes and edges. $|N'|$ and $|E'|$ represent the number of schema nodes and schema edges. The raw size is measured as the combined size of all CSV files.}
   \label{tab:dataset-statistics}
 \end{table}
 
 \begin{figure}[t]
   \centering
   \includegraphics[width=\textwidth]{figures/schema-recommendations.pdf}
-  \caption{Schema of the Recommendations Graph dataset. This schema was constructed manually by analyzing the data.}
+  \caption[The schema of the Recommendations Graph dataset]{The schema of the Recommendations Graph dataset. This schema was constructed manually by analyzing the data.}
   \label{fig:schema-recommendations}
 \end{figure}
 
 \begin{figure}[t]
   \centering
   \includegraphics[width=\textwidth]{figures/schema-snb.pdf}
-  \caption{Schema of the SNB dataset. This schema was created by modifying the schema from \citet{angles2020snb} to not rely on subtype relations, as described in \autoref{sec:schema-discussion}.}
+  \caption[The schema of the SNB dataset]{The schema of the SNB dataset. This schema was created by modifying the schema from \citet{angles2020snb} to not rely on subtype relations, as described in \autoref{sec:schema-discussion}.}
   \label{fig:schema-snb}
 \end{figure}
 
@@ -1077,7 +1076,7 @@ We run both the binary and full validation queries on all datasets. For these wo
 \begin{figure}[t]
   \centering
   \includegraphics[scale=0.5]{figures/results-variant.pdf}
-  \caption{Mean validation time for binary and full variants on all datasets with no errors.}
+  \caption[Mean validation time for full and binary variants]{Mean validation time for binary and full variants on all datasets with no errors.}
   \label{fig:results-variant}
 \end{figure}
 
@@ -1102,7 +1101,7 @@ We run both the binary and full validation queries on all datasets. For these wo
                                 & Recommendations  & 0.02                                                  & 0.02            & 0.32       & 0.768              \\
     \hline
   \end{tabular}
-  \caption{Mean validation time for binary and full variants on all datasets with no errors. A two-sided T-test is performed to test for a difference between the mean validation time for the full and binary variant. Significant results (p $< 0.05$) are marked with a *.}
+  \caption[Mean validation time for binary and full variants]{Mean validation time for binary and full variants on all datasets with no errors. A two-sided T-test is performed to test for a difference between the mean validation time for the full and binary variant. Significant results (p $< 0.05$) are marked with a *.}
   \label{tab:results-variant}
 \end{table}
 
@@ -1117,7 +1116,7 @@ To further illustrate the relationship between validation time and the scale of 
 \begin{figure}[t]
   \centering
   \includegraphics[scale=0.5]{figures/results-scale.pdf}
-  \caption{Validation time against number of objects in the data graph for the SNB dataset with no errors. The markers represent individual measurements and the lines represent the fitted models.}
+  \caption[Validation time against number of objects in the data graph]{Validation time against number of objects in the data graph for the SNB dataset with no errors. The markers represent individual measurements and the lines represent fitted linear regression models.}
   \label{fig:results-scale}
 \end{figure}
 
@@ -1130,7 +1129,7 @@ The workloads so far have all been on data that does not contain any errors, i.e
 \begin{figure}[t]
   \centering
   \includegraphics[scale=0.5]{figures/results-errors.pdf}
-  \caption{Mean validation at different error rates for binary validation of the SNB (SF0.1) dataset.}
+  \caption[Mean validation time at different error rates]{Mean validation time at different error rates for binary validation of the SNB (SF0.1) dataset.}
   \label{fig:results-errors}
 \end{figure}
 
@@ -1146,7 +1145,7 @@ The workloads so far have all been on data that does not contain any errors, i.e
     TigerGraph        & 0.14                                                  & 0.11            & 0.15          & 0.55  & 0.601                        \\
     \hline
   \end{tabular}
-  \caption{Mean validation at different error rates for binary validation of the SNB (SF0.1) dataset. A one-way ANOVA is used to test for a difference between the mean validation time among all error rates. Significant results (p $< 0.05$) are marked with a *.}
+  \caption[Mean validation time at different error rates]{Mean validation time at different error rates for binary validation of the SNB (SF0.1) dataset. A one-way ANOVA is used to test for a difference between the mean validation time among all error rates. Significant results (p $< 0.05$) are marked with a *.}
   \label{tab:results-errors}
 \end{table}
 
