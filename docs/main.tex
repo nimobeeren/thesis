@@ -604,6 +604,7 @@ We adjust the definitions of property conformance, record type, and record confo
 It may be desirable to allow a record to have properties with any name or any value. Such \emph{open record types} can already be expressed under the current definitions. For a record type $\rtype$, we can allow properties with any name by setting $\rtype(k) = \ptype?$ for all (previously unspecified) property names $k \in \mathcal{N}$, where $\ptype$ is an arbitrary property type. Note that there may be infinitely many such $k$, so in practice we may want to have a special syntax to express this. We can allow these properties to have any value by choosing a $\ptype$ such that $\sem{\ptype} = \mathcal{V}$, or we can restrict them to a subset of $\mathcal{V}$.
 
 \section{Discussion}
+\label{sec:schema-discussion}
 
 % TODO: lack of key constraints?
 % TODO: suggest richer constraint language
@@ -1036,8 +1037,8 @@ Some statistics of the datasets are given in \autoref{tab:dataset-statistics}.
 
 \begin{figure}[t]
   \centering
-  \includegraphics[width=\textwidth]{figures/schema-snb.png}
-  \caption{Schema of the SNB dataset (source: \citet{angles2020snb}). TODO: redraw this without subtype relations (using our notation).}
+  \includegraphics[width=\textwidth]{figures/schema-snb.pdf}
+  \caption{Schema of the SNB dataset. This schema was created by modifying the schema from \citet{angles2020snb} to not rely on subtype relations, as described in \autoref{sec:schema-discussion}.}
   \label{fig:schema-snb}
 \end{figure}
 
@@ -1071,7 +1072,7 @@ In this section, we show the results of our experiments. For each research quest
 
 \subsection{\ref*{rq:variant}: Validation Variant}
 
-We run both the binary and full validation queries on all datasets. For these workloads, no errors are introduced, so both variants have to scan the entire graph. We perform Welch's two-sided T-test to test the null hypothesis that the mean validation time is the same for the full and binary variant, with all other variables fixed. The results for each database are shown in \autoref{fig:results-variant} and \autoref{tab:results-variant}. The queries for JanusGraph on the SNB dataset with scale factor larger than 0.1 did not complete within an hour, and are not shown here.
+We run both the binary and full validation queries on all datasets. For these workloads, no errors are introduced, so both variants have to scan the entire graph. We perform Welch's independent two-sided T-test to test the null hypothesis that the mean validation time is the same for the full and binary variant, with all other variables fixed. The results for each database are shown in \autoref{fig:results-variant} and \autoref{tab:results-variant}. The queries for JanusGraph on the SNB dataset with scale factor larger than 0.1 did not complete within an hour, and are not shown here.
 
 \begin{figure}[t]
   \centering
