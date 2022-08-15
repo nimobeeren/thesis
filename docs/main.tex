@@ -146,7 +146,7 @@
 
 Graph databases have been steadily growing in popularity in recent years, receiving attention in the form of fundamental research as well as practical usage. One of the spearpoints of the graph database is its flexibility. While the traditionally dominant relational data model organizes data into tables and requires a fixed schema, graphs offer a simple yet powerful model consisting of nodes and edges which can be structured freely.
 
-However, this freedom comes at a cost. Without a schema, we miss out on opportunities for query optimization \citep{chakravarthy1990logic, buneman1997adding, meier2013semantic}, we risk degradation of data integrity, and we lack a formally verifiable source of documentation. By bringing back schemas to the graph world, the flexibility of graph databases can be combined with the robustness of relational databases.
+However, this freedom comes at a cost. Without a schema, we miss out on opportunities for query optimization, we risk degradation of data integrity, and we lack a formally verifiable source of documentation. By bringing back schemas to the graph world, the flexibility of graph databases can be combined with the robustness of relational databases.
 
 The \emph{property graph model} is the predominant data model among graph database systems today. It provides an intuitive way of modeling entities as nodes, and their relationships as edges. Both nodes and edges are associated with labels, and they hold data in the form of key--value pairs known as \emph{properties}. We can imagine local constraints, such as mandatory properties on nodes or edges, as well as constraints on the structure of the graph, such as mandatory edges between nodes. To the best of our knowledge, there exists no published work that addresses the specification and validation of all these kinds of constraints using a single schema formalism.
 
@@ -1107,24 +1107,7 @@ The different patterns could be explained by the order in which different kinds 
 \chapter{Future Work and Limitations}
 \label{ch:limitations}
 
-\begin{itemize}
-  \item Generalized validation queries / query generation
-  \item Effect of schema with fixed scale
-  \item Implementation of exact cardinality constraints
-  \item Relation with simulation
-  \item In-engine implementation / efficient validation algorithms / indexes
-  \item More constraints:
-        \begin{itemize}
-          \item Key constraints
-          \item Mutual exclusivity
-          \item Larger graph patterns
-          \item Subtyping
-        \end{itemize}
-  \item Query type checking / inference
-  \item Schema inference
-  \item Parallelization
-\end{itemize}
-
+% TODO: introductory paragraph
 Our schema formalism comes with a number of limitations.
 
 \paragraph{Subtyping.} \citet{barker1990entity} introduced the concept of subtyping to the ER model, \citet{lbath2021inference} included subtyping in their schema inference method, and we have seen subtype relations appearing in the SNB property graph schema (\autoref{fig:schema-snb}). Clearly, there is a need for subtyping in property graph schemas. This would help model domains containing type hierarchies more accurately, and would reduce duplication of schema edges and properties.
@@ -1176,6 +1159,24 @@ In \autoref{fig:subtyping}, a constraint is specified which we can express in wo
 \paragraph{Key constraints.} Our schema formalism does not support property uniqueness or key constraints. While key constraints were already present in ER models \citep{chen1976entity}, their application to property graphs is non-trivial. As argued in the \textsc{PG-Keys} proposal \citep{angles2021keys}, there is a need for granular and flexible key constraints. Keys should be applicable to nodes, edges, and properties, which could all represent concrete entities. Moreover, key scopes and descriptors should be defined in a way that allows objects to be keyed by their relations to other objects. Finally, keys may be \emph{exclusive}, \emph{mandatory}, \emph{singleton}, or any combination thereof. Future work should consolidate \textsc{PG-Keys} with a comprehensive schema formalism such as ours.
 
 \paragraph{Mutual exclusivity.} Another type of constraint introduced by \citet{barker1990entity} is mutual exclusivity of edges. For example, a \texttt{Person} may have a \texttt{WORKS\_AT} edge to a \texttt{Bank} or a \texttt{TradingCompany}, but not both.
+% TODO: union types?
+% TODO: object with any label?
+% TODO: multigraph edge cases
+
+\paragraph{Generic validation implementation.} In our approach, the validation queries are hand-crafted for each schema. This requires knowledge of the query language and the schema functionality of a particular database. To make things easier for the user, we could let them provide a schema in a generic schema language or diagram, and generate the validation queries instead.
+
+Alternatively, when the schema and data are both given as graphs, validation could be achieved using generic graph pattern matching queries. In fact, we have provided such a generic implementation for Neo4j\footnote{\url{https://github.com/nimobeeren/thesis/tree/main/neo4j/generic}}. Unfortunately, validation times were prohibitive for all but the smallest graphs. However, there are certainly opportunities for performance gains.
+
+\paragraph{Validation algorithms.} There are advantages to our approach using graph queries for validation: they are easy to adjust, portable between database versions, and convenient to prototype. However, when performance is the primary goal, a lower-level implementation may be suitable. Specialized validation algorithms and indexes could be developed to achieve significant performance benefits.
+% TODO: find areas where algorithms can be beneficial
+
+If a database instance is frequently updated, the cost of scanning the entire graph on every update may be prohibitive. In such a scenario, algorithms for incremental validation would reduce validation time significantly. Since all constraints in our schema formalism have a limited scope, we would only need to scan the fragment of the graph that is affected by the update. Furthermore, the limited scope of our constraints allow validation queries to be easily parallelized and distributed across multiple machines.
+
+\paragraph{Schema-aware query optimization.} \citep{chakravarthy1990logic, buneman1997adding, meier2013semantic}
+
+\paragraph{Query type checking / inference.}
+
+\paragraph{Relation with simulation.}
 
 \chapter{Conclusion}
 
