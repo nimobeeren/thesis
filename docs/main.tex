@@ -282,7 +282,7 @@ After the original specification, the ER model has been extended in various ways
 
 In the next section, we first establish a basic definition of property graph schema, which we then extend with additional features such as cardinality constraints (\autoref{sec:cardinality}) and optional properties (\autoref{sec:optional-properties}).
 
-\section{Basic definition}
+\section{Basic Definition}
 
 In this section, we define a notion of property graph schema which incorporates the basic features of the ER model: entities, relationships, attributes, and values.
 
@@ -445,7 +445,7 @@ Under these definitions, it is not possible to specify that an edge is mandatory
   \label{fig:conformance-basic}
 \end{figure}
 
-\section{Cardinality constraints}
+\section{Cardinality Constraints}
 \label{sec:cardinality}
 
 We first introduce a generalization of the existential quantifier which enables counting the number of distinct variables that satisfy a predicate.
@@ -569,7 +569,7 @@ Compared to \autoref{def:schema-conformance-basic}, \autoref{rule:node} and \ref
   \label{fig:conformance}
 \end{figure}
 
-\section{Optional properties}
+\section{Optional Properties}
 \label{sec:optional-properties}
 
 We revise the definition of record by adding a special property value $\undefined$, which indicates that the value of a property is not defined. The following definitions subsume \autoref{def:record-basic}, \ref{def:property-conformance-basic}, \ref{def:record-type-basic}, and \ref{def:record-conformance-basic}.
@@ -599,7 +599,7 @@ We adjust the definitions of property conformance, record type, and record confo
   We say that a record $r$ \emph{conforms} to a record type $\rtype$, denoted $r \in \sem{\rtype}$, if and only if for each property name $k \in \mathcal{N}$ it holds that $r(k) \in \sem{\rtype(k)}$.
 \end{definition}
 
-\section{Open record types}
+\section{Open Record Types}
 
 It may be desirable to allow a record to have properties with any name or any value. Such \emph{open record types} can already be expressed under the current definitions. For a record type $\rtype$, we can allow properties with any name by setting $\rtype(k) = \ptype?$ for all (previously unspecified) property names $k \in \mathcal{N}$, where $\ptype$ is an arbitrary property type. Note that there may be infinitely many such $k$, so in practice we may want to have a special syntax to express this. We can allow these properties to have any value by choosing a $\ptype$ such that $\sem{\ptype} = \mathcal{V}$, or we can restrict them to a subset of $\mathcal{V}$.
 
