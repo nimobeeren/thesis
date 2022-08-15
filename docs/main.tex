@@ -1112,47 +1112,35 @@ The different patterns could be explained by the order in which different kinds 
 % TODO: multigraph can cause unexpected results, e.g. node can conform to minimum cardinality by having multiple edges to the same node (is this desirable? in some situations it might be, e.g. chemistry)
 % TODO: multiple schema nodes with same label: could model mutually exclusive properties?
 
+Limitations
+
 \begin{itemize}
+  % \item Subtyping
+  % \item Larger graph patterns
+  % \item Key constraints
+  \item Mutual exclusivity
+  \item Object with any label
+  \item Union types
+\end{itemize}
+
+Future work
+
+\begin{itemize}
+  % \item Effect of schema with fixed scale $\rightarrow$ CovidGraph
+  % \item Implementation of exact cardinality constraints $\rightarrow$ CovidGraph
   \item Generalized validation queries / query generation
-  \item Effect of schema with fixed scale
-  \item Implementation of exact cardinality constraints
   \item Relation with simulation
-  \item In-engine implementation / efficient validation algorithms / indexes
-  \item More constraints:
-        \begin{itemize}
-          \item Key constraints
-          \item Mutual exclusivity
-          \item Larger graph patterns
-          \item Subtyping
-        \end{itemize}
+  \item In-engine implementation / efficient validation algorithms / indexes / incremental validation
   \item Query type checking / inference
   \item Schema inference
   \item Parallelization
 \end{itemize}
 
-Our schema formalism comes with a number of limitations. First, it is not possible to specify constraints over a graph pattern larger than two neighboring nodes and the edge between them. For example, say we want to allow a person to drive a car, but only when they have a driver's license. \autoref{fig:drivers-license} depicts a schema that models these entities and their relations this using three nodes and two edges. Unfortunately, it is not possible to prevent a person from driving a car without having a driver's license. This illustrates the limited scope of the constraints that we can specify.
+Our schema formalism comes with a number of limitations.
 
-\begin{figure}[t]
-  \centering
-  \includegraphics{figures/drivers-license.pdf}
-  \caption{A schema consisting of three nodes and two edges. While we can specify constraints on edge cardinalities, we cannot ensure that a person only drives a car if they have a driver's license.}
-  \label{fig:drivers-license}
-\end{figure}
+\paragraph{Subtyping.} \citet{barker1990entity} introduced the concept of subtyping to the ER model, \citet{lbath2021inference} included subtyping in their schema inference method, and we have seen subtype relations appearing in the SNB property graph schema (\autoref{fig:schema-snb}). Clearly, there is a need for subtyping in property graph schemas. This would help model domains containing type hierarchies more accurately, and would reduce duplication of schema edges and properties.
 
-% Alternatively, we can have two \texttt{Person} nodes, where one requires having a \texttt{DriversLicense} and allows owning 0 or more \texttt{Car}s, and the other does not allow owning a \texttt{Car}. This would indeed prevent a situation where a \texttt{Person} owns a \texttt{Car}, but does not have a \texttt{DriversLicense}. However, ...
-
-% However, this breaks down when we add constraints that depend on the uniqueness of a \texttt{Person}. For example, say we want to model that a Person has exactly one Passport, and every Passport is associated with exactly one Person.
-% FIXME: actually, this seems possible, as long as everything is the same for both Person nodes
-
-% Node with any label: create a node for every combination of labels (but then we can't express there should be an edge to "at least one" of them). Solution: union types? Look into type theory again
-
-% Furthermore, it is not possible to have a single object type that allows two different label sets. Hence, it is not possible to have optional labels, i.e. the object type $\otype = (\{\texttt{Vehicle}, \texttt{Car}\}, \langle \texttt{make} : \texttt{string} \rangle)$ requires that the labels \texttt{Vehicle} and \texttt{Car} are both present, just having \texttt{Car} is not enough. Of course, it is possible to have two schema objects like $\otype_1 = (\{\texttt{Car}\}, \langle \texttt{make} : \texttt{string} \rangle)$ and $\otype_2 = (\{\texttt{Vehicle}, \texttt{Car}\}, \langle \texttt{make} : \texttt{string} \rangle)$. However, then it is not possible to specify that every \texttt{Employee} must have exactly one outgoing \texttt{OWNS} edge to a node conforming to either $\otype_1$ or $\otype_2$.
-
-% TODO: In general, it's not possible to say that an object must conform to type 1 OR type 2 (union type). Problem with labels follows from that. But also union of two records is not possible.
-
-% TODO: It's also not possible to say that there may only exist one edge between the same two nodes, or to enforce that a node has two edges to different nodes (mutual exclusion?)
-
-Furthermore, subtype relations generally cannot be expressed. The problem is illustrated by the schema depicted in \autoref{fig:subtyping}. How could we express this using our schema formalism? An attempt is given in \autoref{fig:subtyping-ours}, where properties of the supertype \texttt{Message} are copied and distributed over all its subtypes, and the edge from \texttt{Comment} to \texttt{Message} is accompanied by an edge from \texttt{Comment} to Post and from \texttt{Comment} to itself. While the properties are modeled correctly in this case, it breaks down when we look at the cardinalities.
+In general, subtype relations cannot be expressed using our formalism. The problem is illustrated by the schema depicted in \autoref{fig:subtyping}. How could we express this using our schema formalism? An attempt is given in \autoref{fig:subtyping-ours}, where properties of the supertype \texttt{Message} are copied and distributed over all its subtypes, and the edge from \texttt{Comment} to \texttt{Message} is accompanied by an edge from \texttt{Comment} to Post and from \texttt{Comment} to itself. While the properties are modeled correctly in this case, it breaks down when we look at the cardinalities.
 
 In \autoref{fig:subtyping}, a constraint is specified which we can express in words as ``every \texttt{Comment} is a reply of exactly one \texttt{Message} (or a subtype of \texttt{Message})''. However, it is not possible to specifiy such a constraint without subtype relations, as illustrated by \autoref{fig:subtyping-ours}. This solution allows \texttt{Comment}s which are not a reply to anything, or which are a reply to more than one thing. Then again, if we disregard the cardinality constraints, the two schemas are equivalent. This example shows that our schema formalism can be used to model some but not all subtype relations.
 
@@ -1173,6 +1161,32 @@ In \autoref{fig:subtyping}, a constraint is specified which we can express in wo
   \end{subfigure}
   \caption{A schema consisting of a supertype with two subtypes which cannot be modeled using our schema formalism. Any property graph that conforms to~(a) also conforms to~(b), but not the other way around.}
 \end{figure}
+
+\paragraph{Larger graph patterns.} It is not possible to specify constraints over a graph pattern larger than two neighboring nodes and the edge between them. For example, say we want to allow a person to drive a car, but only when they have a driver's license. \autoref{fig:drivers-license} depicts a schema that models these entities and their relations this using three nodes and two edges. Unfortunately, it is not possible to prevent a person from driving a car without having a driver's license. This illustrates the limited scope of the constraints that we can specify.
+
+\begin{figure}[t]
+  \centering
+  \includegraphics{figures/drivers-license.pdf}
+  \caption{A schema consisting of three nodes and two edges. While we can specify constraints on edge cardinalities, we cannot ensure that a person only drives a car if they have a driver's license.}
+  \label{fig:drivers-license}
+\end{figure}
+
+% Alternatively, we can have two \texttt{Person} nodes, where one requires having a \texttt{DriversLicense} and allows owning 0 or more \texttt{Car}s, and the other does not allow owning a \texttt{Car}. This would indeed prevent a situation where a \texttt{Person} owns a \texttt{Car}, but does not have a \texttt{DriversLicense}. However, ...
+
+% However, this breaks down when we add constraints that depend on the uniqueness of a \texttt{Person}. For example, say we want to model that a Person has exactly one Passport, and every Passport is associated with exactly one Person.
+% --> Actually, this seems possible, as long as everything is the same for both Person nodes
+
+% Node with any label: create a node for every combination of labels (but then we can't express there should be an edge to "at least one" of them). Solution: union types? Look into type theory again
+
+% Furthermore, it is not possible to have a single object type that allows two different label sets. Hence, it is not possible to have optional labels, i.e. the object type $\otype = (\{\texttt{Vehicle}, \texttt{Car}\}, \langle \texttt{make} : \texttt{string} \rangle)$ requires that the labels \texttt{Vehicle} and \texttt{Car} are both present, just having \texttt{Car} is not enough. Of course, it is possible to have two schema objects like $\otype_1 = (\{\texttt{Car}\}, \langle \texttt{make} : \texttt{string} \rangle)$ and $\otype_2 = (\{\texttt{Vehicle}, \texttt{Car}\}, \langle \texttt{make} : \texttt{string} \rangle)$. However, then it is not possible to specify that every \texttt{Employee} must have exactly one outgoing \texttt{OWNS} edge to a node conforming to either $\otype_1$ or $\otype_2$.
+
+% TODO: In general, it's not possible to say that an object must conform to type 1 OR type 2 (union type). Problem with labels follows from that. But also union of two records is not possible.
+
+% TODO: It's also not possible to say that there may only exist one edge between the same two nodes, or to enforce that a node has two edges to different nodes (mutual exclusion?)
+
+\paragraph{Key constraints.} Our schema formalism does not support property uniqueness or key constraints. While key constraints were already present in ER models \citep{chen1976entity}, their application to property graphs is non-trivial. As argued in the \textsc{PG-Keys} proposal \citep{angles2021keys}, there is a need for granular and flexible key constraints. Keys should be applicable to nodes, edges, and properties, which could all represent concrete entities. Moreover, key scopes and descriptors should be defined in a way that allows objects to be keyed by their relations to other objects. Finally, keys may be \emph{exclusive}, \emph{mandatory}, \emph{singleton}, or any combination thereof. Future work should consolidate \textsc{PG-Keys} with a comprehensive schema formalism such as ours.
+
+\paragraph{Mutual exclusivity.} Another type of constraint introduced by \citet{barker1990entity} is mutual exclusivity of edges. For example, a \texttt{Person} may have a \texttt{WORKS\_AT} edge to a \texttt{Bank} or a \texttt{TradingCompany}, but not both.
 
 \chapter{Conclusion}
 
