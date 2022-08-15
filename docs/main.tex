@@ -52,7 +52,7 @@
 \usepackage{subcaption}
 \captionsetup{
   width=0.9\textwidth,
-  font={small, color=muted},
+  font={small,color=muted},
   labelfont=bf
 }
 
@@ -77,6 +77,7 @@
   morekeywords={VERTEX,EDGE,DIRECTED,PRIMARY_ID,TO,ACCUM,PRINT},
   deletekeywords={ROLE}
 }
+\renewcommand*{\lstlistlistingname}{List of Listings}
 
 % Definitions
 \theoremstyle{definition}
@@ -137,7 +138,7 @@
 \tableofcontents
 \listoffigures
 \listoftables
-% TODO: use short captions for list of figures/tables
+\lstlistoflistings
 
 \chapter{Introduction}
 \setcounter{page}{1}
@@ -212,11 +213,11 @@ The schema features of these three databases in are summarized in \autoref{tab:s
     % Subtyping   & \no & \no & \no & \no & \no \\
     \hline
   \end{tabular}
-  \caption{Comparison of schema capabilities of property graph database systems and our schema formalism from \autoref{ch:pg-schema}. *Only one-to-one, one-to-many, etc.}
+  \caption[Comparison of schema capabilities of state-of-the-art property graph databases and our schema formalism]{Comparison of schema capabilities of state-of-the-art property graph databases and our schema formalism from \autoref{ch:pg-schema}. *: only one-to-one, one-to-many, etc.}
   \label{tab:schema-comparison}
 \end{table}
 
-Next, we detail the differences between the three database systems in our scope with respect to their data models and schema capabilities.
+Next, we detail the differences between the three databases in our scope with respect to their data models and schema capabilities.
 
 \paragraph{Neo4j.} Being one of the first to adopt the property graph data model, Neo4j has grown to become the most popular graph database engine today\footnote{\url{https://db-engines.com/en/ranking/graph+dbms} (accessed July 2022)}. Neo4j supports the Cypher query language \citep{francis2018cypher}. Their data model differs from ours in that edges can only have a single label, while nodes can have multiple.
 
@@ -301,7 +302,7 @@ In this section, we define a notion of property graph schema which incorporates 
     Role         & Edge direction* \\
     \hline
   \end{tabular}
-  \caption{Mapping between entity--relationship (ER) and property graph (PG) concepts. Roles and edge direction can be used for similar purposes, but are not equivalent.}
+  \caption[Mapping between entity--relationship and property graph concepts]{Mapping between entity--relationship (ER) and property graph (PG) concepts. Roles and edge direction can be used for similar purposes, but are not equivalent.}
   \label{tab:er-pg}
 \end{table}
 
@@ -376,7 +377,7 @@ We can relate our schema formalism to the ER model once again. Our definitions o
     Value set        & Property type*     \\
     \hline
   \end{tabular}
-  \caption{Mapping between entity--relationship (ER) and property graph (PG) schema concepts. *Strictly speaking, a property type $\ptype$ is not a set, but $\sem{\ptype}$ is.}
+  \caption{Mapping between entity--relationship and property graph schema concepts. Strictly speaking, a property type $\ptype$ is not a set, but $\sem{\ptype}$ is.}
   \label{tab:er-pg-schema}
 \end{table}
 
@@ -441,7 +442,7 @@ Under these definitions, it is not possible to specify that an edge is mandatory
     \label{fig:conformance-basic-in}
   \end{subfigure}
 
-  \caption{Examples of property graphs validated against the schema of \autoref{fig:pg-schema-basic}. Violating nodes and edges have a red dotted outline.}
+  \caption[Property graphs validated against \autoref{fig:pg-schema-basic}]{Examples of property graphs validated against the schema of \autoref{fig:pg-schema-basic}. Violating nodes and edges have a red dotted outline.}
   \label{fig:conformance-basic}
 \end{figure}
 
@@ -488,7 +489,7 @@ An example of a property graph schema with cardinality constraints is given in \
 \begin{figure}[t]
   \centering
   \includegraphics{figures/pg-schema.pdf}
-  \caption{A property graph schema with cardinality constraints.}
+  \caption[A property graph schema with cardinality constraints]{A property graph schema with cardinality constraints.}
   \label{fig:pg-schema}
 \end{figure}
 
@@ -565,7 +566,7 @@ Compared to \autoref{def:schema-conformance-basic}, \autoref{rule:node} and \ref
     \label{fig:conformance-out}
   \end{subfigure}
 
-  \caption{Examples of property graphs validated against the schema of \autoref{fig:pg-schema}. Violating nodes and edges have a red dotted outline.}
+  \caption[Property graphs validated against \autoref{fig:pg-schema}]{Examples of property graphs validated against the schema of \autoref{fig:pg-schema}. Violating nodes and edges have a red dotted outline.}
   \label{fig:conformance}
 \end{figure}
 
@@ -677,7 +678,7 @@ We describe how each conformance rule can be validated using the three databases
 \begin{figure}[H]
   \begin{lstlisting}[
     language=Cypher,
-    caption={Creation of constraints which require the existence of some mandatory properties on \texttt{Movie} nodes.},
+    caption={[Creation of Cypher constraints which require the existence of some mandatory properties on nodes]Creation of Cypher constraints which require the existence of some mandatory properties on \texttt{Movie} nodes.},
     label=lst:neo4j-mandatory-props
   ]
 CREATE CONSTRAINT FOR (m:Movie) REQUIRE m.imdbId IS NOT NULL;
@@ -691,7 +692,7 @@ Next, we tackle the validation of the node and edge labels (\autoref{rule:simp-n
 \begin{figure}[H]
   \begin{lstlisting}[
     language=Cypher,
-    caption={A query to find all nodes that have a label set that is not allowed.},
+    caption={[A Cypher query to find all nodes that have a label set that is not allowed]A Cypher query to find all nodes that have a label set that is not allowed.},
     label=lst:neo4j-node-labels
   ]
 WITH [["Actor", "Person"], ["Movie"], ["User"], ...] AS allowedNodeLabelSets
@@ -704,7 +705,7 @@ RETURN n
 \begin{figure}[H]
   \begin{lstlisting}[
     language=Cypher,
-    caption={A query to check if there are any edge labels that are not allowed. Note that this query returns a Boolean, and does not explain which edges have an illegal label.},
+    caption={[A Cypher query to check if there are any edge labels that are not allowed]A Cypher query to check if there are any edge labels that are not allowed. Note that this query returns a Boolean, and does not explain which edges have an illegal label.},
     label=lst:neo4j-edge-labels
   ]
 WITH ["ACTED_IN", "DIRECTED", ...] AS allowedEdgeLabels
@@ -718,7 +719,7 @@ Next, we look at the properties. The functions \texttt{db.schema.nodeTypePropert
 \begin{figure}[H]
   \begin{lstlisting}[
     language=Cypher,
-    caption={A query to check if there are any \texttt{User} nodes with properties that are not allowed or have the wrong datatype. If the result is \texttt{true}, there are no violations.},
+    caption={[A Cypher query to check if there are any nodes with properties that are not allowed or have the wrong datatype]A Cypher query to check if there are any \texttt{User} nodes with properties that are not allowed or have the wrong datatype. If the result is \texttt{true}, there are no violations.},
     label=lst:neo4j-allowed-props-binary
   ]
 CALL db.schema.nodeTypeProperties() YIELD nodeLabels, propertyName, propertyTypes
@@ -734,7 +735,7 @@ RETURN count(nodeLabels) = 0
 \begin{figure}[H]
   \begin{lstlisting}[
     language=Cypher,
-    caption={A query to find all \texttt{User} nodes with properties that are not allowed or have the wrong datatype.},
+    caption={[A Cypher query to find all nodes with properties that are not allowed or have the wrong datatype]A Cypher query to find all \texttt{User} nodes with properties that are not allowed or have the wrong datatype.},
     label=lst:neo4j-allowed-props-full
   ]
 WITH {
@@ -753,7 +754,7 @@ To check \autoref{rule:simp-edge-endpoints}, we do a \texttt{MATCH} query for ev
 \begin{figure}[H]
   \begin{lstlisting}[
     language=Cypher,
-    caption={A query that finds all \texttt{ACTED\_IN} edges where the endpoints have the wrong label. Note that the source node \texttt{n} may have additional labels.},
+    caption={[A Cypher query that finds all edges where the endpoints have the wrong label]A Cypher query that finds all \texttt{ACTED\_IN} edges where the endpoints have the wrong label. Note that the source node \texttt{n} may have additional labels.},
     label=lst:neo4j-endpoints
   ]
 MATCH (n)-[e:ACTED_IN]->(m)
@@ -768,7 +769,7 @@ Finally, we check the cardinality constraints (\autoref{rule:simp-card-out} and 
 \begin{figure}[H]
   \begin{lstlisting}[
     language=Cypher,
-    caption={A query to find \texttt{ACTOR} nodes that are missing a mandatory \texttt{ACTED\_IN} edge.},
+    caption={[A Cypher query to find nodes that are missing a mandatory edge]A Cypher query to find \texttt{ACTOR} nodes that are missing a mandatory \texttt{ACTED\_IN} edge.},
     label=lst:neo4j-mandatory-edges
   ]
 MATCH (a:Actor)
@@ -790,7 +791,7 @@ For an example of all of JanusGraph's built-in schema functions working together
 \begin{figure}[H]
   \begin{lstlisting}[
     language=Java,
-    caption={A fragment of the Recommendations schema, expressed using JanusGraph's schema methods. Mandatory properties and cardinality constraints cannot be validated in this way. The \texttt{Multiplicity.SIMPLE} configuration ensures there is no more than one \texttt{ACTED\_IN} edge between any given actor and movie.},
+    caption={[A fragment of the Recommendations schema, expressed using JanusGraph's schema methods]A fragment of the Recommendations schema, expressed using JanusGraph's schema methods. Mandatory properties and cardinality constraints cannot be validated in this way. The \texttt{Multiplicity.SIMPLE} configuration ensures there is no more than one \texttt{ACTED\_IN} edge between any given actor and movie.},
     label=lst:janusgraph-schema
   ]
 // Vertex labels
@@ -817,7 +818,7 @@ The remaining rules cannot be fully enforced by JanusGraph's schema, so we write
 \begin{figure}[H]
   \begin{lstlisting}[
     language=Java,
-    caption={A query to find \texttt{User} nodes which are missing a mandatory \texttt{name} or \texttt{userId} property.},
+    caption={[A Gremlin query to find nodes which are missing a mandatory property]A Gremlin query to find \texttt{User} nodes which are missing a mandatory \texttt{name} or \texttt{userId} property.},
     label=lst:janusgraph-mandatory-props
   ]
 g.V().hasLabel("User").or(hasNot("name"), hasNot("userId"))
@@ -827,7 +828,7 @@ g.V().hasLabel("User").or(hasNot("name"), hasNot("userId"))
 \begin{figure}[H]
   \begin{lstlisting}[
     language=Java,
-    caption={A query to find \texttt{Actor} nodes which are missing an outgoing \texttt{ACTED\_IN} edge. Note that \texttt{ActorDirector} is the concatenation of the \texttt{Actor} and \texttt{Director} labels.},
+    caption={[A Gremlin query to find nodes which are missing an outgoing edge]A Gremlin query to find \texttt{Actor} nodes which are missing an outgoing \texttt{ACTED\_IN} edge. Note that \texttt{ActorDirector} is the concatenation of the \texttt{Actor} and \texttt{Director} labels.},
     label=lst:janusgraph-mandatory-edges
   ]
 g.V().hasLabel(P.within("Actor", "ActorDirector"))
@@ -842,7 +843,7 @@ If we are only interested in the binary validation problem, we only need to dete
 \begin{figure}[H]
   \begin{lstlisting}[
     language=GSQL,
-    caption={A fragment of the Recommendations schema, expressed in TigerGraph's schema definition language.},
+    caption={[A fragment of the Recommendations schema, expressed in TigerGraph's schema definition language]A fragment of the Recommendations schema, expressed in TigerGraph's schema definition language.},
     label=lst:tigergraph-schema
   ]
 CREATE VERTEX Actor (
@@ -867,7 +868,7 @@ In TigerGraph, all properties must have a value as soon as the object is instant
 \begin{figure}[H]
   \begin{lstlisting}[
     language=GSQL,
-    caption={A query to find \texttt{Movie} and \texttt{User} nodes which have a mandatory property with a default value. All violating nodes are collected in the accumulator variable \texttt{@@violatingNodes}, which is returned at the end.},
+    caption={[A GSQL query to find nodes which have a mandatory property with a default value]A GSQL query to find \texttt{Movie} and \texttt{User} nodes which have a mandatory property with a default value. All violating nodes are collected in the accumulator variable \texttt{@@violatingNodes}, which is returned at the end.},
     label=lst:tigergraph-mandatory-props
   ]
 SetAccum<VERTEX> @@violatingNodes;
@@ -894,7 +895,7 @@ To cover the final remaining rules, cardinality constraints are validated using 
 \begin{figure}[H]
   \begin{lstlisting}[
     language=GSQL,
-    caption={A query to find \texttt{Actor} nodes which are missing a outgoing \texttt{ACTED\_IN} edge.},
+    caption={[A GSQL query to find nodes which are missing a outgoing edge]A GSQL query to find \texttt{Actor} nodes which are missing a outgoing \texttt{ACTED\_IN} edge.},
     label=lst:tigergraph-mandatory-edges-out
   ]
 SELECT actor
@@ -906,7 +907,7 @@ WHERE actor.outdegree("ACTED_IN") == 0
 \begin{figure}[H]
   \begin{lstlisting}[
     language=GSQL,
-    caption={A query to find \texttt{Post} nodes which are missing a incoming \texttt{CONTAINER\_OF} edge.},
+    caption={[A GSQL query to find nodes which are missing an incoming edge]A GSQL query to find \texttt{Post} nodes which are missing a incoming \texttt{CONTAINER\_OF} edge.},
     label=lst:tigergraph-mandatory-edges-in
   ]
 SumAccum<int> @numContainerOf;
@@ -973,21 +974,21 @@ Some statistics of the datasets are given in \autoref{tab:dataset-statistics}.
     SNB (SF1)        & 3,181,724  & 17,256,038 & 14          & 20          & 1109              \\
     \hline
   \end{tabular}
-  \caption{Statistics of the datasets used in the experiment. $|N|$ and $|E|$ represent the number of nodes and edges. $|N'|$ and $|E'|$ represent the number of schema nodes and schema edges. The raw size is measured as the combined size of all CSV files.}
+  \caption[Statistics of the datasets used in our experiments]{Statistics of the datasets used in our experiments. $|N|$ and $|E|$ represent the number of nodes and edges. $|N'|$ and $|E'|$ represent the number of schema nodes and schema edges. The raw size is measured as the combined size of all CSV files.}
   \label{tab:dataset-statistics}
 \end{table}
 
 \begin{figure}[t]
   \centering
   \includegraphics[width=\textwidth]{figures/schema-recommendations.pdf}
-  \caption{Schema of the Recommendations Graph dataset. This schema was constructed manually by analyzing the data.}
+  \caption[The schema of the Recommendations Graph dataset]{The schema of the Recommendations Graph dataset. This schema was constructed manually by analyzing the data.}
   \label{fig:schema-recommendations}
 \end{figure}
 
 \begin{figure}[t]
   \centering
   \includegraphics[width=\textwidth]{figures/schema-snb.pdf}
-  \caption{Schema of the SNB dataset. This schema was created by modifying the schema from \citet{angles2020snb} to not rely on subtype relations. Because our schema formalism does not support subtyping, the resulting schema is more permissive than the original. This limitation is discussed in detail in \autoref{ch:limitations}.}
+  \caption[The schema of the SNB dataset]{The schema of the SNB dataset. This schema was created by modifying the schema from \citet{angles2020snb} to not rely on subtype relations. Because our schema formalism does not support subtyping, the resulting schema is more permissive than the original. This limitation is discussed in detail in \autoref{ch:limitations}.}
   \label{fig:schema-snb}
 \end{figure}
 
@@ -1026,7 +1027,7 @@ We run both the binary and full validation queries on all datasets. For these wo
 \begin{figure}[t]
   \centering
   \includegraphics[scale=0.5]{figures/results-variant.pdf}
-  \caption{Mean validation time for binary and full variants on all datasets with no errors.}
+  \caption[Mean validation time for full and binary variants]{Mean validation time for binary and full variants on all datasets with no errors.}
   \label{fig:results-variant}
 \end{figure}
 
@@ -1051,7 +1052,7 @@ We run both the binary and full validation queries on all datasets. For these wo
                                 & Recommendations  & 0.02                                                  & 0.02            & 0.32       & 0.768              \\
     \hline
   \end{tabular}
-  \caption{Mean validation time for binary and full variants on all datasets with no errors. A two-sided T-test is performed to test for a difference between the mean validation time for the full and binary variant. Significant results (p $< 0.05$) are marked with a *.}
+  \caption[Mean validation time for binary and full variants]{Mean validation time for binary and full variants on all datasets with no errors. A two-sided T-test is performed to test for a difference between the mean validation time for the full and binary variant. Significant results (p $< 0.05$) are marked with a *.}
   \label{tab:results-variant}
 \end{table}
 
@@ -1066,7 +1067,7 @@ To further illustrate the relationship between validation time and the scale of 
 \begin{figure}[t]
   \centering
   \includegraphics[scale=0.5]{figures/results-scale.pdf}
-  \caption{Validation time against number of objects in the data graph for the SNB dataset with no errors. The markers represent individual measurements and the lines represent the fitted models.}
+  \caption[Validation time against number of objects in the data graph]{Validation time against number of objects in the data graph for the SNB dataset with no errors. The markers represent individual measurements and the lines represent fitted linear regression models.}
   \label{fig:results-scale}
 \end{figure}
 
@@ -1079,7 +1080,7 @@ The workloads so far have all been on data that does not contain any errors, i.e
 \begin{figure}[t]
   \centering
   \includegraphics[scale=0.5]{figures/results-errors.pdf}
-  \caption{Mean validation at different error rates for binary validation of the SNB (SF0.1) dataset.}
+  \caption[Mean validation time at different error rates]{Mean validation time at different error rates for binary validation of the SNB (SF0.1) dataset.}
   \label{fig:results-errors}
 \end{figure}
 
@@ -1095,7 +1096,7 @@ The workloads so far have all been on data that does not contain any errors, i.e
     TigerGraph        & 0.14                                                  & 0.11            & 0.15          & 0.55  & 0.601                        \\
     \hline
   \end{tabular}
-  \caption{Mean validation at different error rates for binary validation of the SNB (SF0.1) dataset. A one-way ANOVA is used to test for a difference between the mean validation time among all error rates. Significant results (p $< 0.05$) are marked with a *.}
+  \caption[Mean validation time at different error rates]{Mean validation time at different error rates for binary validation of the SNB (SF0.1) dataset. A one-way ANOVA is used to test for a difference between the mean validation time among all error rates. Significant results (p $< 0.05$) are marked with a *.}
   \label{tab:results-errors}
 \end{table}
 
@@ -1103,34 +1104,21 @@ The results show different patterns for each database. For Neo4j, increasing the
 
 The different patterns could be explained by the order in which different kinds of violations are checked in our queries. Recall that in Neo4j, we introduce errors by removing mandatory edges. This happens to be the last thing that is checked in our validation queries, hence all other checks still need to be completed. The fact that there is any improvement at all does suggest that Neo4j recognizes it can terminate the query as soon as it finds a violation. For JanusGraph, we only need two queries: the first checks all nodes and the second checks all edges. Since the violation always appears in one of the nodes, the edge query can be skipped. This yields significant time gains, since there are roughly 5 times more edges than nodes. By constrast, TigerGraph shows no indication of improvement when introducing errors, which suggests that it does not terminate early.
 
-\chapter{Limitations and Future Work}
-\label{ch:limitations}
-
-% TODO: lack of key constraints?
-% TODO: suggest richer constraint language
-% TODO: can we allow edge to any other node?
-% TODO: multigraph can cause unexpected results, e.g. node can conform to minimum cardinality by having multiple edges to the same node (is this desirable? in some situations it might be, e.g. chemistry)
-% TODO: multiple schema nodes with same label: could model mutually exclusive properties?
-
-Limitations
+\chapter{Future Work}
 
 \begin{itemize}
-  % \item Subtyping
-  % \item Larger graph patterns
-  % \item Key constraints
-  \item Mutual exclusivity
-  \item Object with any label
-  \item Union types
-\end{itemize}
-
-Future work
-
-\begin{itemize}
-  % \item Effect of schema with fixed scale $\rightarrow$ CovidGraph
-  % \item Implementation of exact cardinality constraints $\rightarrow$ CovidGraph
   \item Generalized validation queries / query generation
+  \item Effect of schema with fixed scale
+  \item Implementation of exact cardinality constraints
   \item Relation with simulation
-  \item In-engine implementation / efficient validation algorithms / indexes / incremental validation
+  \item In-engine implementation / efficient validation algorithms / indexes
+  \item More constraints:
+        \begin{itemize}
+          \item Key constraints
+          \item Mutual exclusivity
+          \item Larger graph patterns
+          \item Subtyping
+        \end{itemize}
   \item Query type checking / inference
   \item Schema inference
   \item Parallelization
