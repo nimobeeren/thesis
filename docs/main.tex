@@ -1104,7 +1104,7 @@ The results show different patterns for each database. For Neo4j, increasing the
 
 The different patterns could be explained by the order in which different kinds of violations are checked in our queries. Recall that in Neo4j, we introduce errors by removing mandatory edges. This happens to be the last thing that is checked in our validation queries, hence all other checks still need to be completed. The fact that there is any improvement at all does suggest that Neo4j recognizes it can terminate the query as soon as it finds a violation. For JanusGraph, we only need two queries: the first checks all nodes and the second checks all edges. Since the violation always appears in one of the nodes, the edge query can be skipped. This yields significant time gains, since there are roughly 5 times more edges than nodes. By constrast, TigerGraph shows no indication of improvement when introducing errors, which suggests that it does not terminate early.
 
-\chapter{Future Work and Limitations}
+\chapter{Limitations and Future Work}
 \label{ch:limitations}
 
 % TODO: introductory paragraph
@@ -1158,7 +1158,7 @@ In \autoref{fig:subtyping}, a constraint is specified which we can express in wo
 
 \paragraph{Key constraints.} Our schema formalism does not support property uniqueness or key constraints. While key constraints were already present in ER models \citep{chen1976entity}, their application to property graphs is non-trivial. As argued in the \textsc{PG-Keys} proposal \citep{angles2021keys}, there is a need for granular and flexible key constraints. Keys should be applicable to nodes, edges, and properties, which could all represent concrete entities. Moreover, key scopes and descriptors should be defined in a way that allows objects to be keyed by their relations to other objects. Finally, keys may be \emph{exclusive}, \emph{mandatory}, \emph{singleton}, or any combination thereof. Future work should consolidate \textsc{PG-Keys} with a comprehensive schema formalism such as ours.
 
-\paragraph{Mutual exclusivity.} Another type of constraint introduced by \citet{barker1990entity} is mutual exclusivity of edges. For example, a \texttt{Person} may have a \texttt{WORKS\_AT} edge to a \texttt{Bank} or a \texttt{TradingCompany}, but not both.
+\paragraph{Mutual exclusivity.} Another kind of constraint introduced by \citet{barker1990entity} is mutual exclusivity of edges. For example, a \texttt{Person} may have a \texttt{WORKS\_AT} edge to a \texttt{Bank} or a \texttt{TradingCompany}, but not both.
 % TODO: union types?
 % TODO: object with any label?
 % TODO: multigraph edge cases
@@ -1167,18 +1167,20 @@ In \autoref{fig:subtyping}, a constraint is specified which we can express in wo
 
 Alternatively, when the schema and data are both given as graphs, validation could be achieved using generic graph pattern matching queries. In fact, we have provided such a generic implementation for Neo4j\footnote{\url{https://github.com/nimobeeren/thesis/tree/main/neo4j/generic}}. Unfortunately, validation times were prohibitive for all but the smallest graphs. However, there are certainly opportunities for performance gains.
 
-\paragraph{Validation algorithms.} There are advantages to our approach using graph queries for validation: they are easy to adjust, portable between database versions, and convenient to prototype. However, when performance is the primary goal, a lower-level implementation may be suitable. Specialized validation algorithms and indexes could be developed to achieve significant performance benefits.
+\paragraph{Validation algorithms.} There are advantages to our approach using graph queries for validation: they are easy to adjust, portable between database versions, and convenient to prototype. However, when performance is the primary goal, a lower-level implementation may be suitable. Specialized validation algorithms and indexes could be developed to achieve performance benefits. Moreover, since all of our validation rules have a limited scope, validation queries may be parallelized and distributed across multiple machines.
 % TODO: find areas where algorithms can be beneficial
 
-If a database instance is frequently updated, the cost of scanning the entire graph on every update may be prohibitive. In such a scenario, algorithms for incremental validation would reduce validation time significantly. Since all constraints in our schema formalism have a limited scope, we would only need to scan the fragment of the graph that is affected by the update. Furthermore, the limited scope of our constraints allow validation queries to be easily parallelized and distributed across multiple machines.
+If a database instance is frequently updated, the cost of scanning the entire graph on every update may be prohibitive. In such a scenario, an incremental validation algorithm could provide significant benefits. Due to the limited scope of our validation rules, only the fragment of the graph that is affected by the update would need to be revalidated. Such an algorithm could be used to reject any updates that cause a schema violation.
 
-\paragraph{Schema-aware query optimization.} \citep{chakravarthy1990logic, buneman1997adding, meier2013semantic}
+\paragraph{Schema-aware query optimization.} Schema knowledge may be used by the query engine to improve query planning. Such optimizations are widely employed in relational databases \citep{chakravarthy1990logic, meier2013semantic,silberschatz2011database}, and have been studied in the context of graph databases as well \citep{buneman1997adding,popa1999equational}. Similar methods could be applied to property graph databases when a schema is present.
 
-\paragraph{Query type checking / inference.}
+\paragraph{Query type checking and type inference.} The presence of schemas may benefit the usability of graph databases. Through query type checking, incorrectly typed parameters could be detected. Moreover, the result type of a query could be inferred to ensure the result is of the expected type before execution. Query type inference could be integrated with type systems of programming languages to achieve type safety across the database and the application. A type inference approach like the one presented by \citet{colazzo2015typing} may be adapted to the property graph model.
 
-\paragraph{Relation with simulation.}
+\paragraph{Relation to other notions of schema conformance.} It may be of theoretical interest to investigate how our notion of conformance is related to other methods found in the literature, such as simulation \citep{buneman1997adding} and homomorphisms \citep{bonifati2019schema}. If they are equivalent, results from other work may be applied to our model as well.
 
 \chapter{Conclusion}
+
+% TODO: conclusion
 
 \bibliography{main}
 
