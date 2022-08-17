@@ -1,4 +1,4 @@
-database,dataset,scale,variant,errors,time
+database,dataset,scale,variant,violations,time
 neo4j,recommendations,1,full,none,1825
 neo4j,recommendations,1,full,none,1327
 neo4j,recommendations,1,full,none,1274
@@ -14,9 +14,9 @@ neo4j,snb,0.1,binary,none,7259
 neo4j,snb,0.1,binary,single,7334
 neo4j,snb,0.1,binary,single,6763
 neo4j,snb,0.1,binary,single,7201
-neo4j,snb,0.1,binary,half,6254
-neo4j,snb,0.1,binary,half,6551
-neo4j,snb,0.1,binary,half,6300
+neo4j,snb,0.1,binary,many,6254
+neo4j,snb,0.1,binary,many,6551
+neo4j,snb,0.1,binary,many,6300
 neo4j,snb,0.3,full,none,48813
 neo4j,snb,0.3,full,none,46313
 neo4j,snb,0.3,full,none,46249
@@ -44,9 +44,9 @@ janusgraph,snb,0.1,binary,none,56188
 janusgraph,snb,0.1,binary,single,6688
 janusgraph,snb,0.1,binary,single,6721
 janusgraph,snb,0.1,binary,single,7211
-janusgraph,snb,0.1,binary,half,195
-janusgraph,snb,0.1,binary,half,230
-janusgraph,snb,0.1,binary,half,211
+janusgraph,snb,0.1,binary,many,195
+janusgraph,snb,0.1,binary,many,230
+janusgraph,snb,0.1,binary,many,211
 tigergraph,recommendations,1,full,none,27
 tigergraph,recommendations,1,full,none,22
 tigergraph,recommendations,1,full,none,23
@@ -62,9 +62,9 @@ tigergraph,snb,0.1,binary,none,110
 tigergraph,snb,0.1,binary,single,104
 tigergraph,snb,0.1,binary,single,115
 tigergraph,snb,0.1,binary,single,117
-tigergraph,snb,0.1,binary,half,120
-tigergraph,snb,0.1,binary,half,115
-tigergraph,snb,0.1,binary,half,204
+tigergraph,snb,0.1,binary,many,120
+tigergraph,snb,0.1,binary,many,115
+tigergraph,snb,0.1,binary,many,204
 tigergraph,snb,0.3,full,none,281
 tigergraph,snb,0.3,full,none,308
 tigergraph,snb,0.3,full,none,276

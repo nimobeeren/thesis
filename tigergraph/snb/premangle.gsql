@@ -8,7 +8,7 @@ CREATE QUERY mangleSingle () SYNTAX v2 {
         POST-ACCUM comment.length = -1;
 }
 
-CREATE QUERY mangleHalf () SYNTAX v2 {
+CREATE QUERY mangleMany () SYNTAX v2 {
     tmp =
         SELECT message
         FROM (Comment|Post):message
@@ -16,4 +16,4 @@ CREATE QUERY mangleHalf () SYNTAX v2 {
         POST-ACCUM message.length = -1;
 }
 
-INSTALL QUERY mangleSingle, mangleHalf
+INSTALL QUERY mangleSingle, mangleMany

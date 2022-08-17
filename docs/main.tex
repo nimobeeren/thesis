@@ -938,13 +938,13 @@ The overarching question we aim to answer is: what is the cost of validating pro
   % \item How is validation time affected by the kinds of constraints in the schema?
   \item\label{rq:variant} How does validation differ between the binary and full validation variants?
   \item\label{rq:scale} How is validation time affected by the scale of the data?
-  \item\label{rq:errors} How is validation time affected by the amount of schema violations?
+  \item\label{rq:violations} How is validation time affected by the amount of schema violations?
   \item\label{rq:database} How is validation time affected by the database system?
 \end{enumerate}
 
 \section{Methodology}
 
-To answer our research questions, we experimentally evaluate the performance of our implementation described in \autoref{ch:practice} in multiple scenarios. For each database, we apply the binary and full validation methods to datasets with different schemas and scales, and we investigate the effect of errors in the data.
+To answer our research questions, we experimentally evaluate the performance of our implementation described in \autoref{ch:practice} in multiple scenarios. For each database, we apply the binary and full validation methods to datasets with different schemas and scales, and we investigate the effect of violations in the data.
 
 \subsection{Dependent Variable}
 
@@ -995,18 +995,17 @@ Some statistics of the datasets are given in \autoref{tab:dataset-statistics}.
 
 \paragraph{Validation variant.} As described in \autoref{sec:variants}, we consider two variants of the validation problem: binary and full validation. For binary validation, we measure the time until the first violation is found (or until the last query has finished, if there are no violations). For the full variant, we measure until the last query has finished.
 
-% TODO: rename error -> violation
-\paragraph{Error rate.} We expect the validation time of the binary variant to be affected by the number of errors in the data. If the data graph conforms to the schema, the entire graph needs to be scanned. However, as soon as a single error is found, it can terminate. The higher the error rate, the sooner we expect to terminate.
+\paragraph{Violation rate.} We expect the validation time of the binary variant to be affected by the number of violations in the data. If the data graph conforms to the schema, the entire graph needs to be scanned. However, as soon as a single violation is found, it can terminate. The higher the violation rate, the sooner we expect to terminate.
 
-We consider three error rate levels:
+We consider three levels of violation rate:
 
 \begin{itemize}
   \item \emph{None:} the graph conforms to the schema.
   \item \emph{Single:} a single node violates a constraint.
-  \item \emph{Half:} 50\% of all nodes violate a constraint. % TODO: rename half -> many
+  \item \emph{Many:} 50\% of all nodes violate a constraint.
 \end{itemize}
 
-The way errors are introduced depends on the database system under test, due to their differences in schema capabilities and data model. For JanusGraph, we remove a mandatory property from nodes. Because TigerGraph requires every property to have a value, we set it to the default value instead. Because Neo4j supports constraints that prevent missing mandatory properties, we remove a mandatory edge instead. Edges are not modified, hence they do not violate any constraints.
+The way violations are introduced depends on the database system under test, due to their differences in schema capabilities and data model. For JanusGraph, we remove a mandatory property from nodes. Because TigerGraph requires every property to have a value, we set it to the default value instead. Because Neo4j supports constraints that prevent missing mandatory properties, we remove a mandatory edge instead. Edges are not modified, hence they do not violate any constraints.
 
 \subsection{Parameters}
 
@@ -1023,12 +1022,12 @@ In this section, we show the results of our experiments. We attempt to answer ea
 
 \subsection{\ref*{rq:variant}: Validation Variant}
 
-We run both the binary and full validation queries on all datasets. For these workloads, no errors are introduced, so both variants have to scan the entire graph. We perform an independent two-sided T-test \citep{student1908probable} to test the null hypothesis that the mean validation time is the same for the full and binary variant, with all other variables fixed. The results for each database are shown in \autoref{fig:results-variant} and \autoref{tab:results-variant}. The queries for JanusGraph on the SNB dataset with scale factor larger than 0.1 did not complete within an hour, and are not shown here.
+We run both the binary and full validation queries on all datasets. For these workloads, no violations are introduced, so both variants have to scan the entire graph. We perform an independent two-sided T-test \citep{student1908probable} to test the null hypothesis that the mean validation time is the same for the full and binary variant, with all other variables fixed. The results for each database are shown in \autoref{fig:results-variant} and \autoref{tab:results-variant}. The queries for JanusGraph on the SNB dataset with scale factor larger than 0.1 did not complete within an hour, and are not shown here.
 
 \begin{figure}[p]
   \centering
   \includegraphics[scale=0.5]{figures/results-variant.pdf}
-  \caption[Mean validation time for full and binary variants]{Mean validation time for binary and full variants on all datasets with no errors.}
+  \caption[Mean validation time for full and binary variants]{Mean validation time for binary and full variants on all datasets with no schema violations.}
   \label{fig:results-variant}
 \end{figure}
 
@@ -1053,11 +1052,11 @@ We run both the binary and full validation queries on all datasets. For these wo
                                 & Recommendations  & 0.02                                                  & 0.02            & 0.32       & 0.768              \\
     \hline
   \end{tabular}
-  \caption[Mean validation time for binary and full variants]{Mean validation time for binary and full variants on all datasets with no errors. A two-sided T-test is performed to test for a difference between the mean validation time for the full and binary variant. We give the \emph{t-statistic} as defined by \citet{student1908probable}, as well as the p-value. Significant results (p $< 0.05$) are marked with a *.}
+  \caption[Mean validation time for binary and full variants]{Mean validation time for binary and full variants on all datasets with no schema violations. A two-sided T-test is performed to test for a difference between the mean validation time for the full and binary variant. We give the \emph{t-statistic} as defined by \citet{student1908probable}, as well as the p-value. Significant results (p $< 0.05$) are marked with a *.}
   \label{tab:results-variant}
 \end{table}
 
-For Neo4j, we find a statistically significant difference (p $< 0.05$) between the full and binary variants, for all datasets except the Recommendations. This difference could be explained by the use of Neo4j's schema statistics, which are retrieved in constant time and eliminate the need for some of the queries used in the full variant. However, on the smaller Recommendations dataset this advantage is no longer apparent, possibly because the constant lookup time outweighs the time saved by skipping some queries. We do not find evidence to suggest any difference between the two variants for JanusGraph and TigerGraph. This is expected, since the queries for both variants are very similar, and the binary variant cannot terminate early because there are no errors in the data.
+For Neo4j, we find a statistically significant difference (p $< 0.05$) between the full and binary variants, for all datasets except the Recommendations. This difference could be explained by the use of Neo4j's schema statistics, which are retrieved in constant time and eliminate the need for some of the queries used in the full variant. However, on the smaller Recommendations dataset this advantage is no longer apparent, possibly because the constant lookup time outweighs the time saved by skipping some queries. We do not find evidence to suggest any difference between the two variants for JanusGraph and TigerGraph. This is expected, since the queries for both variants are very similar, and the binary variant cannot terminate early because the data conforms to the schema.
 
 \subsection{\ref*{rq:scale}: Scale}
 
@@ -1066,21 +1065,21 @@ To further illustrate the relationship between validation time and the scale of 
 \begin{figure}[t]
   \centering
   \includegraphics[scale=0.5]{figures/results-scale.pdf}
-  \caption[Validation time against number of objects in the data graph]{Validation time against number of objects in the data graph for the SNB dataset with no errors. The markers represent individual measurements and the lines represent fitted linear regression models.}
+  \caption[Validation time against number of objects in the data graph]{Validation time against number of objects in the data graph for the SNB dataset with no schema violations. The markers represent individual measurements and the lines represent fitted linear regression models.}
   \label{fig:results-scale}
 \end{figure}
 
 These results suggest a linear relationship between number of objects and validation time. This conclusion is supported by fitting a simple linear regression model using the least squares method. We use the number of objects as the explanatory variable and the validation time as the response variable. The high $R^2$ values suggest a good fit. This linear relationship is expected, since our queries perform a linear scan of the nodes and edges in the data graph.
 
-\subsection{\ref*{rq:errors}: Error Rate}
+\subsection{\ref*{rq:violations}: Violation Rate}
 
-The workloads so far have all been on data that does not contain any errors, i.e. the the data conforms to the schema. For this research question, we use the SNB dataset at SF0.1 and introduce some errors into the data. We only test the binary validation variant, because full validation requires a full scan of the graph, regardless of the number of errors. A one-way ANOVA is performed to test the null hypothesis that the mean validation time is the same for all error rates for a particular database. The results are shown in \autoref{fig:results-errors} and \autoref{tab:results-errors}.
+The workloads so far have all been on data that does not contain any schema violations, meaning that the data conforms to the schema. For this research question, we use the SNB dataset at SF0.1 and introduce some errors into the data. We only test the binary validation variant, because full validation requires a full scan of the graph, regardless of the number of violations. A one-way ANOVA is performed to test the null hypothesis that the mean validation time is the same for all violation rates for a particular database. The results are shown in \autoref{fig:results-violations} and \autoref{tab:results-violations}.
 
 \begin{figure}[t]
   \centering
-  \includegraphics[scale=0.5]{figures/results-errors.pdf}
-  \caption[Mean validation time at different error rates]{Mean validation time at different error rates for binary validation of the SNB (SF0.1) dataset.}
-  \label{fig:results-errors}
+  \includegraphics[scale=0.5]{figures/results-violations.pdf}
+  \caption[Mean validation time at different violation rates]{Mean validation time at different violation rates for binary validation of the SNB (SF0.1) dataset.}
+  \label{fig:results-violations}
 \end{figure}
 
 \begin{table}[t]
@@ -1088,20 +1087,20 @@ The workloads so far have all been on data that does not contain any errors, i.e
   \begin{tabular}{lrrrrrrrrr}
     \hline
     \textbf{Database} & \multicolumn{3}{c}{\textbf{Mean validation time (s)}} & \textbf{F}      & \textbf{p}                                           \\
-                      & \textbf{None}                                         & \textbf{Single} & \textbf{Half} &                                      \\
+                      & \textbf{None}                                         & \textbf{Single} & \textbf{Many} &                                      \\
     \hline
     Neo4j             & 7.38                                                  & 7.10            & 6.37          & 14.21 & \textbf{0.005*}              \\
     JanusGraph        & 56.74                                                 & 6.87            & 0.21          & 27152 & $\mathbf{<0.0001}\textbf{*}$ \\
     TigerGraph        & 0.14                                                  & 0.11            & 0.15          & 0.55  & 0.601                        \\
     \hline
   \end{tabular}
-  \caption[Mean validation time at different error rates]{Mean validation time at different error rates for binary validation of the SNB (SF0.1) dataset. A one-way ANOVA is performed to test for a difference between the mean validation time among all error rates. We give the F-statistic as defined by \citet{snedecor1989statistical} as well as the p-value. Significant results (p $< 0.05$) are marked with a *.}
-  \label{tab:results-errors}
+  \caption[Mean validation time at different violation rates]{Mean validation time at different violation rates for binary validation of the SNB (SF0.1) dataset. A one-way ANOVA is performed to test for a difference between the mean validation time among all violation rates. We give the F-statistic as defined by \citet{snedecor1989statistical} as well as the p-value. Significant results (p $< 0.05$) are marked with a *.}
+  \label{tab:results-violations}
 \end{table}
 
-The results show different patterns for each database. For Neo4j, increasing the error rate decreases validation time, but not by a large amount. For JanusGraph, even a single error cuts the validation time by an order of magnitude, and when half of all nodes violate a constraint, validation time is again significantly reduced. For TigerGraph, we found no evidence that increasing the error rate reduces validation time.
+The results show different patterns for each database. For Neo4j, increasing the violation rate decreases validation time, but not by a large amount. For JanusGraph, even a single violation cuts the validation time by an order of magnitude, and when half of all nodes violate a constraint, validation time is again significantly reduced. For TigerGraph, we found no evidence that increasing the violation rate reduces validation time.
 
-The different patterns could be explained by the order in which different kinds of violations are checked in our queries. Recall that in Neo4j, we introduce errors by removing mandatory edges. This happens to be the last thing that is checked in our validation queries, hence all other checks still need to be completed. The fact that there is any improvement at all does suggest that Neo4j recognizes it can terminate the query as soon as it finds a violation. For JanusGraph, we only need two queries: the first checks all nodes and the second checks all edges. Since the violation always appears in one of the nodes, the edge query can be skipped. This yields significant time gains, since there are roughly 5 times more edges than nodes. By constrast, TigerGraph shows no indication of improvement when introducing errors, which suggests that it does not terminate early.
+The different patterns could be explained by the order in which different kinds of violations are checked in our queries. Recall that in Neo4j, we introduce violations by removing mandatory edges. This happens to be the last thing that is checked in our validation queries, hence all other checks still need to be completed. The fact that there is any improvement at all does suggest that Neo4j recognizes it can terminate the query as soon as it finds a violation. For JanusGraph, we only need two queries: the first checks all nodes and the second checks all edges. Since the violation always appears in one of the nodes, the edge query can be skipped. This yields significant time gains, since there are roughly 5 times more edges than nodes. By constrast, TigerGraph shows no indication of improvement when introducing violations, which suggests that it does not terminate early.
 
 \subsection{\ref*{rq:database}: Database}
 
