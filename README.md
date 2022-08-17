@@ -2,11 +2,6 @@
 
 [![Build thesis PDF](https://github.com/nimobeeren/thesis/actions/workflows/latex.yml/badge.svg)](https://github.com/nimobeeren/thesis/actions/workflows/latex.yml)
 
-## Dependencies
+## Errata
 
-- Neo4j Community Edition 4.4.7
-- APOC 4.4.0.5
-
-## Required Configuration
-
-For security reasons, procedures that use internal Neo4j APIs are disabled by default. They must be enabled in configuration file `$NEO4J_HOME/conf/neo4j.conf` by setting `dbms.security.procedures.unrestricted=apoc.*`.
+- The cardinality constraint of "exactly one" appears several times in the SNB schema, but was implemented as "at least one" for all databases and validation variants.
