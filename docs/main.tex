@@ -422,7 +422,7 @@ Under these definitions, it is not possible to specify that an edge is mandatory
   \begin{subfigure}[t]{0.45\textwidth}
     \centering
     \includegraphics[width=\textwidth]{figures/conformance-basic-edge.pdf}
-    \caption{A \texttt{knows} edge is missing a \texttt{since} property, which violates \autoref{rule:basic-edge}.}
+    \caption{A \texttt{KNOWS} edge is missing a \texttt{since} property, which violates \autoref{rule:basic-edge}.}
     \label{fig:conformance-basic-edge}
   \end{subfigure}
 
@@ -431,14 +431,14 @@ Under these definitions, it is not possible to specify that an edge is mandatory
   \begin{subfigure}[t]{0.45\textwidth}
     \centering
     \includegraphics[width=\textwidth]{figures/conformance-basic-edge-target.pdf}
-    \caption{The target of a \texttt{knows} edge is not a \texttt{Person}, which violates \autoref{rule:basic-edge}.}
+    \caption{The target of a \texttt{KNOWS} edge is not a \texttt{Person}, which violates \autoref{rule:basic-edge}.}
     \label{fig:conformance-basic-edge-target}
   \end{subfigure}
   \hfill
   \begin{subfigure}[t]{0.45\textwidth}
     \centering
     \includegraphics[width=\textwidth]{figures/conformance-basic-in.pdf}
-    \caption{A \texttt{Post} is missing an incoming \texttt{created} edge, but this does not violate any rules.}
+    \caption{Conforms to the schema. A \texttt{Post} is missing an incoming \texttt{CREATED} edge, but this does not violate any rules.}
     \label{fig:conformance-basic-in}
   \end{subfigure}
 
@@ -546,7 +546,7 @@ Compared to \autoref{def:schema-conformance-basic}, \autoref{rule:node} and \ref
   \begin{subfigure}[t]{0.45\textwidth}
     \centering
     \includegraphics[width=\textwidth]{figures/conformance-out-2.pdf}
-    \caption{Conforms to the schema. A \texttt{Person} is allowed to have no outgoing \texttt{knows} edges.}
+    \caption{Conforms to the schema. A \texttt{Person} is allowed to have no outgoing \texttt{KNOWS} edges.}
     \label{fig:conformance-edge}
   \end{subfigure}
 
@@ -555,14 +555,14 @@ Compared to \autoref{def:schema-conformance-basic}, \autoref{rule:node} and \ref
   \begin{subfigure}[t]{0.45\textwidth}
     \centering
     \includegraphics[width=\textwidth]{figures/conformance-too-many-in.pdf}
-    \caption{This \texttt{Post} has too many incoming \texttt{created} edges, which violates \autoref{rule:in}.}
+    \caption{This \texttt{Post} has too many incoming \texttt{CREATED} edges, which violates \autoref{rule:in}.}
     \label{fig:conformance-edge-target}
   \end{subfigure}
   \hfill
   \begin{subfigure}[t]{0.45\textwidth}
     \centering
     \includegraphics[width=\textwidth]{figures/conformance-in.pdf}
-    \caption{A \texttt{Post} is missing an incoming \texttt{created} edge, which violates \autoref{rule:in}.}
+    \caption{A \texttt{Post} is missing an incoming \texttt{CREATED} edge, which violates \autoref{rule:in}.}
     \label{fig:conformance-out}
   \end{subfigure}
 
@@ -1096,7 +1096,7 @@ The workloads so far have all been on data that does not contain any errors, i.e
     TigerGraph        & 0.14                                                  & 0.11            & 0.15          & 0.55  & 0.601                        \\
     \hline
   \end{tabular}
-  \caption[Mean validation time at different error rates]{Mean validation time at different error rates for binary validation of the SNB (SF0.1) dataset. A one-way ANOVA is used to test for a difference between the mean validation time among all error rates. Significant results (p $< 0.05$) are marked with a *.}
+  \caption[Mean validation time at different error rates]{Mean validation time at different error rates for binary validation of the SNB (SF0.1) dataset. A one-way ANOVA is performed to test for a difference between the mean validation time among all error rates. Significant results (p $< 0.05$) are marked with a *.}
   \label{tab:results-errors}
 \end{table}
 
