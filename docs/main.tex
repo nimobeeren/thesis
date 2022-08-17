@@ -1024,14 +1024,14 @@ In this section, we show the results of our experiments. For each research quest
 
 We run both the binary and full validation queries on all datasets. For these workloads, no errors are introduced, so both variants have to scan the entire graph. We perform Welch's independent two-sided T-test to test the null hypothesis that the mean validation time is the same for the full and binary variant, with all other variables fixed. The results for each database are shown in \autoref{fig:results-variant} and \autoref{tab:results-variant}. The queries for JanusGraph on the SNB dataset with scale factor larger than 0.1 did not complete within an hour, and are not shown here.
 
-\begin{figure}[t]
+\begin{figure}[p]
   \centering
   \includegraphics[scale=0.5]{figures/results-variant.pdf}
   \caption[Mean validation time for full and binary variants]{Mean validation time for binary and full variants on all datasets with no errors.}
   \label{fig:results-variant}
 \end{figure}
 
-\begin{table}[t]
+\begin{table}[p]
   \centering
   \begin{tabular}{llrrrr}
     \hline
@@ -1071,7 +1071,7 @@ To further illustrate the relationship between validation time and the scale of 
   \label{fig:results-scale}
 \end{figure}
 
-These results suggest a linear relationship between number of objects and validation time. This conclusion is supported by fitting a simple linear regression model using the least squares method. We use the number of objects as the explanatory variable and the validation time as the response variable. The high $R^2$ values in \autoref{fig:results-scale} suggest a good fit. This linear relationship is expected, since our queries perform a linear scan of the nodes and edges in the data graph.
+These results suggest a linear relationship between number of objects and validation time. This conclusion is supported by fitting a simple linear regression model using the least squares method. We use the number of objects as the explanatory variable and the validation time as the response variable. The high $R^2$ values suggest a good fit. This linear relationship is expected, since our queries perform a linear scan of the nodes and edges in the data graph.
 
 \subsection{\ref*{rq:errors}: Error Rate}
 
