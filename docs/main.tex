@@ -157,15 +157,11 @@ Our overarching goal is to develop an end-to-end framework for property graph sc
 
 \section{Graph Integrity Constraints}
 
-% TODO: refer to querying graphs book instead of discussing integrity constraints here
-
-The problem of expressing and validating integrity constraints for graphs has received some attention in the scientific community. A large part of this research has been on functional dependencies, which has been studied extensively in the context of relational databases \citep{fagin1984theory,abiteboul1999data}. The idea of functional dependencies has been adapted to graph data, with the first work focussing on \emph{key constraints}, which aim to uniquely identify entities represented by nodes \citep{fan2015keys}. These have been extended to include more general dependencies \citep{fan2016functional}. The current state of the art of key constraints is presented in \textsc{PG-Keys} \citep{angles2021keys}.
-
-% TODO: other kinds of graph integrity constraints (pokorny 2017?)
+An area of research closely related to schema is that of integrity constraints. The problem of expressing and validating integrity constraints for graphs has received some attention in the literature. A large part of this research has been on functional dependencies, which has been studied extensively in the context of relational databases \citep{fagin1984theory,abiteboul1999data}. The idea of functional dependencies has been adapted to graph data, with the first work focussing on \emph{key constraints}, which aim to uniquely identify entities represented by nodes \citep{fan2015keys}. These have been extended to include more general dependencies \citep{fan2016functional}. The current state of the art of key constraints is presented in \textsc{PG-Keys} \citep{angles2021keys}. \citet{pokorny2017integrity} describe and implement several integrity constraints for property graphs, though a formal specification is not provided. For further discussion of graph integrity constraints, see \citet{bonifati2018querying}.
 
 \section{Graph Schema}
 
-Some approaches to graph schema have been discussed in the literature. While these methods are based on different graph models, they may be adapted to the property graph model. \citet{buneman1997adding} propose a method that represents both data and schema as edge-labeled graphs. This enables the specification of the types of edges and paths that are allowed to occur in a database instance, but does not cover mandatory edges or more general cardinality constraints.
+While integrity constraints are typically scoped to a subset of the database, a schema serves as a model of the entire database. We will now discuss some approaches to graph schemas which have been discussed in the literature. While these methods are based on different graph models, they may be adapted to the property graph model. \citet{buneman1997adding} propose a method that represents both data and schema as edge-labeled graphs. This enables the specification of the types of edges and paths that are allowed to occur in a database instance, but does not cover mandatory edges or more general cardinality constraints.
 
 \citet{colazzo2015typing} introduce another schema formalism for edge-labeled data graphs. They define a schema as a set of pairs $(r_{in}, r_{out})$, where $r_{in}$ and $r_{out}$ are regular expressions. The semantics is that every node must match a schema element $(r_{in}, r_{out})$, meaning that the node's incoming edges match $r_{in}$ and its outgoing edges match $r_{out}$. Using Regular Path Queries (RPQs), edge cardinality can be exactly specified. When extending the language to Nested Regular Expressions (NREs), it is possible to specify structural constraints over arbitrarily large graph patterns.
 
@@ -275,7 +271,9 @@ The functions $\src$ and $\trg$ map ordered pairs to their first and second elem
 \chapter{Property Graph Schemas}
 \label{ch:pg-schema}
 
-A schema should allow modeling of real-world entities and their relationships. A more expressive schema language enables the specification of more complex constraints, but may come at the cost of greater research and engineering effort, as well as worse runtime performance. This needs to be balanced in our choice of schema language.
+In this chapter, we design a schema model for property graphs, and provide a formal specification. We provide a set of first-order logic rules which determine whether a property graph conforms to a schema.
+
+A schema should allow modeling of all kinds of entities and their relationships. A more expressive schema language enables the specification of more complex constraints, but may come at the cost of greater research and engineering effort, as well as worse runtime performance. This needs to be balanced in the design of our schema model.
 
 To explore the schema features that are commonly used in practice, let us look at some existing data modeling techniques. As a baseline, we consider the Entity--Relationship (ER) model as proposed by~\citet{chen1976entity}. This model incorporates entities, relationships, attributes, and values. An \emph{entity} is a ``thing'' that can be uniquely identified, a \emph{relationship} is an association between entities, and an \emph{attribute--value} pair represents information about an entity or relationship. Furthermore, an entity may have a \emph{role} in a relationship, such as ``white'' or ``black'' in a chess match relationship. These are the concepts underlying many conceptual data modeling methods in use today.
 
