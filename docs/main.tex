@@ -242,7 +242,6 @@ For a formal definition, we assume the existence of the following countably infi
   A \emph{record} is a finite partial function $r : \mathcal{N} \pto \mathcal{V}$ that maps some property names to property values. The set of all records is denoted as $\mathcal{R}$.
 \end{definition}
 
-% TODO: rename "node" -> "data node"? also edges and objects
 \begin{definition}[Property graph]
   \label{def:pg}
   A \emph{property graph} is a tuple $$G = (N, E, \rho, \lambda, \pi)$$ where
@@ -438,7 +437,7 @@ Under these definitions, it is not possible to specify that an edge is mandatory
     \label{fig:conformance-basic-in}
   \end{subfigure}
 
-  \caption[Property graphs validated against \autoref{fig:pg-schema-basic}]{Examples of property graphs validated against the schema of \autoref{fig:pg-schema-basic}. Violating nodes and edges have a red dotted outline.}
+  \caption[Property graphs validated against \autoref{fig:pg-schema-basic}]{Examples of property graphs validated against the schema of \autoref{fig:pg-schema-basic}. Violating nodes and edges are marked and have a red outline.}
   \label{fig:conformance-basic}
 \end{figure}
 
@@ -562,7 +561,7 @@ Compared to \autoref{def:schema-conformance-basic}, \autoref{rule:node} and \ref
     \label{fig:conformance-out}
   \end{subfigure}
 
-  \caption[Property graphs validated against \autoref{fig:pg-schema}]{Examples of property graphs validated against the schema of \autoref{fig:pg-schema}. Violating nodes and edges have a red dotted outline.}
+  \caption[Property graphs validated against \autoref{fig:pg-schema}]{Examples of property graphs validated against the schema of \autoref{fig:pg-schema}. Violating nodes and edges have are marked and have a red outline.}
   \label{fig:conformance}
 \end{figure}
 
@@ -1168,7 +1167,6 @@ Finally, it is unclear whether the differences between databases would persist w
 Alternatively, when the schema and data are both given as graphs, validation could be achieved using generic graph pattern matching queries. In fact, we have provided such a generic implementation for Neo4j\footnote{\url{https://github.com/nimobeeren/thesis/tree/main/neo4j/generic}}. Unfortunately, validation times were prohibitive for all but the smallest graphs. However, there are certainly opportunities for performance gains.
 
 \paragraph{Validation algorithms.} There are advantages to our approach using graph queries for validation: they are easy to adjust, portable between database versions, and convenient to prototype. However, when performance is the primary goal, a lower-level implementation may be more suitable. Specialized validation algorithms and indexes could be developed to achieve performance benefits. Moreover, since all of our validation rules have a limited scope, validation queries may be parallelized and distributed across multiple machines.
-% TODO: find areas where algorithms can be beneficial
 
 If a database instance is frequently updated, the cost of scanning the entire graph on every update may be prohibitive. In such a scenario, an incremental validation algorithm could provide significant benefits. Due to the limited scope of our validation rules, only the fragment of the graph that is affected by the update would need to be revalidated. Such an algorithm could be used to reject any updates that cause a schema violation.
 
