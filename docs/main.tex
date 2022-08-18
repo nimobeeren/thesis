@@ -948,7 +948,7 @@ To answer our research questions, we perform an experimental study to evaluate t
 
 \subsection{Dependent Variable}
 
-\paragraph{Validation time.} We are interested in the time it takes to validate conformance of a graph to a schema. For Neo4j and TigerGraph, we measure this using the execution time as listed in the internal query logs. For JanusGraph, we use Java's \texttt{System.currentTimeMillis()} method. If multiple queries are needed, we take the sum of their execution times.
+\paragraph{Validation time.} We are interested in the time it takes to validate conformance of a graph to a schema. For Neo4j and TigerGraph, we measure this using the execution time as listed in the internal query logs. For JanusGraph, we use Java's \texttt{System.currentTimeMillis()} method, which reports the wall-clock time. If multiple queries are needed, we take the sum of their execution times.
 
 \subsection{Independent Variables}
 
@@ -1103,16 +1103,16 @@ The different patterns could be explained by the order in which different kinds 
 
 \subsection{\ref*{rq:database}: Database}
 
-From the previous research questions, we can see there is a clear difference between database systems. In nearly all scenarios, TigerGraph beats Neo4j by an order of magnitude, and JanusGraph is another order of magnitude slower. The only exception occurs when we introduce violations to the data. When there is a single violation, JanusGraph's performance is roughly equal to Neo4j's, and when there are many violations, JanusGraph is on par with TigerGraph.
+From the previous results, we can see there is a clear difference in performance between database systems. In nearly all scenarios, TigerGraph beats Neo4j by an order of magnitude, and JanusGraph is another order of magnitude slower. The only exception occurs when we introduce violations to the data. When there is a single violation, JanusGraph's performance is roughly equal to Neo4j's, and when there are many violations, JanusGraph is on par with TigerGraph.
 
-We are hesitant to draw conclusions about the optimal level of performance that could be achieved with better optimizations, since indexes and other optimizations can have a large impact on execution time. However, these results give an indication of the level of performance that can be expected from an initial implementation.
+We are hesitant to draw conclusions about the optimal level of performance that could be achieved with better optimizations specific to each database, since indexes and other optimizations can have a large impact on execution time. However, these results give an indication of the level of performance that can be expected from an initial implementation.
 
 \chapter{Limitations and Future Work}
 \label{ch:limitations}
 
 \section{Schema Formalism}
 
-Our schema formalism comes with a number of limitations.
+We discuss limitations and opportunities for improvement of our schema formalism as defined in \autoref{ch:pg-schema}.
 
 \paragraph{Subtyping.} \citet{barker1990entity} introduced the concept of subtyping to the ER model, \citet{lbath2021inference} included subtyping in their schema inference method, and we have seen subtype relations appearing in the SNB property graph schema (\autoref{fig:schema-snb}). Clearly, there is a need for subtyping in property graph schemas. This would help model domains containing type hierarchies more accurately, and would reduce duplication of schema edges and properties.
 
@@ -1162,27 +1162,26 @@ In \autoref{fig:subtyping}, a constraint is specified which we can express in wo
 
 \paragraph{Key constraints.} Our schema formalism does not support property uniqueness or key constraints. While key constraints were already present in ER models \citep{chen1976entity}, their application to property graphs is non-trivial. As argued in the \textsc{PG-Keys} proposal \citep{angles2021keys}, there is a need for granular and flexible key constraints. Keys should be applicable to nodes, edges, and properties, which could all represent concrete entities. Moreover, key scopes and descriptors should be defined in a way that allows objects to be keyed by their relations to other objects. Finally, keys may be \emph{exclusive}, \emph{mandatory}, \emph{singleton}, or any combination thereof. Future work should consolidate \textsc{PG-Keys} with a comprehensive schema formalism such as ours.
 
-\paragraph{Mutual exclusivity.} Another kind of constraint introduced by \citet{barker1990entity} is mutual exclusivity of edges. For example, a \texttt{Person} may have a \texttt{WORKS\_AT} edge to a \texttt{Bank} or a \texttt{TradingCompany}, but not both.
+\paragraph{Mutual exclusivity.} Another kind of constraint introduced by \citet{barker1990entity} is mutual exclusivity of edges. For example, a \texttt{Person} may have a \texttt{WORKS\_AT} edge to a \texttt{Bank} or a \texttt{TradingCompany}, but not both. Mutual exclusivity could be incorporated into our schema formalism, though we should carefully consider whether the benefits for users weigh up against the added complexity. Some constraints may be easier to understand and implement efficiently through seperate queries or another constraint language that sits on top of our schema validation queries.
 % TODO: union types?
 % TODO: object with any label?
 % TODO: multigraph edge cases
 
 \section{Empirical Evaluation}
 
-% TODO: We discuss threats to validity...
+We discuss limitations and threats to the validity of our experiments of \autoref{ch:experiment}.
 
-\paragraph{Internal validity.} This concerns the degree of confidence in the causal relationship between the dependent and independent variables in our study.
-% Instrumentation: time measuring. only affects difference between databases, which is huge anyway (or is this concept validity?)
+\paragraph{Internal validity.} This concerns the degree of confidence in the causal relationships which we inferred from our results. The way we measured validation time poses a threat to internal validity, because the instrumentation differed between databases. For Neo4j and TigerGraph, we rely on the query logs to yield an accurate measurement, while for JanusGraph we use the wall-clock time. The method of time measuring might create some variance between databases, although this can only explain a small part of the difference we observed.
 
-\paragraph{Construct validity.}
-% ?
+Furthermore, some variance in validation time can be explained by background processes and low-level CPU optimizations. We suspect this factor to have a small impact, though possibly significant when measuring on a sub-second timescale.
 
-\paragraph{External validity.} This concerns the generalization of our results.
-% Scale to larger data/schema?
-% If no additional experiment:
-% - Effect of schema with fixed scale
-% - Exact cardinality constraints
-% Different kinds of schema violations
+\paragraph{Construct validity.} This concerns the way our variables of interest were operationalized. One threat to construct validity comes from the way we introduced schema violations into the data. This was done by either removing a mandatory property or a mandatory edge for a node (depending on the database). In reality, different kinds of violations could occur: extraneous properties, incorrect datatypes, or incorrect edge cardinality and others. These could have differing effects on validation time.
+
+\paragraph{External validity.} This concerns the generalization of our results. One such threat comes from the scale of the datasets used in our experiment, which ranged from roughly 100K to 10M objects. We observed a linear relationship between the number of objects and the validation time. However, this relationship may not generalize to very large datasets, especially when they are too large to fit on a single disk.
+
+Another threat to external validity arises from the two schemas we have analyzed (Recommendations and SNB). The number of schemas is limited, and we did not perform any experiments to isolate the effect of different schemas. Moreover, the schemas are similar in terms of the kinds of constraints they express. Neither of the schemas contain cardinality constraints of the form ``exactly~$n$'', even though this can be expressed with our schema formalism. Future work could investigate the relationship between validation time and schema size or the kinds of constraints in the schema. This could be done by validating the same datasets against several schemas.
+
+Finally, it is unclear whether the differences between databases would persist when further optimizations are made. We tried to put equal effort into optimization for each database, but results may differ when more labor is exerted.
 
 \section{Miscellaneous}
 
