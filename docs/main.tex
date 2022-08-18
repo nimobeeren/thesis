@@ -665,9 +665,7 @@ We consider two variants of the schema validation problem:
   \item \textbf{Full validation:} given a graph and a schema, find all graph objects which cause a violation of at least one of the rules of schema conformance.
 \end{itemize}
 
-While a binary validation method may be sufficient for some use cases, full validation is required when we want to explain why a graph does not conform. Binary validation is a strictly easier problem because we can stop as soon as we find a single violation, while full validation always requires at least one full scan of the graph.
-
-% TODO: explain what it means for a graph object to "cause" a violation
+While a binary validation method may be sufficient for some use cases, full validation is required when we want to explain why a graph does not conform. Binary validation is a strictly easier problem because we can stop as soon as we find a single violation, while full validation always needs to find all violations in the graph.
 
 \section{Implementation}
 \label{sec:implementation}
@@ -995,7 +993,7 @@ Some statistics of the datasets are given in \autoref{tab:dataset-statistics}.
 
 \paragraph{Validation variant.} As described in \autoref{sec:variants}, we consider two variants of the validation problem: binary and full validation. For binary validation, we measure the time until the first violation is found (or until the last query has finished, if there are no violations). For the full variant, we measure until the last query has finished.
 
-\paragraph{Violation rate.} We expect the validation time of the binary variant to be affected by the number of violations in the data. If the data graph conforms to the schema, the entire graph needs to be scanned. However, as soon as a single violation is found, it can terminate. The higher the violation rate, the sooner we expect to terminate.
+\paragraph{Violation rate.} We expect the validation time of the binary variant to be affected by the number of violations in the data. If the data graph conforms to the schema, the entire graph is scanned. However, as soon as a single violation is found, it can terminate. The higher the violation rate, the sooner we expect to terminate.
 
 We consider three levels of violation rate:
 
@@ -1072,7 +1070,7 @@ These results suggest a linear relationship between number of objects and valida
 
 \subsection{\ref*{rq:violations}: Violation Rate}
 
-The workloads so far have all been on data that does not contain any schema violations, meaning that the data conforms to the schema. For this research question, we use the SNB dataset at SF0.1 and introduce some errors into the data. We only test the binary validation variant, because full validation requires a full scan of the graph, regardless of the number of violations. A one-way ANOVA is performed to test the null hypothesis that the mean validation time is the same for all violation rates for a particular database. The results are shown in \autoref{fig:results-violations} and \autoref{tab:results-violations}.
+The workloads so far have all been on data that does not contain any schema violations, meaning that the data conforms to the schema. For this research question, we use the SNB dataset at SF0.1 and introduce some errors into the data. We only test the binary validation variant, because we do not expect the amount of violations to make a significant impact on the full variant. A one-way ANOVA is performed to test the null hypothesis that the mean validation time is the same for all violation rates for a particular database. The results are shown in \autoref{fig:results-violations} and \autoref{tab:results-violations}.
 
 \begin{figure}[t]
   \centering
