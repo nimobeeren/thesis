@@ -42,10 +42,15 @@
 \renewcommand{\sectionautorefname}{Section}
 \renewcommand{\subsectionautorefname}{Subsection}
 
-% Bibliography and citation style
+% Bibliography and citations
 \usepackage[square]{natbib}
 \bibliographystyle{apalike}
 \renewcommand{\refname}{Bibliography}
+
+% Table of contents
+\renewcommand{\contentsname}{Table of Contents}
+% Add bibliography and other stuff
+\usepackage[nottoc]{tocbibind}
 
 % Captions
 \usepackage{caption}
@@ -136,6 +141,7 @@
 \renewcommand{\thepage}{\roman{page}}
 
 \tableofcontents
+% TODO: add bibliography to ToC
 \listoffigures
 \listoftables
 \lstlistoflistings
@@ -157,11 +163,13 @@ Our overarching goal is to develop an end-to-end framework for property graph sc
 
 \section{Graph Integrity Constraints}
 
-An area of research closely related to schema is that of integrity constraints. The problem of expressing and validating integrity constraints for graphs has received some attention in the literature. A large part of this research has been on functional dependencies, which has been studied extensively in the context of relational databases \citep{fagin1984theory,abiteboul1999data}. The idea of functional dependencies has been adapted to graph data, with the first work focussing on \emph{key constraints}, which aim to uniquely identify entities represented by nodes \citep{fan2015keys}. These have been extended to include more general dependencies \citep{fan2016functional}. The current state of the art of key constraints is presented in \textsc{PG-Keys} \citep{angles2021keys}. \citet{pokorny2017integrity} describe and implement several integrity constraints for property graphs, though a formal specification is not provided. For further discussion of graph integrity constraints, see \citet{bonifati2018querying}.
+An area of research closely related to schema is that of integrity constraints. The problem of expressing and validating integrity constraints for graphs has received some attention in the literature. A large part of this research has been on functional dependencies, which has been studied extensively in the context of relational databases \citep{fagin1984theory,abiteboul1999data}. The idea of functional dependencies has been adapted to graph data, with the first work focussing on \emph{key constraints}, which aim to uniquely identify entities represented by nodes \citep{fan2015keys}. These have been extended to include more general dependencies \citep{fan2016functional}. The current state of the art of key constraints is presented in \textsc{PG-Keys} \citep{angles2021keys}. For further discussion of graph integrity constraints, see \citet{bonifati2018querying}.
 
 \section{Graph Schema}
 
-While integrity constraints are typically scoped to a subset of the database, a schema serves as a model of the entire database. We will now discuss some approaches to graph schemas which have been discussed in the literature. While these methods are based on different graph models, they may be adapted to the property graph model. \citet{buneman1997adding} propose a method that represents both data and schema as edge-labeled graphs. This enables the specification of the types of edges and paths that are allowed to occur in a database instance, but does not cover mandatory edges or more general cardinality constraints.
+While integrity constraints are typically scoped to a subset of the database, a schema serves as a model of the entire database. We will now discuss some approaches to graph schemas which have been discussed in the literature. While these methods are based on different graph models, they may be adapted to the property graph model.
+
+\citet{buneman1997adding} propose a method that represents both data and schema as edge-labeled graphs. This enables the specification of the types of edges and paths that are allowed to occur in a database instance, but does not cover mandatory edges or more general cardinality constraints.
 
 \citet{colazzo2015typing} introduce another schema formalism for edge-labeled data graphs. They define a schema as a set of pairs $(r_{in}, r_{out})$, where $r_{in}$ and $r_{out}$ are regular expressions. The semantics is that every node must match a schema element $(r_{in}, r_{out})$, meaning that the node's incoming edges match $r_{in}$ and its outgoing edges match $r_{out}$. Using Regular Path Queries (RPQs), edge cardinality can be exactly specified. When extending the language to Nested Regular Expressions (NREs), it is possible to specify structural constraints over arbitrarily large graph patterns.
 
@@ -171,44 +179,82 @@ SHACL\footnote{\url{https://www.w3.org/TR/shacl/}} is a language for specifying 
 
 The property graph data model has been adopted by numerous contemporary graph database systems (dating back to at least 2007 with the first release of Neo4j\footnote{\url{https://neo4j.com/open-source-project/}}), but a formal specification was missing until one was proposed by \citet{angles2018property}. The author also brought integrity constraints to the property graph model, and defined a basic notion of schema using first-order logic rules. In this work, no distinction was made between mandatory and optional properties, nor were cardinality constraints addressed.
 
+\citet{pokorny2017integrity} describe and implement several integrity constraints for property graphs, including mandatory properties, endpoint constraints, data type constraints, cardinality constraints, and property uniqueness. In addition, they introduce \emph{label coexistence} constraints, which express that two particular labels may not occur on the same node, or that one label may only occur together with another label. However, these constraints are not formally specified, and they are not integrated into a schema model. To specify these kinds of constraints, a syntax extension for the Cypher query language \citep{francis2018cypher} is proposed. A prototypical implementation for Neo4j is given, which is briefly evaluated.
+
 \citet{bonifati2019schema} present a property graph schema validation approach based on graph homomorphisms. They differentiate between mandatory and optional properties, though edges are always interpreted as optional. Cardinality constraints are not discussed. The authors look at schemas from two different angles: they can be descriptive in the sense that they only reflect the data, or they can be prescriptive by means of enforcing constraints on data. This distinction is relevant in particular to the topic of schema evolution, where it may be desirable to switch between these two modes as an application matures. It is noted that most contemporary graph database systems only provide descriptive schema tools.
 
 \citet{lbath2021inference} look at property graph schemas from the perspective of schema inference. Their goal is to extract an accurate and complete schema for an arbitrary property graph instance. To this end, a property graph schema formalism is defined, supporting cardinality constraints, mandatory and optional edges, as well as subtyping. In addition, a syntax for schema definition is presented, and the schema inference pipeline is evaluated using real-world datasets. The problem of validating a graph against a given schema is not addressed. Statistical methods are applied in \citep{bonifati2022hierarchical} to improve performance.
 
 \citet{lei2021thesis} proposes a semi-automated method for schema extraction which incorporates expert knowledge. The user can adjust parameters and similarity measures which affect how the schema is generated. An implementation and experimental results are given. Cardinality constraints are not covered.
+% TODO: expand
+
+To summarize, \autoref{tab:pg-schema-literature} compares the main papers discussed in this section in terms of schema features, and places them alongside our schema formalism which is detailed in \autoref{ch:pg-schema}. We elaborate here on the meaning of the listed features. Mandatory property constraints express that some property must exist on a node or edge. Allowed property constraints express that no properties other than the ones explicitly specified may exist. Endpoint constraints express that edges may not connect nodes which do not conform to some specified types. Data type constraints express that the value of a property must be of a particular data type. Maximum and minimum cardinality constraints express that a node must have a particular number of incoming or outgoing edges of a particular type. Property uniqueness constraints express that no two nodes may have the same value for a particular property. Subtype relations express that an objects inherit properties or incident edges from another object. Label coexistence express which labels may or may not occur together on the same object.
+
+% TODO: fix overflow
+\begin{table}[t]
+  \centering
+  \begin{tabular}{lcccccc}
+    \hline
+     & \textbf{\citeauthor{angles2018property}} & \textbf{\citeauthor{pokorny2017integrity}}$^\dagger$ & \textbf{\citeauthor{bonifati2019schema}} & \textbf{\citeauthor{lbath2021inference}}$^\ddagger$ & \textbf{\citeauthor{lei2021thesis}} & \textbf{Ours} \\
+    \hline
+    \makecell[l]{Mandatory                                                                                                                                                                      \\properties}   & \no                & \yes                & \yes                 & \yes                & \yes          & \yes \\
+    \hline
+    \makecell[l]{Allowed                                                                                                                                                                        \\properties}     & \no                & \yes                 & \yes                & \yes                & \no          & \yes \\
+    \hline
+    \makecell[l]{Endpoint                                                                                                                                                                       \\constraints}    & \yes                & \yes                 & \yes                & \yes                & \yes          & \yes \\
+    \hline
+    \makecell[l]{Data type                                                                                                                                                                      \\constraints}   & \yes                & \yes                 & \yes                & \yes                & \yes          & \yes \\
+    \hline
+    \makecell[l]{Maximum                                                                                                                                                                        \\cardinality}     & \no                & \yes                 & \no               & \yes*                 & \no          & \yes \\
+    \hline
+    \makecell[l]{Minimum                                                                                                                                                                        \\cardinality}     & \no                & \yes                 & \no                 & \yes*                 & \no          & \yes \\
+    \hline
+    \makecell[l]{Property                                                                                                                                                                       \\uniqueness}    & \no               & \yes                & \no                 & \no                & \no           & \no \\
+    \hline
+    \makecell[l]{Label                                                                                                                                                                          \\coexistence} & \no                & \yes                & \no                 & \no                 & \no           & \no \\
+    \hline
+    \makecell[l]{Subtype                                                                                                                                                                        \\relations} & \no                & \no                 & \no                 & \yes                 & \no           & \no \\
+    \hline
+  \end{tabular}
+  \caption[Comparison of capabilities of property graph schema formalisms found in the literature and ours]{Comparison of capabilities of property graph schema formalisms found in the literature and ours as detailed in \autoref{ch:pg-schema}. $*$: only one-to-one, one-to-many, etc. \textdagger: only informal specification. {\footnotesize \textdaggerdbl}: no specification of conformance.}
+  \label{tab:pg-schema-literature}
+\end{table}
 
 \section{Property Graph Databases}
 
 Current property graph database systems vary in their support and philosophy around schema. Some require the user to specify a schema, while others infer a schema from data. In this section, we take a closer look at three of the most popular property graph databases: \emph{Neo4j}, \emph{JanusGraph}, and \emph{TigerGraph}.
 
-The schema features of these three databases are summarized in \autoref{tab:schema-comparison}, where they are compared to our schema formalism which is detailed in \autoref{ch:pg-schema}. We elaborate here on the meaning of the listed features. Mandatory property constraints express that some property must exist on a node or edge. Allowed property constraints express that no properties may exist, other than the ones explicitly specified. Endpoint constraints express that edges may not connect nodes which do not conform to some specified types. Data type constraints express that the value of a property must be of a particular data type. Maximum and minimum cardinality constraints express that a node must have some number of incoming or outgoing edges of a particular type. Property uniqueness constraints express that no two nodes may have the same value for a particular property.
+The schema features of these three databases are summarized in \autoref{tab:pg-schema-databases}, where they are compared to our schema formalism which is detailed in \autoref{ch:pg-schema}.
+% TODO: move table to the end
+% TODO: refer to implementation, not formalism
 
 \begin{table}[t]
   \centering
   \begin{tabular}{lccccc}
     \hline
-     & \textbf{Neo4j}     & \textbf{Neo4j}      & \textbf{JanusGraph} & \textbf{TigerGraph} & \textbf{Ours} \\
-     & \textbf{Community} & \textbf{Enterprise} &                     &                     &               \\
+     & \makecell{\textbf{Neo4j}\\\textbf{Community}}     & \makecell{\textbf{Neo4j}\\\textbf{Enterprise}}      & \textbf{JanusGraph} & \textbf{TigerGraph} & \textbf{Ours} \\
     \hline
-    \makecell{Mandatory                                                                                     \\properties}   & \no                & \yes                & \no                 & \yes                & \yes          \\
+    \makecell[l]{Mandatory                                                                                     \\properties}   & \no                & \yes                & \no                 & \yes                & \yes          \\
     \hline
-    \makecell{Allowed                                                                                       \\properties}     & \no                & \no                 & \yes                & \no                 & \yes          \\
+    \makecell[l]{Allowed                                                                                       \\properties}     & \no                & \no                 & \yes                & \no                 & \yes          \\
     \hline
-    \makecell{Endpoint                                                                                      \\constraints}    & \no                & \no                 & \yes                & \yes                & \yes          \\
+    \makecell[l]{Endpoint                                                                                      \\constraints}    & \no                & \no                 & \yes                & \yes                & \yes          \\
     \hline
-    \makecell{Data type                                                                                     \\constraints}   & \no                & \no                 & \yes                & \yes                & \yes          \\
+    \makecell[l]{Data type                                                                                     \\constraints}   & \no                & \no                 & \yes                & \yes                & \yes          \\
     \hline
-    \makecell{Maximum                                                                                       \\cardinality}     & \no                & \no                 & \yes*               & \no                 & \yes          \\
+    \makecell[l]{Maximum                                                                                       \\cardinality}     & \no                & \no                 & \yes*               & \no                 & \yes          \\
     \hline
-    \makecell{Minimum                                                                                       \\cardinality}     & \no                & \no                 & \no                 & \no                 & \yes          \\
+    \makecell[l]{Minimum                                                                                       \\cardinality}     & \no                & \no                 & \no                 & \no                 & \yes          \\
     \hline
-    \makecell{Property                                                                                      \\uniqueness}    & \yes               & \yes                & \no                 & \yes                & \no           \\
-    % \hline
-    % Subtyping   & \no & \no & \no & \no & \no \\
+    \makecell[l]{Property                                                                                      \\uniqueness}    & \yes               & \yes                & \no                 & \yes                & \no           \\
+    \hline
+    \makecell[l]{Label                                                                                         \\coexistence} & \no                & \no                 & \no                 & \no                 & \no            \\
+    \hline
+    \makecell[l]{Subtype                                                                                       \\relations} & \no                & \no                 & \no                 & \no                 & \no           \\
     \hline
   \end{tabular}
-  \caption[Comparison of schema capabilities of state-of-the-art property graph databases and our schema formalism]{Comparison of schema capabilities of state-of-the-art property graph databases and our schema formalism detailed in \autoref{ch:pg-schema}. *: only one-to-one, one-to-many, etc.}
-  \label{tab:schema-comparison}
+  \caption[Comparison of schema capabilities of current property graph databases and our implementation]{Comparison of schema capabilities of current property graph databases and our implementation as detailed in \autoref{ch:practice}. $*$: only one-to-one, one-to-many, etc.}
+  \label{tab:pg-schema-databases}
 \end{table}
 
 Next, we detail the differences between the three databases in our scope with respect to their data models and schema capabilities.
@@ -384,18 +430,18 @@ Next, we define what it means for a property graph to conform to a schema.
 
   \begin{enumerate}
     \item\label{rule:basic-node}
-          Every node $n$ conforms to some schema node $n'$:
-          \begin{align*}
-             & \forall n \in N \; \exists n' \in N' : n \conf n'
-          \end{align*}
+    Every node $n$ conforms to some schema node $n'$:
+    \begin{align*}
+       & \forall n \in N \; \exists n' \in N' : n \conf n'
+    \end{align*}
 
     \item\label{rule:basic-edge}
-          Every edge $e$ conforms to some schema edge $e'$, and the source and target nodes of $e$ conform to the respective endpoints of $e'$:
-          \begin{align*}
-             & \forall e \in E \; \exists e' \in E' :                      \\
-             & \quad e \conf e' \wedge \src(\rho(e)) \conf \src(\rho'(e'))
-            \wedge \trg(\rho(e)) \conf \trg(\rho'(e'))
-          \end{align*}
+    Every edge $e$ conforms to some schema edge $e'$, and the source and target nodes of $e$ conform to the respective endpoints of $e'$:
+    \begin{align*}
+       & \forall e \in E \; \exists e' \in E' :                      \\
+       & \quad e \conf e' \wedge \src(\rho(e)) \conf \src(\rho'(e'))
+      \wedge \trg(\rho(e)) \conf \trg(\rho'(e'))
+    \end{align*}
   \end{enumerate}
 \end{definition}
 
@@ -494,34 +540,34 @@ An example of a property graph schema with cardinality constraints is given in \
 
   \begin{enumerate}
     \item\label{rule:node}
-          Every node $n$ conforms to some schema node $n'$:
-          \begin{align*}
-             & \forall n \in N \; \exists n' \in N' : n \conf n'
-          \end{align*}
+    Every node $n$ conforms to some schema node $n'$:
+    \begin{align*}
+       & \forall n \in N \; \exists n' \in N' : n \conf n'
+    \end{align*}
 
     \item\label{rule:edge}
-          Every edge $e$ conforms to some schema edge $e'$, and the source and target nodes of $e$ conform to the respective endpoints of $e'$:
-          \begin{align*}
-             & \forall e \in E \; \exists e' \in E' :                      \\
-             & \quad e \conf e' \wedge \src(\rho(e)) \conf \src(\rho'(e'))
-            \wedge \trg(\rho(e)) \conf \trg(\rho'(e'))
-          \end{align*}
+    Every edge $e$ conforms to some schema edge $e'$, and the source and target nodes of $e$ conform to the respective endpoints of $e'$:
+    \begin{align*}
+       & \forall e \in E \; \exists e' \in E' :                      \\
+       & \quad e \conf e' \wedge \src(\rho(e)) \conf \src(\rho'(e'))
+      \wedge \trg(\rho(e)) \conf \trg(\rho'(e'))
+    \end{align*}
 
     \item\label{rule:out}
-          If a node $n$ conforms to the source of a schema edge $e'$, it must have the right number of outgoing edges of the right type:
-          \begin{align*}
-             & \forall n \in N \; \forall e' \in E' :                                                        \\
-             & \quad \big[n \conf \src(\rho(e')) \implies \exists^{\src(\eta(e'))} e \in E :                 \\
-             & \quad\quad e \conf e' \wedge \src(\rho(e)) = n \wedge \trg(\rho(e)) \conf \trg(\rho(e'))\big]
-          \end{align*}
+    If a node $n$ conforms to the source of a schema edge $e'$, it must have the right number of outgoing edges of the right type:
+    \begin{align*}
+       & \forall n \in N \; \forall e' \in E' :                                                        \\
+       & \quad \big[n \conf \src(\rho(e')) \implies \exists^{\src(\eta(e'))} e \in E :                 \\
+       & \quad\quad e \conf e' \wedge \src(\rho(e)) = n \wedge \trg(\rho(e)) \conf \trg(\rho(e'))\big]
+    \end{align*}
 
     \item\label{rule:in}
-          If a node $n$ conforms to the target of a schema edge $e'$, it must have the right number of incoming edges of the right type:
-          \begin{align*}
-             & \forall n \in N \; \forall e' \in E' :                                                        \\
-             & \quad \big[n \conf \trg(\rho(e')) \implies \exists^{\trg(\eta(e'))} e \in E :                 \\
-             & \quad\quad e \conf e' \wedge \src(\rho(e)) \conf \src(\rho(e')) \wedge \trg(\rho(e)) = n\big]
-          \end{align*}
+    If a node $n$ conforms to the target of a schema edge $e'$, it must have the right number of incoming edges of the right type:
+    \begin{align*}
+       & \forall n \in N \; \forall e' \in E' :                                                        \\
+       & \quad \big[n \conf \trg(\rho(e')) \implies \exists^{\trg(\eta(e'))} e \in E :                 \\
+       & \quad\quad e \conf e' \wedge \src(\rho(e)) \conf \src(\rho(e')) \wedge \trg(\rho(e)) = n\big]
+    \end{align*}
   \end{enumerate}
 \end{definition}
 
@@ -601,7 +647,7 @@ It may be desirable to allow a record to have properties with any name or any va
 
 \section{Mapping Functionality to Rules}
 
-In \autoref{ch:related-work}, we compared the capabilities of existing property graph schema implementations. We can now see how all but one of the features in \autoref{tab:schema-comparison} can be mapped to one of our conformance rules.
+In \autoref{ch:related-work}, we compared the capabilities of existing property graph schema implementations. We can now see how all but one of the features in \autoref{tab:pg-schema-databases} can be mapped to one of our conformance rules.
 
 Mandatory and allowed properties are captured by our notion of record conformance (\autoref{def:record-conformance}), which corresponds to \autoref{rule:node}. Endpoint constraints correspond to \autoref{rule:edge}. Data type constraints are captured by our notion of object conformance (\autoref{def:object-conformance}), and correspond to \autoref{rule:node}. Cardinality constraints correspond to \autoref{rule:out} and \ref{rule:in}. Property uniqueness is not covered by our formalism.
 
@@ -623,30 +669,30 @@ Under this assumption, we can simplify the conformance rules. Informally:
   \item
         \begin{enumerate}
           \item\label{rule:simp-node-labels}
-                Every node has the same set of labels as some schema node.
+          Every node has the same set of labels as some schema node.
           \item\label{rule:simp-node-mandatory-props}
-                All mandatory properties exist on the node.
+          All mandatory properties exist on the node.
           \item\label{rule:simp-node-allowed-props}
-                The node has no properties that are not allowed.
+          The node has no properties that are not allowed.
           \item\label{rule:simp-node-datatype}
-                All node properties have a value of the right type.
+          All node properties have a value of the right type.
         \end{enumerate}
   \item
         \begin{enumerate}
           \item\label{rule:simp-edge-labels}
-                Every edge has the same set of labels as some schema edge.
+          Every edge has the same set of labels as some schema edge.
           \item\label{rule:simp-edge-mandatory-props}
-                All mandatory properties exist on the edge.
+          All mandatory properties exist on the edge.
           \item\label{rule:simp-edge-allowed-props}
-                The edge has no properties that are not allowed.
+          The edge has no properties that are not allowed.
           \item\label{rule:simp-edge-datatype}
-                All edge properties have a value of the right type.
+          All edge properties have a value of the right type.
           \item\label{rule:simp-edge-endpoints}
-                Both endpoints of the edge have the right labels.
+          Both endpoints of the edge have the right labels.
         \end{enumerate}
-  \item\label{rule:simp-card-out}
+        \item\label{rule:simp-card-out}
         Every node has the right number of outgoing edges with the right labels.
-  \item\label{rule:simp-card-in}
+        \item\label{rule:simp-card-in}
         Every node has the right number of incoming edges with the right labels.
 \end{enumerate}
 
@@ -946,6 +992,7 @@ To answer our research questions, we perform an experimental study to evaluate t
 \subsection{Independent Variables}
 
 \paragraph{Database.} We evaluate the three databases which we have focused on throughout this thesis: \emph{Neo4j}, \emph{JanusGraph}, and \emph{TigerGraph}. In our experiments, we use Neo4j Enterprise edition, which supports mandatory property constraints.
+% TODO: exact db versions
 
 \paragraph{Dataset.} To determine the impact of different schemas and scales on the performance of our implementation, we apply our methods to two datasets:
 
@@ -1027,21 +1074,21 @@ We run both the binary and full validation queries on all datasets. For these wo
   \centering
   \begin{tabular}{llrrrr}
     \hline
-    \textbf{Database}           & \textbf{Dataset} & \multicolumn{2}{c}{\textbf{Mean validation time (s)}} & \textbf{t}      & \textbf{p}                      \\
-                                &                  & \textbf{Full}                                         & \textbf{Binary} &            &                    \\
+    \textbf{Database}           & \textbf{Dataset} & \multicolumn{2}{c}{\textbf{Mean validation time (s)}} & \textbf{t}      & \textbf{p}                                \\
+                                &                  & \textbf{Full}                                         & \textbf{Binary} &            &                              \\
     \hline
     \multirow{4}{*}{Neo4j}      & SNB (SF1)        & 171.89                                                & 68.17           & 49.9       & $\mathbf{<}\textbf{0.0001*}$ \\
                                 & SNB (SF0.3)      & 47.13                                                 & 20.18           & 28.9       & $\mathbf{<}\textbf{0.0001*}$ \\
                                 & SNB (SF0.1)      & 17.71                                                 & 7.38            & 31.3       & $\mathbf{<}\textbf{0.0001*}$ \\
-                                & Recommendations  & 1.48                                                  & 1.55            & -0.37      & 0.731              \\
+                                & Recommendations  & 1.48                                                  & 1.55            & -0.37      & 0.731                        \\
     \hline
-    \multirow{2}{*}{JanusGraph} & SNB (SF0.1)      & 56.41                                                 & 56.74           & -0.56      & 0.608              \\
-                                & Recommendations  & 6.05                                                  & 6.11            & -0.42      & 0.697              \\
+    \multirow{2}{*}{JanusGraph} & SNB (SF0.1)      & 56.41                                                 & 56.74           & -0.56      & 0.608                        \\
+                                & Recommendations  & 6.05                                                  & 6.11            & -0.42      & 0.697                        \\
     \hline
-    \multirow{4}{*}{TigerGraph} & SNB (SF1)        & 1.01                                                  & 1.02            & -0.66      & 0.546              \\
-                                & SNB (SF0.3)      & 0.29                                                  & 0.38            & -1.34      & 0.252              \\
-                                & SNB (SF0.1)      & 0.11                                                  & 0.14            & -0.78      & 0.478              \\
-                                & Recommendations  & 0.02                                                  & 0.02            & 0.32       & 0.768              \\
+    \multirow{4}{*}{TigerGraph} & SNB (SF1)        & 1.01                                                  & 1.02            & -0.66      & 0.546                        \\
+                                & SNB (SF0.3)      & 0.29                                                  & 0.38            & -1.34      & 0.252                        \\
+                                & SNB (SF0.1)      & 0.11                                                  & 0.14            & -0.78      & 0.478                        \\
+                                & Recommendations  & 0.02                                                  & 0.02            & 0.32       & 0.768                        \\
     \hline
   \end{tabular}
   \caption[Mean validation time for binary and full variants]{Mean validation time for binary and full variants on all datasets with no schema violations. A two-sided T-test is performed to test for a difference between the mean validation time for the full and binary variant. We give the \emph{t-statistic} as defined by \citet{student1908probable}, as well as the p-value. Significant results (p $< 0.05$) are marked with a *.}
