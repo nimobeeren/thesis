@@ -317,7 +317,7 @@ The functions $\src$ and $\trg$ map ordered pairs to their first and second elem
 
 An example of a property graph is given in \autoref{fig:pg}. Nodes are drawn as boxes, and edges are drawn as arrows. Node labels are written in the top compartment, and node properties are written in the bottom compartment. Edge labels are written inside a pill and edge properties are surrounded by `\{' and `\}', which may be omitted when an edge has no properties.
 
-The example of \autoref{fig:pg} can be mapped to our formal model as follows:
+The example of \autoref{fig:pg} can be mapped to our formal property graph model as follows:
 \begin{align*}
   &N = \{n_1, n_2, n_3, n_4, n_5\}\\
   &E = \{e_1, e_2, e_3, e_4, e_5\}\\
@@ -422,7 +422,16 @@ An example of a basic property graph schema is given in \autoref{fig:pg-schema-b
 
 Note that a property graph schema can be simulated by a property graph if we allow properties to take property types as values, i.e. $\ptypes \subseteq \mathcal{V}$. Then we let $\lambda$ and $\pi$ take the role of $\omega$: for all objects $o$ in the property graph, if $\omega(o) = (L, \rtype)$ then $\lambda(o) = L$ and $\pi(o) = \rtype$.
 
-% TODO: map schema to formal model
+The example of \autoref{fig:pg-schema-basic} can be mapped to our basic property graph schema model as follows:
+\begin{align*}
+  &N = \{n_1, n_2\}\\
+  &E = \{e_1, e_2\}\\
+  &\rho(e1) = (n_1, n_2) \quad \rho(e_2) = (n_1, n_1)\\
+  &\lambda(n_1) = \{\texttt{Person}\} \quad \lambda(n_2) = \{\texttt{Person}\} \quad \lambda(e_1) = \{\texttt{CREATED}\} \quad \lambda(e_2) = \{\texttt{KNOWS}\}\\
+  &\omega(n_1) = (\{\texttt{Person}\}, \langle \texttt{id} : \texttt{ID},\;\texttt{name} : \texttt{String},\;\texttt{birthday} : \texttt{Date} \rangle)\\
+  &\omega(n_2) = (\{\texttt{Post}\}, \langle \texttt{id} : \texttt{ID},\;\texttt{content} : \texttt{String},\;\texttt{length} : \texttt{Integer},\;\texttt{creationDate} : \texttt{Date} \rangle)\\
+  &\omega(e_1) = (\{\texttt{CREATED}\}, \langle\rangle) \quad \omega(e_2) = (\{\texttt{KNOWS}\}, \langle \texttt{since} : \texttt{Date} \rangle)
+\end{align*}
 
 We can relate our schema formalism to the ER model once again. Our definitions of schema nodes and schema edges are analogous to the concepts of \emph{entity set} and \emph{relationship set}, respectively. Entity sets and schema nodes represent classes of entities that have something in common, whereas relationship sets and schema edges represent classes of relationships. \autoref{tab:er-pg-schema} summarizes the relationship between the ER model and our schema formalism.
 
@@ -441,7 +450,7 @@ We can relate our schema formalism to the ER model once again. Our definitions o
   \label{tab:er-pg-schema}
 \end{table}
 
-To make it easier to reason about objects conforming to schema objects, we define the \emph{conformance relation}.
+To make it easier to reason about objects conforming to schema objects, we introduce the \emph{conformance relation}.
 
 \begin{definition}[Conformance relation]
   Given a property graph $$G = (N, E, \rho, \lambda, \pi)$$ and a property graph schema $$S = (N', E', \rho', \omega)$$ we define the binary \emph{conformance relation} $$\conf \; = \{(o, o') \in (N \cup E) \times (N' \cup E') \mid o \in \sem{\omega(o')}\}$$ We say that an object $o$ \emph{conforms} to a schema object $o'$ if and only if $o \conf o'$.
