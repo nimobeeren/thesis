@@ -128,7 +128,11 @@
 \newcommand{\yes}{\cellcolor{lightgreen}\color{green}\checkmark}
 \newcommand{\no}{\cellcolor{lightred}\color{red}$\times$}
 
+% Conformance rules
 \renewcommand{\itemautorefname}{Rule}
+
+% Paragraph seperator
+\newcommand{\sep}{\begin{center}\rule{0.33333\textwidth}{0.4pt}\vspace{4pt}\end{center}}
 
 \title{Property Graph Schemas}
 \author{Nimo Beeren}
@@ -228,9 +232,23 @@ To summarize, \autoref{tab:pg-schema-literature} compares the main papers discus
 
 Current property graph database systems vary in their support and philosophy around schema. Some require the user to specify a schema, while others infer a schema from data. In this section, we take a closer look at three of the most popular property graph databases: \emph{Neo4j}, \emph{JanusGraph}, and \emph{TigerGraph}.
 
+Next, we detail the differences between the three databases in our scope with respect to their data models and schema capabilities.
+
+\paragraph{Neo4j.} Being one of the first to adopt the property graph data model, Neo4j has grown to become the most popular graph database engine today\footnote{\url{https://db-engines.com/en/ranking/graph+dbms} (accessed July 2022)}. Neo4j supports the Cypher query language \citep{francis2018cypher}. Their data model differs from ours in that edges can only have a single label, while nodes can have multiple.
+
+Neo4j's approach to schema is primarily implicit: after inserting data, a schema that describes the data can be automatically constructed using built-in functions. In addition, some constraints can be explicitly specified, namely existence of mandatory properties and key constraints (enterprise edition only), and uniqueness of property values. Note that if a property is a key, then it is mandatory and unique.
+
+\paragraph{JanusGraph.} Originating from the open source Titan project, JanusGraph is a continuation of the effort to create a distributed and highly scalable graph database. The Gremlin query language \citep{rodriguez2015gremlin} enables pattern matching by means of graph traversals. In JanusGraph's data model, nodes and edges always have one label. Properties can have sets and lists as values, and there may exist multiple properties with the same key on the same node. Furthermore, properties themselves can have properties. In this sense, the data model is like a blend of property graphs and RDF \citep{pan2009rdf}.
+
+JanusGraph has the largest set of schema features among all systems we have investigated. Similarly to Neo4j, JanusGraph can automatically generate a schema during operation. However, this functionality can be disabled, in which case the schema must be explicitly defined. There is built-in support for specifying which node labels, edge labels, and property names may exist. Furthermore, it can be specified which properties may exist depending on the label of a node or edge. Property values are restricted to a data type and may be single-valued or multi-valued (lists or sets). In addition, the types of the source and target nodes that may be connected by an edge with a particular label can be constrained. Edge cardinality can be constrained to one-to-one, one-to-many, many-to-one, many-to-many, or ``simple'' (at most one edge of a particular label between any pair of nodes). Finally, there are features to support static (immutable) nodes, time-to-live (TTL), and unidirectional edges which can only be traversed from source to target.
+
+All of JanusGraph's schema features are centered around specifying what is allowed in the graph, but mandatory properties and edges are not supported. Cardinality constraints are supported, but not to the full extent of our definition. To be precise, JanusGraph can impose constraints on the maximum edge cardinality, but not the minimum. For example, a many-to-one schema edge ensures that every target node has at most one incoming edge of a particular type, but does not prevent a target node from having no incoming edges.
+
+\paragraph{TigerGraph.} A unique aspect of TigerGraph \citep{deutsch2019tigergraph} is that it is schema-first: the entire schema must be specified before a database is instantiated. This allows for more powerful optimizations, building on decades of research on relational databases. The query language is GSQL: an extension of SQL with graph pattern matching capabilities. In TigerGraph's data model, nodes and edges have exactly one label, but nodes can be associated with any number of \emph{tags}, which are conceptually similar to labels. Edges can be directed or undirected.
+
+TigerGraph's schema is strict, in the sense that every node label, edge label, and property must be explicitly defined. All properties are mandatory and have a fixed data type, which may be singular or multi-valued. There are no null values; if a property value is missing during insertion, a default value is used. All nodes have a primary key, which may be a single property or a composite key. Schema edges must specify a source and target node type, though it is possible to specify multiple types on either side. By default, directed edges can only be traversed from source to target, though a reverse edge can be automatically constructed if desired.
+
 The schema features of these three databases are summarized in \autoref{tab:pg-schema-databases}, where they are compared to our schema formalism which is detailed in \autoref{ch:pg-schema}.
-% TODO: move table to the end
-% TODO: refer to implementation, not formalism
 
 \begin{table}[t]
   \centering
@@ -260,22 +278,6 @@ The schema features of these three databases are summarized in \autoref{tab:pg-s
   \caption[Comparison of current property graph databases and our implementation]{Comparison of current property graph databases and our implementation as detailed in \autoref{ch:practice}. $*$: only one-to-one, one-to-many, etc.}
   \label{tab:pg-schema-databases}
 \end{table}
-
-Next, we detail the differences between the three databases in our scope with respect to their data models and schema capabilities.
-
-\paragraph{Neo4j.} Being one of the first to adopt the property graph data model, Neo4j has grown to become the most popular graph database engine today\footnote{\url{https://db-engines.com/en/ranking/graph+dbms} (accessed July 2022)}. Neo4j supports the Cypher query language \citep{francis2018cypher}. Their data model differs from ours in that edges can only have a single label, while nodes can have multiple.
-
-Neo4j's approach to schema is primarily implicit: after inserting data, a schema that describes the data can be automatically constructed using built-in functions. In addition, some constraints can be explicitly specified, namely existence of mandatory properties and key constraints (enterprise edition only), and uniqueness of property values. Note that if a property is a key, then it is mandatory and unique.
-
-\paragraph{JanusGraph.} Originating from the open source Titan project, JanusGraph is a continuation of the effort to create a distributed and highly scalable graph database. The Gremlin query language \citep{rodriguez2015gremlin} enables pattern matching by means of graph traversals. In JanusGraph's data model, nodes and edges always have one label. Properties can have sets and lists as values, and there may exist multiple properties with the same key on the same node. Furthermore, properties themselves can have properties. In this sense, the data model is like a blend of property graphs and RDF \citep{pan2009rdf}.
-
-JanusGraph has the largest set of schema features among all systems we have investigated. Similarly to Neo4j, JanusGraph can automatically generate a schema during operation. However, this functionality can be disabled, in which case the schema must be explicitly defined. There is built-in support for specifying which node labels, edge labels, and property names may exist. Furthermore, it can be specified which properties may exist depending on the label of a node or edge. Property values are restricted to a data type and may be single-valued or multi-valued (lists or sets). In addition, the types of the source and target nodes that may be connected by an edge with a particular label can be constrained. Edge cardinality can be constrained to one-to-one, one-to-many, many-to-one, many-to-many, or ``simple'' (at most one edge of a particular label between any pair of nodes). Finally, there are features to support static (immutable) nodes, time-to-live (TTL), and unidirectional edges which can only be traversed from source to target.
-
-All of JanusGraph's schema features are centered around specifying what is allowed in the graph, but mandatory properties and edges are not supported. Cardinality constraints are supported, but not to the full extent of our definition. To be precise, JanusGraph can impose constraints on the maximum edge cardinality, but not the minimum. For example, a many-to-one schema edge ensures that every target node has at most one incoming edge of a particular type, but does not prevent a target node from having no incoming edges.
-
-\paragraph{TigerGraph.} A unique aspect of TigerGraph \citep{deutsch2019tigergraph} is that it is schema-first: the entire schema must be specified before a database is instantiated. This allows for more powerful optimizations, building on decades of research on relational databases. The query language is GSQL: an extension of SQL with graph pattern matching capabilities. In TigerGraph's data model, nodes and edges have exactly one label, but nodes can be associated with any number of \emph{tags}, which are conceptually similar to labels. Edges can be directed or undirected.
-
-TigerGraph's schema is strict, in the sense that every node label, edge label, and property must be explicitly defined. All properties are mandatory and have a fixed data type, which may be singular or multi-valued. There are no null values; if a property value is missing during insertion, a default value is used. All nodes have a primary key, which may be a single property or a composite key. Schema edges must specify a source and target node type, though it is possible to specify multiple types on either side. By default, directed edges can only be traversed from source to target, though a reverse edge can be automatically constructed if desired.
 
 \chapter{Property Graphs}
 
