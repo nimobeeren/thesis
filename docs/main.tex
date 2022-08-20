@@ -285,13 +285,11 @@ We start by introducing our data model, which is based on the definition of \emp
 
 Our notion of property graph represents data as a directed attributed multigraph. Nodes and edges carry data in the form of a set of labels and a set of key--value pairs, called \emph{properties}. We use the umbrella term \emph{objects} to refer to nodes and edges. Being a \emph{multigraph}, a property graph allows the existence of multiple edges between two nodes $u$ and $v$. Furthermore, we allow $u = v$, in which case the edge is called a \emph{self-loop}. For ease of notation, we do not consider undirected edges, although they could be simulated by attaching a special label or property to an edge.
 
-An example of a property graph is given in \autoref{fig:pg}. Nodes are drawn as boxes, and edges are drawn as arrows. Node labels are written in the top compartment, and node properties are written in the bottom compartment. Edge labels are written inside a pill and edge properties are surrounded by `\{' and `\}', which may be omitted when an edge has no properties.
-
 For a formal definition, we assume the existence of the following countably infinite sets: the set of labels $\mathcal{L}$, the set of property names $\mathcal{N}$ and the set of property values $\mathcal{V}$.
 
 \begin{definition}[Basic record]
   \label{def:record-basic}
-  A \emph{record} is a finite partial function $r : \mathcal{N} \pto \mathcal{V}$ that maps some property names to property values. The set of all records is denoted as $\mathcal{R}$.
+  A \emph{record} is a finite partial function $r : \mathcal{N} \pto \mathcal{V}$ that maps some property names to property values. We denote such records as $\langle n_1 : v_1, \ldots, n_k : v_k \rangle$ The set of all records is denoted as $\mathcal{R}$.
 \end{definition}
 
 \begin{definition}[Property graph]
@@ -313,9 +311,27 @@ The functions $\src$ and $\trg$ map ordered pairs to their first and second elem
 \begin{figure}[t]
   \centering
   \includegraphics{figures/pg.pdf}
-  \caption{A property graph representing a small social network.}
+  \caption[A property graph representing a small movie database]{A property graph consisting of 5 nodes and 5 edges, representing a small movie database. Nodes and edges are given identifiers (in blue circles) in order to refer to them in text.}
   \label{fig:pg}
 \end{figure}
+
+An example of a property graph is given in \autoref{fig:pg}. Nodes are drawn as boxes, and edges are drawn as arrows. Node labels are written in the top compartment, and node properties are written in the bottom compartment. Edge labels are written inside a pill and edge properties are surrounded by `\{' and `\}', which may be omitted when an edge has no properties.
+
+The example of \autoref{fig:pg} can be mapped to our formal model as follows:
+\begin{align*}
+  &N = \{n_1, n_2, n_3, n_4, n_5\}\\
+  &E = \{e_1, e_2, e_3, e_4, e_5\}\\
+  &\rho(e_1) = (n_1, n_3) \quad \rho(e_2) = (n_2, n_3) \quad \rho(e_3) = (n_4, n_3) \quad \rho(e_4) = (n_4, n_3) \quad \rho(e_5) = (n_3, n_5)\\
+  &\lambda(n_1) = \{\texttt{Person}, \texttt{Actor}, \texttt{Director}\} \quad \lambda(n_2) = \{\texttt{Person}, \texttt{Director}\} \quad \lambda(n_3) = \{\texttt{Movie}\}\\
+  &\lambda(n_4) = \{\texttt{User}\} \quad \lambda(n_5) = \{\texttt{Genre}\} \quad \lambda(e_1) = \{\texttt{ACTED}\} \quad \lambda(e_2) = \{\texttt{DIRECTED}\}\\
+  &\lambda(e_3) = \{\texttt{RATED}\} \quad \lambda(e_4) = \{\texttt{RATED}\} \quad \lambda(e_5) = \{\texttt{IN\_GENRE}, \texttt{CLASSIC}\}\\
+  &\pi(n_1) = \langle \texttt{born} : \texttt{1930-05-31},\;\texttt{name} : \texttt{Clint Eastwood},\;\texttt{url} : \texttt{person/190} \rangle\\
+  &\pi(n_2) = \langle \texttt{born} : \texttt{1929-01-03},\;\texttt{name} : \texttt{Sergio Leone},\;\texttt{url} : \texttt{person/4385} \rangle\\
+  &\pi(n_3) = \langle \texttt{rating} : \texttt{8.9},\;\texttt{title} : \texttt{The Good, the Bad and the Ugly},\;\texttt{url} : \texttt{movie/429},\\
+  &\quad\texttt{year} : \texttt{1966} \rangle \quad \pi(n_4) = \langle \texttt{name} : \texttt{Deborah} \rangle \quad \pi(n_5) = \langle \texttt{name} : \texttt{Western} \rangle\\
+  &\pi(e_1) = \langle \texttt{role} : \texttt{Blondie} \rangle \quad \pi(e_2) = \langle\rangle \quad \pi(e_3) = \langle \texttt{timestamp} : \texttt{1970-01-14},\;\texttt{rating} : \texttt{2.0}\rangle\\
+  &\pi(e_4) = \langle \texttt{timestamp} : \texttt{1979-07-31},\;\texttt{rating} : \texttt{5.0}\rangle \quad \pi(e_5) = \langle\rangle
+\end{align*}
 
 \chapter{Property Graph Schemas}
 \label{ch:pg-schema}
@@ -373,8 +389,7 @@ The concept of property type is similar to a \emph{value set} in the ER model. V
 
 \begin{definition}[Basic record type]
   \label{def:record-type-basic}
-  A \emph{record type} is a finite partial function $\rtype : \mathcal{N} \pto \ptypes$ that maps some property names to a property type.
-  % We denote such record types as $\langle a_1 : \ptype_1, \ldots, a_n : \ptype_n \rangle$.
+  A \emph{record type} is a finite partial function $\rtype : \mathcal{N} \pto \ptypes$ that maps some property names to a property type. We denote such record types as $\langle a_1 : \ptype_1, \ldots, a_n : \ptype_n \rangle$.
 \end{definition}
 
 \begin{definition}[Basic record conformance]
@@ -624,7 +639,7 @@ We revise the definition of record by adding a special property value $\undefine
 
 \begin{definition}[Record]
   \label{def:record}
-  A \emph{record} is a total function $r : \mathcal{N} \to \mathcal{V} \cup \{\undefined\}$ that maps property names to property values or the special value $\undefined$. The set of all records is denoted as $\mathcal{R}$.
+  A \emph{record} is a total function $r : \mathcal{N} \to \mathcal{V} \cup \{\undefined\}$ that maps property names to property values or the special value $\undefined$. We denote such records as $\langle n_1 : v_1, \ldots, n_k : v_k \rangle$. The set of all records is denoted as $\mathcal{R}$.
 \end{definition}
 
 For a record $r$ and a property name $k \in \mathcal{N}$ such that $r(k)$ was previously undefined, we now say $r(k) = \undefined$. This can be seen as the ``default'' value of a property.
@@ -638,8 +653,7 @@ We adjust the definitions of property conformance, record type, and record confo
 
 \begin{definition}[Record type]
   \label{def:record-type}
-  A \emph{record type} is a total function $\rtype : \mathcal{N} \to \ptypes$ that maps property names to a property type.
-  % We denote such record types as $\langle a_1 : \rtype_1, \ldots, a_n : \rtype_n \rangle$.
+  A \emph{record type} is a total function $\rtype : \mathcal{N} \to \ptypes$ that maps property names to property types. We denote such record types as $\langle n_1 : \ptype_1, \ldots, n_k : \ptype_k \rangle$.
 \end{definition}
 
 \begin{definition}[Record conformance]
