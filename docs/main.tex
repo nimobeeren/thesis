@@ -661,7 +661,7 @@ We adjust the definitions of property conformance, record type, and record confo
   We say that a record $r$ \emph{conforms} to a record type $\rtype$, denoted $r \in \sem{\rtype}$, if and only if for each property name $k \in \mathcal{N}$ it holds that $r(k) \in \sem{\rtype(k)}$.
 \end{definition}
 
-An example containing an optional property is shown in \autoref{fig:optional-property}. This examples illustrates that optional properties may be omitted, but if they are present, they must have a value of the right type.
+An example of a schema containing an optional property is shown in \autoref{fig:optional-property}. This examples illustrates that optional properties may be omitted, but if they are present, they must have a value of the right type.
 
 \begin{figure}[t]
   \centering
@@ -676,7 +676,7 @@ An example containing an optional property is shown in \autoref{fig:optional-pro
     \includegraphics[scale=0.75]{figures/conformance-optional-prop.pdf}
     \caption{A property graph consisting of three disconnected nodes. Properties with a value of $\undefined$ are not shown.}
   \end{subfigure}
-  \caption[A property graph validated against a schema containing an optional property]{A property graph validated against a schema containing an optional property. The node with \texttt{id}~:~\texttt{2} violates \autoref{rule:node} because the \texttt{height} property value has the wrong type.}
+  \caption[A property graph validated against a schema containing an optional property]{A property graph validated against a schema containing an optional property. The node with \texttt{id}~:~\texttt{2} violates \autoref{rule:node} because the \texttt{height} property value is of the wrong type.}
   \label{fig:optional-property}
 \end{figure}
 
@@ -684,11 +684,30 @@ An example containing an optional property is shown in \autoref{fig:optional-pro
 
 It may be desirable to allow a record to have properties with any name or any value. Such \emph{open record types} can already be expressed under the current definitions. For a record type $\rtype$, we can allow properties with any name by setting $\rtype(k) = \ptype?$ for all (previously unspecified) property names $k \in \mathcal{N}$, where $\ptype$ is an arbitrary property type. Note that there may be infinitely many such $k$, so in practice we may want to have a special syntax to express this. We can allow these properties to have any value by choosing a $\ptype$ such that $\sem{\ptype} = \mathcal{V}$, or we can restrict them to a subset of $\mathcal{V}$.
 
+An example of a schema containing an open record type is shown in \autoref{fig:open-record}. An open record type allows properties with any name, but still requires explicitly defined properties to be of the right type.
+
+\begin{figure}[t]
+  \centering
+  \begin{subfigure}[t]{0.8\textwidth}
+    \centering
+    \includegraphics[scale=0.75]{figures/pg-schema-open-record.pdf}
+    \caption{A schema consisting of a single schema node. Open records are indicated with \ldots at the bottom.}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}[t]{0.8\textwidth}
+    \centering
+    \includegraphics[scale=0.75]{figures/conformance-open-record.pdf}
+    \caption{A property graph consisting of three disconnected nodes.}
+  \end{subfigure}
+  \caption[A property graph validated against a schema containing an open record type]{A property graph validated against a schema containing an open record type. The node with \texttt{id}~:~\texttt{2} violates \autoref{rule:node} because the \texttt{birthday} property value is of the the wrong type.}
+  \label{fig:open-record}
+\end{figure}
+
 \section{Mapping Functionality to Rules}
 
-In \autoref{ch:related-work}, we compared the capabilities of existing property graph schema implementations. We can now see how all but one of the features in \autoref{tab:pg-schema-databases} can be mapped to one of our conformance rules.
+In \autoref{ch:related-work}, we compared the capabilities of existing property graph schema implementations. We can now see how most of the features in \autoref{tab:pg-schema-databases} can be mapped to one of our conformance rules.
 
-Mandatory and allowed properties are captured by our notion of record conformance (\autoref{def:record-conformance}), which corresponds to \autoref{rule:node}. Endpoint constraints correspond to \autoref{rule:edge}. Data type constraints are captured by our notion of object conformance (\autoref{def:object-conformance}), and correspond to \autoref{rule:node}. Cardinality constraints correspond to \autoref{rule:out} and \ref{rule:in}. Property uniqueness is not covered by our formalism.
+Mandatory and allowed properties are captured by our notion of record conformance (\autoref{def:record-conformance}), which corresponds to \autoref{rule:node}. Endpoint constraints correspond to \autoref{rule:edge}. Data type constraints are captured by our notion of object conformance (\autoref{def:object-conformance}), and correspond to \autoref{rule:node}. Cardinality constraints correspond to \autoref{rule:out} and \ref{rule:in}. Property uniqueness, label coexistence, and subtype relations are not covered by our formalism.
 
 \chapter{Schema Validation in Practice}
 \label{ch:practice}
