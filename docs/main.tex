@@ -369,15 +369,6 @@ In this section, we define a notion of property graph schema which incorporates 
   \label{tab:er-pg}
 \end{table}
 
-An example of a basic property graph schema is given in \autoref{fig:pg-schema-basic}. The similarity between property graphs and schemas allows us to visualize and think about them using the same mental model. Schema nodes and edges are drawn in the same way as data graphs, but properties are associated with types rather than concrete values.
-
-\begin{figure}[t]
-  \centering
-  \includegraphics{figures/pg-schema-basic.pdf}
-  \caption{A basic property graph schema.}
-  \label{fig:pg-schema-basic}
-\end{figure}
-
 To formally define property graph schemas and schema conformance, we first assume the existence of a set of property types $\mathcal{T}$. Next, we introduce a number of supporting concepts.
 
 \begin{definition}[Basic property conformance]
@@ -420,11 +411,18 @@ The concept of property type is similar to a \emph{value set} in the ER model. V
   \end{itemize}
 \end{definition}
 
-\begin{definition}[Conformance relation]
-  Given a property graph $$G = (N, E, \rho, \lambda, \pi)$$ and a property graph schema $$S = (N', E', \rho', \omega)$$ we define the binary \emph{conformance relation} $$\conf \; = \{(o, o') \in (N \cup E) \times (N' \cup E') \mid o \in \sem{\omega(o')}\}$$ We say that an object $o$ \emph{conforms} to a schema object $o'$ if and only if $o \conf o'$.
-\end{definition}
+An example of a basic property graph schema is given in \autoref{fig:pg-schema-basic}. The similarity between property graphs and schemas allows us to visualize and think about them using the same mental model. Schema nodes and edges are drawn in the same way as data graphs, but properties are associated with types rather than concrete values.
+
+\begin{figure}[t]
+  \centering
+  \includegraphics{figures/pg-schema-basic.pdf}
+  \caption{A basic property graph schema.}
+  \label{fig:pg-schema-basic}
+\end{figure}
 
 Note that a property graph schema can be simulated by a property graph if we allow properties to take property types as values, i.e. $\ptypes \subseteq \mathcal{V}$. Then we let $\lambda$ and $\pi$ take the role of $\omega$: for all objects $o$ in the property graph, if $\omega(o) = (L, \rtype)$ then $\lambda(o) = L$ and $\pi(o) = \rtype$.
+
+% TODO: map schema to formal model
 
 We can relate our schema formalism to the ER model once again. Our definitions of schema nodes and schema edges are analogous to the concepts of \emph{entity set} and \emph{relationship set}, respectively. Entity sets and schema nodes represent classes of entities that have something in common, whereas relationship sets and schema edges represent classes of relationships. \autoref{tab:er-pg-schema} summarizes the relationship between the ER model and our schema formalism.
 
@@ -443,7 +441,13 @@ We can relate our schema formalism to the ER model once again. Our definitions o
   \label{tab:er-pg-schema}
 \end{table}
 
-Next, we define what it means for a property graph to conform to a schema.
+To make it easier to reason about objects conforming to schema objects, we define the \emph{conformance relation}.
+
+\begin{definition}[Conformance relation]
+  Given a property graph $$G = (N, E, \rho, \lambda, \pi)$$ and a property graph schema $$S = (N', E', \rho', \omega)$$ we define the binary \emph{conformance relation} $$\conf \; = \{(o, o') \in (N \cup E) \times (N' \cup E') \mid o \in \sem{\omega(o')}\}$$ We say that an object $o$ \emph{conforms} to a schema object $o'$ if and only if $o \conf o'$.
+\end{definition}
+
+Finally, we define what it means for a property graph to \emph{conform} to a schema.
 
 \begin{definition}[Basic schema conformance]
   \label{def:schema-conformance-basic}
@@ -470,7 +474,7 @@ Next, we define what it means for a property graph to conform to a schema.
 
 Intuitively, \autoref{rule:basic-node} specifies the types of nodes that are allowed to exist in the graph. If there exists a node in the graph that is not specified in the schema, the graph does not conform. \autoref{rule:basic-edge} similarly specifies the allowed types of edges. In contrast to \autoref{rule:basic-node}, it looks not only at the properties of the edge itself, but also at the source and target nodes. This prevents a node from having an edge that is not explicitly allowed, even if that edge itself does conform to some schema edge.
 
-Under these definitions, it is not possible to specify that an edge is mandatory. In the following, we introduce a notion of cardinality constraints which makes this possible.
+Under these definitions, it is not possible to specify that an edge is mandatory. In the next subsection, we introduce a notion of cardinality constraints which makes this possible.
 
 \begin{figure}[t]
   \centering
