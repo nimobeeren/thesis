@@ -190,12 +190,16 @@ The property graph data model has been adopted by numerous contemporary graph da
 
 To summarize, \autoref{tab:pg-schema-literature} compares the main papers discussed in this section in terms of schema features, and places them alongside our schema formalism which is detailed in \autoref{ch:pg-schema}. We elaborate here on the meaning of the listed features. Mandatory property constraints express that some property must exist on a node or edge. Allowed property constraints express that no properties other than the ones explicitly specified may exist. Endpoint constraints express that edges may not connect nodes which do not conform to some specified types. Data type constraints express that the value of a property must be of a particular data type. Maximum and minimum cardinality constraints express that a node must have a particular number of incoming or outgoing edges of a particular type. Property uniqueness constraints express that no two nodes may have the same value for a particular property. Subtype relations express that an objects inherit properties or incident edges from another object. Label coexistence express which labels may or may not occur together on the same object.
 
-% TODO: fix overflow
+\defcitealias{angles2018property}{Angles}
+\defcitealias{pokorny2017integrity}{Pokorn\'{y}}
+\defcitealias{bonifati2019schema}{Bonifati}
+\defcitealias{lbath2021inference}{Lbath}
+\defcitealias{lei2021thesis}{Lei}
 \begin{table}[t]
   \centering
   \begin{tabular}{lcccccc}
     \hline
-     & \textbf{\citeauthor{angles2018property}} & \textbf{\citeauthor{pokorny2017integrity}}$^\dagger$ & \textbf{\citeauthor{bonifati2019schema}} & \textbf{\citeauthor{lbath2021inference}}$^\ddagger$ & \textbf{\citeauthor{lei2021thesis}} & \textbf{Ours} \\
+     & \textbf{\citetalias{angles2018property}} & \textbf{\citetalias{pokorny2017integrity}}$^\dagger$ & \textbf{\citetalias{bonifati2019schema}} & \textbf{\citetalias{lbath2021inference}}$^\ddagger$ & \textbf{\citetalias{lei2021thesis}} & \textbf{Ours} \\
     \hline
     \makecell[l]{Mandatory                                                                                                                                                                      \\properties}   & \no                & \yes                & \yes                 & \yes                & \yes          & \yes \\
     \hline
@@ -216,7 +220,7 @@ To summarize, \autoref{tab:pg-schema-literature} compares the main papers discus
     \makecell[l]{Subtype                                                                                                                                                                        \\relations} & \no                & \no                 & \no                 & \yes                 & \no           & \no \\
     \hline
   \end{tabular}
-  \caption[Comparison of capabilities of property graph schema formalisms found in the literature and ours]{Comparison of capabilities of property graph schema formalisms found in the literature and ours as detailed in \autoref{ch:pg-schema}. $*$: only one-to-one, one-to-many, etc. \textdagger: only informal specification. {\footnotesize \textdaggerdbl}: no specification of conformance.}
+  \caption[Comparison of property graph schema formalisms found in the literature and ours]{Comparison of property graph schema formalisms found in the literature and ours as detailed in \autoref{ch:pg-schema}. $*$: only one-to-one, one-to-many, etc. \textdagger: only informal specification. {\footnotesize \textdaggerdbl}: no specification of conformance.}
   \label{tab:pg-schema-literature}
 \end{table}
 
@@ -253,7 +257,7 @@ The schema features of these three databases are summarized in \autoref{tab:pg-s
     \makecell[l]{Subtype                                                                                       \\relations} & \no                & \no                 & \no                 & \no                 & \no           \\
     \hline
   \end{tabular}
-  \caption[Comparison of schema capabilities of current property graph databases and our implementation]{Comparison of schema capabilities of current property graph databases and our implementation as detailed in \autoref{ch:practice}. $*$: only one-to-one, one-to-many, etc.}
+  \caption[Comparison of current property graph databases and our implementation]{Comparison of current property graph databases and our implementation as detailed in \autoref{ch:practice}. $*$: only one-to-one, one-to-many, etc.}
   \label{tab:pg-schema-databases}
 \end{table}
 
