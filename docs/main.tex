@@ -317,7 +317,7 @@ The functions $\src$ and $\trg$ map ordered pairs to their first and second elem
 
 An example of a property graph is given in \autoref{fig:pg}. Nodes are drawn as boxes, and edges are drawn as arrows. Node labels are written in the top compartment, and node properties are written in the bottom compartment. Edge labels are written inside a pill and edge properties are surrounded by `\{' and `\}', which may be omitted when an edge has no properties.
 
-The example of \autoref{fig:pg} can be mapped to our formal property graph model as follows:
+The example of \autoref{fig:pg} can be mapped to our formal property graph model in the following way:
 \begin{align*}
   &N = \{n_1, n_2, n_3, n_4, n_5\}\\
   &E = \{e_1, e_2, e_3, e_4, e_5\}\\
@@ -422,7 +422,7 @@ An example of a basic property graph schema is given in \autoref{fig:pg-schema-b
 
 Note that a property graph schema can be simulated by a property graph if we allow properties to take property types as values, i.e. $\ptypes \subseteq \mathcal{V}$. Then we let $\lambda$ and $\pi$ take the role of $\omega$: for all objects $o$ in the property graph, if $\omega(o) = (L, \rtype)$ then $\lambda(o) = L$ and $\pi(o) = \rtype$.
 
-The example of \autoref{fig:pg-schema-basic} can be mapped to our basic property graph schema model as follows:
+The example of \autoref{fig:pg-schema-basic} can be mapped to our basic property graph schema model in the following way:
 \begin{align*}
   &N = \{n_1, n_2\}\\
   &E = \{e_1, e_2\}\\
@@ -560,6 +560,7 @@ Next, we revise the definitions of property graph schema and schema conformance,
 \end{definition}
 
 An example of a property graph schema with cardinality constraints is given in \autoref{fig:pg-schema}. Intervals such as $[n, m]$ are written as $n..m$, and $[n, n]$ is written simply as $n$, following notation established in UML~\citep{uml}. Furthermore, we use the ``look-here'' notation (as opposed to ``look-across''), meaning that the interval indicates the minimum and maximum number of edges that the node on that side of the edge must participate in. Contrary to some data modeling diagram conventions, the arrow head is unrelated to cardinality, instead it specifies the direction of an edge. Note  that every property graph that conforms to \autoref{fig:pg-schema-basic} also conforms to \autoref{fig:pg-schema}, but not the other way around.
+% TODO: check if the look-here thing is actually true???
 
 \begin{figure}[t]
   \centering
@@ -567,6 +568,20 @@ An example of a property graph schema with cardinality constraints is given in \
   \caption[A property graph schema with cardinality constraints]{A property graph schema with cardinality constraints.}
   \label{fig:pg-schema}
 \end{figure}
+
+The example of \autoref{fig:pg-schema} can be mapped to our property graph schema model in the following way:
+\begin{align*}
+  &N = \{n_1, n_2\}\\
+  &E = \{e_1, e_2\}\\
+  &\rho(e1) = (n_1, n_2) \quad \rho(e_2) = (n_1, n_1)\\
+  &\lambda(n_1) = \{\texttt{Person}\} \quad \lambda(n_2) = \{\texttt{Person}\} \quad \lambda(e_1) = \{\texttt{CREATED}\} \quad \lambda(e_2) = \{\texttt{KNOWS}\}\\
+  &\omega(n_1) = (\{\texttt{Person}\}, \langle \texttt{id} : \texttt{ID},\;\texttt{name} : \texttt{String},\;\texttt{birthday} : \texttt{Date} \rangle)\\
+  &\omega(n_2) = (\{\texttt{Post}\}, \langle \texttt{id} : \texttt{ID},\;\texttt{content} : \texttt{String},\;\texttt{length} : \texttt{Integer},\;\texttt{creationDate} : \texttt{Date} \rangle)\\
+  &\omega(e_1) = (\{\texttt{CREATED}\}, \langle\rangle) \quad \omega(e_2) = (\{\texttt{KNOWS}\}, \langle \texttt{since} : \texttt{Date} \rangle)\\
+  &\eta(e_1) = ([1, 1], [0, *]) \quad \eta(e_2) = ([0, *], [0, *])
+\end{align*}
+
+Next, we redefine schema conformance, taking cardinality constraints into account.
 
 \begin{definition}[Schema conformance]
   \label{def:schema-conformance}
