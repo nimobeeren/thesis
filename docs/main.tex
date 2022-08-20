@@ -661,6 +661,25 @@ We adjust the definitions of property conformance, record type, and record confo
   We say that a record $r$ \emph{conforms} to a record type $\rtype$, denoted $r \in \sem{\rtype}$, if and only if for each property name $k \in \mathcal{N}$ it holds that $r(k) \in \sem{\rtype(k)}$.
 \end{definition}
 
+An example containing an optional property is shown in \autoref{fig:optional-property}. This examples illustrates that optional properties may be omitted, but if they are present, they must have a value of the right type.
+
+\begin{figure}[t]
+  \centering
+  \begin{subfigure}[t]{0.8\textwidth}
+    \centering
+    \includegraphics[scale=0.75]{figures/pg-schema-optional-prop.pdf}
+    \caption{A schema consisting of a single schema node.}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}[t]{0.8\textwidth}
+    \centering
+    \includegraphics[scale=0.75]{figures/conformance-optional-prop.pdf}
+    \caption{A property graph consisting of three disconnected nodes. Properties with a value of $\undefined$ are not shown.}
+  \end{subfigure}
+  \caption[A property graph validated against a schema containing an optional property]{A property graph validated against a schema containing an optional property. The node with \texttt{id}~:~\texttt{2} violates \autoref{rule:node} because the \texttt{height} property value has the wrong type.}
+  \label{fig:optional-property}
+\end{figure}
+
 \section{Open Record Types}
 
 It may be desirable to allow a record to have properties with any name or any value. Such \emph{open record types} can already be expressed under the current definitions. For a record type $\rtype$, we can allow properties with any name by setting $\rtype(k) = \ptype?$ for all (previously unspecified) property names $k \in \mathcal{N}$, where $\ptype$ is an arbitrary property type. Note that there may be infinitely many such $k$, so in practice we may want to have a special syntax to express this. We can allow these properties to have any value by choosing a $\ptype$ such that $\sem{\ptype} = \mathcal{V}$, or we can restrict them to a subset of $\mathcal{V}$.
