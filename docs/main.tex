@@ -730,16 +730,18 @@ An example of a schema containing an open record type is shown in \autoref{fig:o
 
 \section{Mapping Functionality to Rules}
 
-In \autoref{ch:related-work}, we compared the capabilities of existing property graph schema implementations. We can now see how most of the features in \autoref{tab:pg-schema-databases} can be mapped to one of our conformance rules.
+In \autoref{ch:related-work}, we compared the capabilities of existing property graph schema implementation. We can now see how most of the features in \autoref{tab:pg-schema-databases} can be mapped to one of our conformance rules.
 
 Mandatory and allowed properties are captured by our notion of record conformance (\autoref{def:record-conformance}), which corresponds to \autoref{rule:node}. Endpoint constraints correspond to \autoref{rule:edge}. Data type constraints are captured by our notion of object conformance (\autoref{def:object-conformance}), and correspond to \autoref{rule:node}. Cardinality constraints correspond to \autoref{rule:out} and \ref{rule:in}. Property uniqueness, label coexistence, and subtype relations are not covered by our formalism.
 
 \chapter{Schema Validation in Practice}
 \label{ch:practice}
 
-Our property graph schema formalism is capable of expressing constraints in common conceptual data modeling methods. However, in \autoref{ch:related-work}, we found that existing property graph database systems are limited in the kinds of constraints they can enforce, in particular cardinality constraints.
+Our property graph schema formalism is capable of expressing constraints in common conceptual data modeling methods. However, we have found that existing property graph database systems are limited in the kinds of constraints they can enforce, in particular cardinality constraints.
 
-In this chapter, we describe how existing database systems can be extended to support all kinds of constraints that can be expressed with our schema formalism. We cover \emph{Neo4j}, \emph{JanusGraph}, and \emph{TigerGraph}. Where possible, we make use of the schema functionality exposed by the database engine. For constraints that cannot be validated in this way, we provide graph queries.
+In this chapter, we describe how existing database systems can be extended to support all kinds of constraints that can be expressed with our schema formalism. Where possible, we make use of the schema functionality exposed by the database engine. For constraints that cannot be validated in this way, we provide graph queries.
+
+We focus here on the same three databases we covered in \autoref{ch:related-work}: \emph{Neo4j}, \emph{JanusGraph}, and \emph{TigerGraph}. This is choice is motivated by the diversity of schema approaches employed by these systems. Neo4j's schemas are mostly inferred from data, whereas TigerGraph requires an explicit schema, and JanusGraph is schema-optional.
 
 \section{Assumptions}
 
@@ -903,7 +905,7 @@ RETURN a;
 
 To give the database engine the best opportunity to perform query optimization, the queries described here are merged as much as possible. These merged queries are then executed sequentially. This is particularly relevant for the binary variant, since it can terminate as soon as a single violation is found. For \texttt{MATCH} queries, we always return a value using \texttt{count(variable) = 0}. This theoretically allows the query to terminate early, but it is up to the query engine to implement this optimization.
 
-\paragraph{JanusGraph.} The additional schema features that JanusGraph provides allow us to enforce most conformance rules at the time of schema definition, preventing any non-conforming data from being inserted. The complete set of allowed node and edge labels (\autoref{rule:simp-node-labels} and \ref{rule:simp-edge-labels}) are defined using \texttt{makeVertexLabel()} and \texttt{makeEdgeLabel()}. If a schema object has more than one label, we concatenate them to form a single label. This does not affect the semantics (as long as the order of concatenation is consistent), since we only ever check for equality of label sets.
+\paragraph{JanusGraph.} The extensive set of schema features that JanusGraph provides allow us to specify most conformance rules at the time of schema definition, preventing any non-conforming data from being inserted. The complete set of allowed node and edge labels (\autoref{rule:simp-node-labels} and \ref{rule:simp-edge-labels}) are defined using \texttt{makeVertexLabel()} and \texttt{makeEdgeLabel()}. Because JanusGraph only allows a single label on an object, we concatenate the labels if more than one is present in the data. This does not affect the semantics (as long as the order of concatenation is consistent), since we only ever check for equality of label sets (see \autoref{def:object-conformance}).
 
 For each edge label, the method \texttt{addConnection()} lets us specify the allowed labels of the edge endpoints (\autoref{rule:simp-edge-endpoints}). The maximum cardinality for an edge label is set with \texttt{multiplicity()}, but this does not provide any guarantees on minimum cardinality.
 
@@ -1050,7 +1052,7 @@ All TigerGraph queries are \emph{installed} before execution, which allows the q
 \chapter{Empirical Evaluation}
 \label{ch:experiment}
 
-In this chapter, we evaluate the performance of our prototypical implementation through a controlled experiment. The presented results may help the reader to determine whether our approach is feasible for their use case.
+In this chapter, we evaluate the performance of our prototypical implementation through a controlled experiment. We evaluate the three databases we have focused on throughout this thesis: Neo4j, JanusGraph, and TigerGraph. The presented results may help the reader to determine whether our approach is feasible for their use case.
 
 \section{Research Questions}
 
@@ -1058,7 +1060,7 @@ To explore the cost of validating property graph schema conformance using curren
 
 \begin{enumerate}[label=\bfseries RQ\arabic*,ref=RQ\arabic*]
   % \item How is validation time affected by the kinds of constraints in the schema?
-  \item\label{rq:variant} How does validation differ between the binary and full validation variants?
+  \item\label{rq:variant} How does validation time differ between the binary and full validation variants?
   \item\label{rq:scale} How is validation time related to the scale of the data?
   \item\label{rq:violations} How is validation time related to the amount of schema violations?
   \item\label{rq:database} How does validation time differ between database systems?
@@ -1066,7 +1068,7 @@ To explore the cost of validating property graph schema conformance using curren
 
 \section{Methodology}
 
-To answer our research questions, we perform an experimental study to evaluate the performance of our implementation described in \autoref{ch:practice} in various realistic scenarios. For each database, we apply the binary and full validation methods to datasets with different schemas and scales, and we investigate the effect of violations in the data. The next subsections describe the performance-related factors we considered.
+To answer our research questions, we perform a set of experiments which test the performance of our implementation described in \autoref{ch:practice} in various realistic scenarios. For each database, we apply the binary and full validation methods to datasets with different schemas and scales, and we investigate the effect of violations in the data. The next subsections describe the performance-related factors we considered.
 
 \subsection{Dependent Variable}
 
@@ -1074,8 +1076,7 @@ To answer our research questions, we perform an experimental study to evaluate t
 
 \subsection{Independent Variables}
 
-\paragraph{Database.} We evaluate the three databases which we have focused on throughout this thesis: \emph{Neo4j}, \emph{JanusGraph}, and \emph{TigerGraph}. In our experiments, we use Neo4j Enterprise edition, which supports mandatory property constraints.
-% TODO: exact db versions
+\paragraph{Database.} The different decisions regarding schemas made by our three databases of interest may affect their performance on a schema validation workload. We use Neo4j Enterprise Edition 4.4.8 (supporting mandatory property constraints), JanusGraph 0.6.2, and TigerGraph 3.6.0.
 
 \paragraph{Dataset.} To determine the impact of different schemas and scales on the performance of our implementation, we apply our methods to two datasets:
 
@@ -1084,7 +1085,7 @@ To answer our research questions, we perform an experimental study to evaluate t
   \item The \textbf{LDBC Social Network Benchmark} (SNB) \citep{angles2020snb} is a synthetic dataset, designed to evaluate graph-like data management technologies in a realistic setting. The dataset consists of users, messages, likes, and other concepts that can be found in the domain of social networks. The schema is of moderate size, and is visualized in \autoref{fig:schema-snb}. The data is made available at various scales, ranging from less than a gigabyte up to a terabyte of raw data. We run multiple workloads with scale factor 0.1, 0.3, and 1. This lets us analyze how our solution scales with the size of the data.
 \end{itemize}
 
-Some statistics of the datasets are given in \autoref{tab:dataset-statistics}.
+Some statistics regarding the size of the datasets are given in \autoref{tab:dataset-statistics}.
 
 \begin{table}[t]
   \centering
@@ -1098,7 +1099,7 @@ Some statistics of the datasets are given in \autoref{tab:dataset-statistics}.
     SNB (SF1)        & 3,181,724  & 17,256,038 & 14          & 20          & 1109              \\
     \hline
   \end{tabular}
-  \caption[Statistics of the datasets used in our experiments]{Statistics of the datasets used in our experiments. $|N|$ and $|E|$ represent the number of nodes and edges. $|N'|$ and $|E'|$ represent the number of schema nodes and schema edges. The raw size is measured as the combined size of all CSV files.}
+  \caption[SIze statistics of the datasets used in our experiments]{Size statistics of the datasets used in our experiments. $|N|$ and $|E|$ represent the number of nodes and edges. $|N'|$ and $|E'|$ represent the number of schema nodes and schema edges. The raw size is measured as the combined size of all CSV files from which the data is loaded.}
   \label{tab:dataset-statistics}
 \end{table}
 
