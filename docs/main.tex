@@ -430,6 +430,7 @@ The example of \autoref{fig:pg-schema-basic} can be mapped to our basic property
   &\omega(n_2) = (\{\texttt{Post}\}, \langle \texttt{id} : \texttt{ID},\;\texttt{content} : \texttt{String},\;\texttt{length} : \texttt{Integer},\;\texttt{creationDate} : \texttt{Date} \rangle)\\
   &\omega(e_1) = (\{\texttt{CREATED}\}, \langle\rangle) \quad \omega(e_2) = (\{\texttt{KNOWS}\}, \langle \texttt{since} : \texttt{Date} \rangle)
 \end{align*}
+Here, we use \texttt{ID}, \texttt{String}, \texttt{Date}, and \texttt{Integer} to denote property types. Their semantics may depend on the specific implementation. For example, $\sem{\texttt{ID}}$ could be the set of all UUIDs\footnote{\url{https://www.rfc-editor.org/rfc/rfc4122}}, and $\sem{\texttt{Integer}}$ could be the set of all 32-bit integers.
 
 We can relate our schema formalism to the ER model once again. Our definitions of schema nodes and schema edges are analogous to the concepts of \emph{entity set} and \emph{relationship set}, respectively. Entity sets and schema nodes represent classes of entities that have something in common, whereas relationship sets and schema edges represent classes of relationships. \autoref{tab:er-pg-schema} summarizes the relationship between the ER model and our schema formalism.
 
@@ -577,7 +578,6 @@ The example of \autoref{fig:pg-schema} can be mapped to our property graph schem
   &\omega(e_1) = (\{\texttt{CREATED}\}, \langle\rangle) \quad \omega(e_2) = (\{\texttt{KNOWS}\}, \langle \texttt{since} : \texttt{Date} \rangle)\\
   &\eta(e_1) = ([1, 1], [0, *]) \quad \eta(e_2) = ([0, *], [0, *])
 \end{align*}
-
 Next, we redefine schema conformance, taking cardinality constraints into account. This definition subsumes \autoref{def:schema-conformance-basic}.
 
 \begin{definition}[Schema conformance]
