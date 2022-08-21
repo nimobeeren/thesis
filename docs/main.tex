@@ -603,7 +603,7 @@ Next, we redefine schema conformance, taking cardinality constraints into accoun
     If a node $n$ conforms to the source of a schema edge $e'$, it must have the right number of outgoing edges of the right type:
     \begin{align*}
        & \forall n \in N \; \forall e' \in E' :                                                        \\
-       & \quad \big[n \conf \src(\rho(e')) \implies \exists^{\src(\eta(e'))} e \in E :                 \\
+       & \quad \big[n \conf \src(\rho(e')) \implies \exists^{\trg(\eta(e'))} e \in E :                 \\
        & \quad\quad e \conf e' \wedge \src(\rho(e)) = n \wedge \trg(\rho(e)) \conf \trg(\rho(e'))\big]
     \end{align*}
 
@@ -611,7 +611,7 @@ Next, we redefine schema conformance, taking cardinality constraints into accoun
     If a node $n$ conforms to the target of a schema edge $e'$, it must have the right number of incoming edges of the right type:
     \begin{align*}
        & \forall n \in N \; \forall e' \in E' :                                                        \\
-       & \quad \big[n \conf \trg(\rho(e')) \implies \exists^{\trg(\eta(e'))} e \in E :                 \\
+       & \quad \big[n \conf \trg(\rho(e')) \implies \exists^{\src(\eta(e'))} e \in E :                 \\
        & \quad\quad e \conf e' \wedge \src(\rho(e)) \conf \src(\rho(e')) \wedge \trg(\rho(e)) = n\big]
     \end{align*}
   \end{enumerate}
