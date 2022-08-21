@@ -1085,7 +1085,7 @@ To answer our research questions, we perform a set of experiments which test the
   \item The \textbf{LDBC Social Network Benchmark} (SNB) \citep{angles2020snb} is a synthetic dataset, designed to evaluate graph-like data management technologies in a realistic setting. The dataset consists of users, messages, likes, and other concepts that can be found in the domain of social networks. The schema is of moderate size, and is visualized in \autoref{fig:schema-snb}. The data is made available at various scales, ranging from less than a gigabyte up to a terabyte of raw data. We run multiple workloads with scale factor 0.1, 0.3, and 1. This lets us analyze how our solution scales with the size of the data.
 \end{itemize}
 
-Some statistics regarding the size of the datasets are given in \autoref{tab:dataset-statistics}.
+These datasets are diverse in scale, ranging from roughly 200K to 20M objects. However, they are all small enough to fit entirely in memory. This choice is motivated primarily by convenience, keeping validation times relatively short and allowing us to perform tests in many different scenarios. Some statistics regarding the size of the datasets are given in \autoref{tab:dataset-statistics}.
 
 \begin{table}[t]
   \centering
@@ -1285,7 +1285,7 @@ Furthermore, some variance in validation time can be explained by background pro
 
 \paragraph{Construct validity.} This concerns the way our variables of interest were operationalized. One threat to construct validity comes from the way we introduced schema violations into the data. This was done by either removing a mandatory property or a mandatory edge for a node (depending on the database). In reality, different kinds of violations could occur: extraneous properties, incorrect datatypes, or incorrect edge cardinality and others. These could have differing effects on validation time.
 
-\paragraph{External validity.} This concerns the generalization of our results. One such threat comes from the scale of the datasets used in our experiment, which ranged from roughly 100K to 10M objects. We observed a linear relationship between the number of objects and the validation time. However, this relationship may not generalize to very large datasets, especially when they are too large to fit on a single disk.
+\paragraph{External validity.} This concerns the generalization of our results. One such threat comes from the scale of the datasets used in our experiment, which ranged from roughly 200K to 20M objects. We observed a linear relationship between the number of objects and the validation time. However, this relationship may not generalize to very large datasets, especially when they are too large to fit on a single disk.
 
 Another threat to external validity arises from the two schemas we have analyzed (Recommendations and SNB). The number of schemas is limited, and we did not perform any experiments to isolate the effect of different schemas. Moreover, the schemas are similar in terms of the kinds of constraints they express. Neither of the schemas contain cardinality constraints of the form ``exactly~$n$'', even though this can be expressed with our schema formalism. Future work could investigate the relationship between validation time and schema size or the kinds of constraints in the schema. This could be done by validating the same datasets against several schemas.
 
