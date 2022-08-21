@@ -1234,6 +1234,20 @@ From the previous results, we can see there is a clear difference in performance
 
 We are hesitant to draw conclusions about the optimal level of performance that could be achieved with better optimizations specific to each database, since indexes and other optimizations can have a large impact on execution time. However, these results give an indication of the level of performance that can be expected from an initial implementation.
 
+\subsection{Summary}
+
+We summarize the main results of our experiment:
+
+\begin{itemize}
+  \item Only Neo4j shows a significant difference in validation time between the full and binary variants when the data conforms to the schema, but this difference is no longer apparent when the data is small ($\sim$200K objects).
+  \item Neo4j and TigerGraph scale approximately linearly with the size of the data.
+  \item Schema violations have a moderate impact on validation time for Neo4j, a very significant impact for JanusGraph, and no discernible impact for TigerGraph.
+  \item In nearly all scenarios, TigerGraph is much faster than Neo4j, which is much faster than JanusGraph. However, when the data does not conform to the schema, JanusGraph's performance quickly improves, even matching TigerGraph. 
+  \item Schema validation can feasibly be performed with Neo4j and TigerGraph for datasets of 20M objects. JanusGraph did not complete on a dataset of 5M objects.
+\end{itemize}
+
+Further discussion regarding the validity of our results can be found in \autoref{sec:limitations-experiment}.
+
 \chapter{Limitations and Future Work}
 \label{ch:limitations}
 
@@ -1279,6 +1293,7 @@ In \autoref{fig:subtyping}, a constraint is specified which we can express in wo
 \paragraph{Mutual exclusivity.} Another kind of constraint introduced by \citet{barker1990entity} is mutual exclusivity of edges. For example, a \texttt{Person} may have a \texttt{WORKS\_AT} edge to a \texttt{Bank} or a \texttt{TradingCompany}, but not both. Mutual exclusivity could be incorporated into our schema formalism, though we should carefully consider whether the benefits for users weigh up against the added complexity. Some constraints may be easier to understand and implement efficiently through seperate queries or another constraint language that sits on top of our schema validation queries.
 
 \section{Empirical Evaluation}
+\label{sec:limitations-experiment}
 
 We discuss limitations and threats to the validity of our experiments of \autoref{ch:experiment}.
 
@@ -1292,7 +1307,7 @@ Furthermore, some variance in validation time can be explained by background pro
 
 Another threat to external validity arises from the two schemas we have analyzed (Recommendations and SNB). The number of schemas is limited, and we did not perform any experiments to isolate the effect of different schemas. Moreover, the schemas are similar in terms of the kinds of constraints they express. Neither of the schemas contain cardinality constraints of the form ``exactly~$n$'', even though this can be expressed with our schema formalism. Future work could investigate the relationship between validation time and schema size or the kinds of constraints in the schema. This could be done by validating the same datasets against several schemas.
 
-Finally, it is unclear whether the differences between databases would persist when further optimizations are made. We tried to put equal effort into optimization for each database, but results may differ when more labor is exerted.
+Finally, it is unclear whether the differences between databases would persist when further optimizations are made. We tried to put equal effort into optimization for each database, but results may differ when more labor is done.
 
 \section{Miscellaneous}
 
