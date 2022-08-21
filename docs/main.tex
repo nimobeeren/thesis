@@ -578,7 +578,7 @@ The example of \autoref{fig:pg-schema} can be mapped to our property graph schem
   &\eta(e_1) = ([1, 1], [0, *]) \quad \eta(e_2) = ([0, *], [0, *])
 \end{align*}
 
-Next, we redefine schema conformance, taking cardinality constraints into account.
+Next, we redefine schema conformance, taking cardinality constraints into account. This definition subsumes \autoref{def:schema-conformance-basic}.
 
 \begin{definition}[Schema conformance]
   \label{def:schema-conformance}
@@ -617,9 +617,9 @@ Next, we redefine schema conformance, taking cardinality constraints into accoun
   \end{enumerate}
 \end{definition}
 
-\autoref{fig:conformance} contains some examples of property graphs which are validated against the schema of \autoref{fig:pg-schema}, taking into account the new rules.
-
 Compared to \autoref{def:schema-conformance-basic}, \autoref{rule:node} and \ref{rule:edge} are unchanged, while \autoref{rule:out} and \ref{rule:in} enforce cardinality constraints on edges. With these new rules, we can enforce mandatory edges, i.e. a cardinality constraint of ``at least one''.
+
+\autoref{fig:conformance} contains some examples of property graphs which are validated against the schema of \autoref{fig:pg-schema}, taking into account the new rules.
 
 \begin{figure}[t]
   \centering
