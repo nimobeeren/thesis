@@ -1147,7 +1147,7 @@ In this section, we show the results of our experiments. We attempt to answer ea
 
 \subsection{\ref*{rq:variant}: Validation Variant}
 
-We run both the binary and full validation queries on all datasets. For these workloads, no violations are introduced, so both variants have to scan the entire graph. We perform an independent two-sided T-test \citep{student1908probable} to test the null hypothesis that the mean validation time is the same for the full and binary variant, with all other variables fixed. The results for each database are shown in \autoref{fig:results-variant} and \autoref{tab:results-variant}. The queries for JanusGraph on the SNB dataset with scale factor larger than 0.1 did not complete within an hour, and are not shown here.
+We run both the binary and full validation queries on all datasets. For these workloads, no violations are introduced. While we are also interested in the effect of violations on the binary variant, this is addressed in \autoref{sec:results-violations}. We perform an independent two-sided T-test \citep{student1908probable} to test the null hypothesis that the mean validation time is the same for the full and binary variant, with all other variables fixed. The results for each database are shown in \autoref{fig:results-variant} and \autoref{tab:results-variant}. The queries for JanusGraph on the SNB dataset with scale factor larger than 0.1 did not complete within an hour, and are not shown here.
 
 \begin{figure}[p]
   \centering
@@ -1185,7 +1185,7 @@ For Neo4j, we find a statistically significant difference (p $< 0.05$) between t
 
 \subsection{\ref*{rq:scale}: Scale}
 
-To further illustrate the relationship between validation time and the scale of the data, \autoref{fig:results-scale} plots the validation time against the number of objects in the data graph. To keep the schema and structure constant, we only consider the SNB dataset, but at different scale factors. We do not plot the results for JanusGraph, because only the smallest scale factor could be tested.
+To further illustrate the relationship between validation time and the scale of the data, \autoref{fig:results-scale} plots the validation time against the number of objects in the data graph. To keep the schema and structure constant, we only consider the SNB dataset, but at different scale factors. We do not plot the results for JanusGraph, because only the smallest scale factor could be successfully tested.
 
 \begin{figure}[t]
   \centering
@@ -1197,8 +1197,9 @@ To further illustrate the relationship between validation time and the scale of 
 These results suggest a linear relationship between number of objects and validation time. This conclusion is supported by fitting a simple linear regression model using the least squares method. We use the number of objects as the explanatory variable and the validation time as the response variable. The high $R^2$ values suggest a good fit. This linear relationship is expected, since our queries perform a linear scan of the nodes and edges in the data graph.
 
 \subsection{\ref*{rq:violations}: Violation Rate}
+\label{sec:results-violations}
 
-The workloads so far have all been on data that does not contain any schema violations, meaning that the data conforms to the schema. For this research question, we use the SNB dataset at SF0.1 and introduce some errors into the data. We only test the binary validation variant, because we do not expect the amount of violations to make a significant impact on the full variant. A one-way ANOVA is performed to test the null hypothesis that the mean validation time is the same for all violation rates for a particular database. The results are shown in \autoref{fig:results-violations} and \autoref{tab:results-violations}.
+The workloads so far have did not contain any schema violations, meaning that the data conformed to the schema. To evaluate how schema violations affect the validation time question, we choose a fixed dataset and introduce some errors into the data. We choose the SNB dataset at SF0.1, because all databases could succesfully complete full validation, and the scale is large enough to have potential for improvement. We only test the binary validation variant, because we do not expect the amount of violations to have a significant impact on the full variant. A one-way ANOVA is performed to test the null hypothesis that the mean validation time is the same for all violation rates for a particular database. The results are shown in \autoref{fig:results-violations} and \autoref{tab:results-violations}.
 
 \begin{figure}[t]
   \centering
