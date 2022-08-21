@@ -132,7 +132,7 @@
 \renewcommand{\itemautorefname}{Rule}
 
 % Paragraph seperator
-\newcommand{\sep}{\begin{center}\rule{0.33333\textwidth}{0.4pt}\vspace{4pt}\end{center}}
+\newcommand{\sep}{\begin{center}\color{muted}\rule{0.33333\textwidth}{0.4pt}\vspace{4pt}\end{center}}
 
 \title{Property Graph Schemas}
 \author{Nimo Beeren}
@@ -167,7 +167,7 @@ Our overarching goal is to develop an end-to-end framework for property graph sc
 
 \section{Graph Integrity Constraints}
 
-An area of research closely related to schema is that of integrity constraints. The problem of expressing and validating integrity constraints for graphs has received some attention in the literature. A large part of this research has been on functional dependencies, which has been studied extensively in the context of relational databases \citep{fagin1984theory,abiteboul1999data}. The idea of functional dependencies has been adapted to graph data, with the first work focussing on \emph{key constraints}, which aim to uniquely identify entities represented by nodes \citep{fan2015keys}. These have been extended to include more general dependencies \citep{fan2016functional}. The current state of the art of key constraints is presented in \textsc{PG-Keys} \citep{angles2021keys}. For further discussion of graph integrity constraints, see \citet{bonifati2018querying}.
+An area of research closely related to schema is that of integrity constraints. The problem of expressing and validating integrity constraints for graphs has received some attention in the literature. A large part of this research has been on functional dependencies, which have been studied extensively in the context of relational databases \citep{fagin1984theory,abiteboul1999data}. The idea of functional dependencies has been adapted to graph data, with the first work focussing on \emph{key constraints}. These aim to uniquely identify entities represented by nodes \citep{fan2015keys}, and have been extended to include more general dependencies \citep{fan2016functional}. The current state of the art of key constraints is presented in \textsc{PG-Keys} \citep{angles2021keys}. For further discussion of graph integrity constraints, see \citet{bonifati2018querying}.
 
 \section{Graph Schema}
 
@@ -192,7 +192,7 @@ The property graph data model has been adopted by numerous contemporary graph da
 \citet{lei2021thesis} proposes a semi-automated method for schema extraction which incorporates expert knowledge. The user can adjust parameters and similarity measures which affect how the schema is generated. An implementation and experimental results are given. Cardinality constraints are not covered.
 % TODO: expand
 
-To summarize, \autoref{tab:pg-schema-literature} compares the main papers discussed in this section in terms of schema features, and places them alongside our schema formalism which is detailed in \autoref{ch:pg-schema}. We elaborate here on the meaning of the listed features. Mandatory property constraints express that some property must exist on a node or edge. Allowed property constraints express that no properties other than the ones explicitly specified may exist. Endpoint constraints express that edges may not connect nodes which do not conform to some specified types. Data type constraints express that the value of a property must be of a particular data type. Maximum and minimum cardinality constraints express that a node must have a particular number of incoming or outgoing edges of a particular type. Property uniqueness constraints express that no two nodes may have the same value for a particular property. Subtype relations express that an objects inherit properties or incident edges from another object. Label coexistence express which labels may or may not occur together on the same object.
+To summarize, \autoref{tab:pg-schema-literature} compares the main papers discussed in this section in terms of schema features, and places them alongside our schema formalism which is detailed in \autoref{ch:pg-schema}. We elaborate here on the meaning of the listed features. Mandatory property constraints express that some property must exist on a node or edge. Allowed property constraints express that no properties other than the ones explicitly specified may exist. Endpoint constraints express that edges may not connect nodes which do not conform to some specified types. Data type constraints express that the value of a property must be of a particular data type. Maximum and minimum cardinality constraints express that a node must have a particular number of incoming or outgoing edges of a particular type. Property uniqueness constraints express that no two nodes may have the same value for a particular property. Subtype relations express that an object inherits properties or incident edges from another object. Label coexistence express which labels may or may not occur together on the same object.
 
 \defcitealias{angles2018property}{Angles}
 \defcitealias{pokorny2017integrity}{Pokorn\'{y}}
@@ -230,11 +230,9 @@ To summarize, \autoref{tab:pg-schema-literature} compares the main papers discus
 
 \section{Property Graph Databases}
 
-Current property graph database systems vary in their support and philosophy around schema. Some require the user to specify a schema, while others infer a schema from data. In this section, we take a closer look at three of the most popular property graph databases: \emph{Neo4j}, \emph{JanusGraph}, and \emph{TigerGraph}.
+Current property graph database systems vary in their support and philosophy around schema. Some require the user to specify a schema, while others infer a schema from data. In this section, we discuss the difference in terms of data models and schema capabilities of three of the most popular\footnote{\url{https://db-engines.com/en/ranking/graph+dbms} (accessed July 2022)} property graph databases: \emph{Neo4j}, \emph{JanusGraph}, and \emph{TigerGraph}.
 
-Next, we detail the differences between the three databases in our scope with respect to their data models and schema capabilities.
-
-\paragraph{Neo4j.} Being one of the first to adopt the property graph data model, Neo4j has grown to become the most popular graph database engine today\footnote{\url{https://db-engines.com/en/ranking/graph+dbms} (accessed July 2022)}. Neo4j supports the Cypher query language \citep{francis2018cypher}. Their data model differs from ours in that edges can only have a single label, while nodes can have multiple.
+\paragraph{Neo4j.} Being one of the first to adopt the property graph data model, Neo4j has grown to become the most popular graph database engine today. Neo4j supports the Cypher query language \citep{francis2018cypher}. In their data model, edges have a single label, while nodes have one or more.
 
 Neo4j's approach to schema is primarily implicit: after inserting data, a schema that describes the data can be automatically constructed using built-in functions. In addition, some constraints can be explicitly specified, namely existence of mandatory properties and key constraints (enterprise edition only), and uniqueness of property values. Note that if a property is a key, then it is mandatory and unique.
 
@@ -247,6 +245,8 @@ All of JanusGraph's schema features are centered around specifying what is allow
 \paragraph{TigerGraph.} A unique aspect of TigerGraph \citep{deutsch2019tigergraph} is that it is schema-first: the entire schema must be specified before a database is instantiated. This allows for more powerful optimizations, building on decades of research on relational databases. The query language is GSQL: an extension of SQL with graph pattern matching capabilities. In TigerGraph's data model, nodes and edges have exactly one label, but nodes can be associated with any number of \emph{tags}, which are conceptually similar to labels. Edges can be directed or undirected.
 
 TigerGraph's schema is strict, in the sense that every node label, edge label, and property must be explicitly defined. All properties are mandatory and have a fixed data type, which may be singular or multi-valued. There are no null values; if a property value is missing during insertion, a default value is used. All nodes have a primary key, which may be a single property or a composite key. Schema edges must specify a source and target node type, though it is possible to specify multiple types on either side. By default, directed edges can only be traversed from source to target, though a reverse edge can be automatically constructed if desired.
+
+\sep
 
 The schema features of these three databases are summarized in \autoref{tab:pg-schema-databases}, where they are compared to our schema formalism which is detailed in \autoref{ch:pg-schema}.
 
@@ -338,7 +338,7 @@ The example of \autoref{fig:pg} can be mapped to our formal property graph model
 
 In this chapter, we design a schema model for property graphs, and provide a formal specification. We provide a set of first-order logic rules which determine whether a property graph conforms to a schema.
 
-A schema should allow modeling of all kinds of entities and their relationships. A more expressive schema language enables the specification of more complex constraints, but may come at the cost of greater research and engineering effort, as well as worse runtime performance. This needs to be balanced in the design of our schema model.
+A schema should allow modeling of all kinds of entities and their relationships. A more expressive schema language enables the specification of more complex constraints, but this may come at the cost of greater research and engineering effort, as well as worse runtime performance. This needs to be balanced in the design of our schema model.
 
 To explore the schema features that are commonly used in practice, let us look at some existing data modeling techniques. As a baseline, we consider the Entity--Relationship (ER) model as proposed by~\citet{chen1976entity}. This model incorporates entities, relationships, attributes, and values. An \emph{entity} is a ``thing'' that can be uniquely identified, a \emph{relationship} is an association between entities, and an \emph{attribute--value} pair represents information about an entity or relationship. Furthermore, an entity may have a \emph{role} in a relationship, such as ``white'' or ``black'' in a chess match relationship. These are the concepts underlying many conceptual data modeling methods in use today.
 
@@ -348,9 +348,7 @@ In the next section, we first establish a basic definition of property graph sch
 
 \section{Basic Definition}
 
-In this section, we define a notion of property graph schema which incorporates the basic features of the ER model: entities, relationships, attributes, and values.
-
-\autoref{tab:er-pg} shows how the basic elements of the ER model can be mapped to the property graph model. Note that there are no named roles in the property graph model, but the direction of an edge does allow the distinction between the source and target of an edge. Conversely, the direction of an edge can be represented using roles in the ER model.
+In this section, we define a notion of property graph schema which incorporates the basic features of the ER model: entities, relationships, attributes, and values. \autoref{tab:er-pg} shows how the basic elements of the ER model can be mapped to the property graph model. Note that there are no named roles in the property graph model, but the direction of an edge does allow the distinction between the source and target of an edge. Conversely, the edge direction can be represented using roles in the ER model.
 
 \begin{table}[t]
   \centering
@@ -362,10 +360,10 @@ In this section, we define a notion of property graph schema which incorporates 
     Relationship & Edge            \\
     Attribute    & Property name   \\
     Value        & Value           \\
-    Role         & Edge direction* \\
+    Role*        & Edge direction* \\
     \hline
   \end{tabular}
-  \caption[Mapping between entity--relationship and property graph concepts]{Mapping between entity--relationship (ER) and property graph (PG) concepts. Roles and edge direction can be used for similar purposes, but are not equivalent.}
+  \caption[Mapping between entity--relationship and property graph concepts]{Mapping between entity--relationship (ER) and property graph (PG) concepts. $*$: roles and edge direction can be used for similar purposes, but are not equivalent.}
   \label{tab:er-pg}
 \end{table}
 
@@ -420,7 +418,7 @@ An example of a basic property graph schema is given in \autoref{fig:pg-schema-b
   \label{fig:pg-schema-basic}
 \end{figure}
 
-Note that a property graph schema can be simulated by a property graph if we allow properties to take property types as values, i.e. $\ptypes \subseteq \mathcal{V}$. Then we let $\lambda$ and $\pi$ take the role of $\omega$: for all objects $o$ in the property graph, if $\omega(o) = (L, \rtype)$ then $\lambda(o) = L$ and $\pi(o) = \rtype$.
+Note that a property graph schema can be simulated by a property graph if we allow properties to take property types as values, i.e. $\ptypes \subseteq \mathcal{V}$. Then we let $\lambda$ and $\pi$ take the role of $\omega$: for all schema objects $o$ in the property graph schema, if $\omega(o) = (L, \rtype)$ then $\lambda(o) = L$ and $\pi(o) = \rtype$.
 
 The example of \autoref{fig:pg-schema-basic} can be mapped to our basic property graph schema model in the following way:
 \begin{align*}
@@ -446,7 +444,7 @@ We can relate our schema formalism to the ER model once again. Our definitions o
     Value set        & Property type*     \\
     \hline
   \end{tabular}
-  \caption[Mapping between entity--relationship and property graph schema concepts]{Mapping between entity--relationship (ER) and property graph (PG) schema concepts. Strictly speaking, a property type $\ptype$ is not a set, but $\sem{\ptype}$ is.}
+  \caption[Mapping between entity--relationship and property graph schema concepts]{Mapping between entity--relationship (ER) and property graph (PG) schema concepts. $*$: strictly speaking, a property type $\ptype$ is not a set, but $\sem{\ptype}$ is.}
   \label{tab:er-pg-schema}
 \end{table}
 
@@ -479,11 +477,9 @@ Finally, we define what it means for a property graph to \emph{conform} to a sch
   \end{enumerate}
 \end{definition}
 
-\autoref{fig:conformance-basic} contains some examples of property graphs which are validated against the schema of \autoref{fig:pg-schema-basic}. In particular, \autoref{fig:conformance-basic-in} shows a case that we might want to prevent (a \texttt{Post} with no creator), but the current schema formalism cannot express this.
-
 Intuitively, \autoref{rule:basic-node} specifies the types of nodes that are allowed to exist in the graph. If there exists a node in the graph that is not specified in the schema, the graph does not conform. \autoref{rule:basic-edge} similarly specifies the allowed types of edges. In contrast to \autoref{rule:basic-node}, it looks not only at the properties of the edge itself, but also at the source and target nodes. This prevents a node from having an edge that is not explicitly allowed, even if that edge itself does conform to some schema edge.
 
-Under these definitions, it is not possible to specify that an edge is mandatory. In the next subsection, we introduce a notion of cardinality constraints which makes this possible.
+\autoref{fig:conformance-basic} contains some examples of property graphs which are validated against the schema of \autoref{fig:pg-schema-basic}. In particular, \autoref{fig:conformance-basic-in} shows a case that we might want to prevent (a \texttt{Post} with no creator), but the current schema formalism cannot express this. In general, it is not possible to specify that an edge is mandatory under these definitions. In the next subsection, we introduce a notion of cardinality constraints which makes this possible.
 
 \begin{figure}[t]
   \centering
@@ -534,6 +530,8 @@ We first introduce a generalization of the existential quantifier which enables 
     \item $\exists^{[n, m]} x \in X : P(x) \equiv \exists^{\geq n} x \in X : P(x) \wedge \exists^{\leq m} x' \in X : P(x')$;
     \item $\exists^{[n, *]} x \in X : P(x) \equiv \exists^{\geq n} x \in X : P(x)$.
   \end{itemize}
+
+  Here, the $\equiv$ operator denotes logical equivalence.
 \end{definition}
 
 Next, we introduce the notion of a \emph{cardinality constraint}.
