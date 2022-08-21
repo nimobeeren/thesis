@@ -1072,7 +1072,7 @@ To answer our research questions, we perform a set of experiments which test the
 
 \subsection{Dependent Variable}
 
-\paragraph{Validation time.} We are interested in the time it takes to validate conformance of a graph to a schema. For Neo4j and TigerGraph, we measure this using the execution time as listed in the internal query logs. For JanusGraph, we use Java's \texttt{System.currentTimeMillis()} method, which reports the wall-clock time. If multiple queries are needed, we take the sum of their execution times.
+\paragraph{Validation time.} We are interested in the time it takes to validate conformance of a graph to a schema. For Neo4j and TigerGraph, we measure this using the execution time as listed in the internal query logs. Even though we depend on the logs to provide a fair and accurate measurement, we believe this method is best because it ignores irrelevant things, such as the time taken to print out results. JanusGraph does not provide such logs, so we use Java's \texttt{System.currentTimeMillis()} method, which reports the wall-clock time. If multiple queries are needed to produce an answer, we take the sum of their execution times.
 
 \subsection{Independent Variables}
 
