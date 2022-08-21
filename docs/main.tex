@@ -1137,7 +1137,7 @@ The choice to only introduce violations on nodes is convenient, but we expect it
 
 We control the following parameters so that they are the same for every workload.
 
-\paragraph{Indexing and caching.} We use only indexes that the database system creates by default. Most of these are not useful to us, because their purpose is to find sets of objects with specific labels or properties. The exception is TigerGraph's outdegree index (see \autoref{sec:implementation}), which speeds up the validation of cardinality constraints. Caching is disabled for Neo4j and JanusGraph, while TigerGraph does not provide any caching functionality that we know of.
+\paragraph{Indexing and caching.} To enable a fair comparison between databases, we attempt to put an equal amount of effort into optimization for each of them. We use only indexes that the database system creates by default. Most of these are not useful to us, because their purpose is to find sets of objects with specific labels or properties. The exception is TigerGraph's outdegree index (see \autoref{sec:implementation}), which may speed up the validation of cardinality constraints. To improve independence between subsequent runs, caching is disabled for Neo4j and JanusGraph. TigerGraph does not provide any caching functionality that we know of.
 
 \paragraph{Hardware.} All workloads are run on a single machine with 4 CPU cores, 6 gigabytes of dedicated memory, and a solid-state drive with enough capacity to store all data.
 
