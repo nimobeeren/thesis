@@ -1131,6 +1131,8 @@ We consider three levels of violation rate:
 
 The way violations are introduced depends on the database system under test, due to their differences in schema capabilities and data model. For JanusGraph, we remove a mandatory property from nodes. Because TigerGraph requires every property to have a value, we set it to the default value instead. Because Neo4j supports constraints that prevent missing mandatory properties, we remove a mandatory edge instead. Edges are not modified, hence they do not violate any constraints.
 
+The choice to only introduce violations on nodes is convenient, but we expect it to be sufficient to have a measurable effect. If we assume the validation process to be a random search through all objects, we can see it as a sequence of random trials with probability $1-p$, where $p$ is the proportion of objects that violate a constraint. Then, the time until the first violation is detected shrinks exponentially with the number of violations in the data. While all of our datasets have more edges than nodes, the ratio of nodes to edges is large enough to make a significant difference in theoretical binary validation time between the levels of violation rate.
+
 \subsection{Parameters}
 
 We control the following parameters so that they are the same for every workload.
