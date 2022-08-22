@@ -156,13 +156,15 @@
 \setcounter{page}{1}
 \renewcommand{\thepage}{\arabic{page}}
 
-Graph databases have been steadily growing in popularity in recent years, receiving attention in the form of fundamental research as well as practical usage. One of the spear points of the graph database is its flexibility. While the traditionally dominant relational data model organizes data into tables and requires a fixed schema, graphs offer a simple yet powerful model consisting of nodes and edges which can be structured freely.
+Graph databases have been steadily growing in popularity in recent years, receiving attention from both industry and academia. While the traditionally dominant relational database organizes data into tables and requires a fixed schema, graphs offer a simple yet powerful model consisting of nodes and edges which can be structured freely. The \emph{property graph} model, being the predominant data model among graph databases today, associates nodes and edges with \emph{labels} and key--value pairs known as \emph{properties}. This enables very natural expression of data originating from a wide variety of domains.
 
-However, this freedom comes at a cost. Without a schema, we miss out on opportunities for query optimization, we risk degradation of data integrity, and we lack a formally verifiable source of documentation. By bringing back schemas to the graph world, the flexibility of graph databases can be combined with the robustness of relational databases.
+However, the freedom that graphs permit comes at a cost. Without a schema, we miss out on opportunities for query optimization, we risk degradation of data integrity, and we lack a formally verifiable source of documentation. We aim to bring schemas back to the world of graphs, blending the flexibility of the graph model with the structure of relational databases.
 
-The \emph{property graph model} is the predominant data model among graph database systems today. It provides an intuitive way of modeling entities as nodes, and their relationships as edges. Both nodes and edges are associated with labels, and they hold data in the form of key--value pairs known as \emph{properties}. We can imagine local constraints, such as mandatory properties on nodes or edges, as well as constraints on the structure of the graph, such as mandatory edges between nodes. To the best of our knowledge, there exists no published work that addresses the specification and validation of all these kinds of constraints using a single schema formalism.
+Our overarching goal is to develop an end-to-end framework for property graph schema specification and validation. To this end, we propose a schema model based on common conceptual data modeling methods, integrating constraints on mandatory and allowed properties, property data types, edge endpoints, and edge cardinality. Then, the notion of schema conformance is defined using first-order logic rules. Moreover, we provide a prototypical implementation of schema validation in the form of concrete graph queries, and we investigate the practical feasibility of our approach using contemporary graph databases by means of a controlled experiment.
 
-Our overarching goal is to develop an end-to-end framework for property graph schema specification and validation. To this end, we propose a schema formalism capable of expressing local and structural constraints, we provide a prototypical implementation for schema validation in the form of graph queries, and we investigate the practical feasibility of this approach on current graph database systems and realistic datasets.
+Evaluating the property graph database systems \emph{Neo4j}, \emph{JanusGraph}, and \emph{TigerGraph}, we find that our implementation enables schema validation with acceptable execution times, which scale linearly with the size of the data. We observe a significant difference in performance between databases, where TigerGraph is fastest, followed by Neo4j, then JanusGraph. However, JanusGraph shows drastic improvement when the data does not conform to the schema.
+
+The rest of this thesis is organized as follows. \autoref{ch:related-work} describes related work on graphs and schemas in academia and industry. In \autoref{ch:data-model}, we formally specify our property graph data model. \autoref{ch:pg-schema} details the design and formalisation of our property graph schema model, and specifies the rules for schema conformance. \autoref{ch:practice} addresses the translation of our formal rules to graph queries. In \autoref{ch:experiment}, we empirically evaluate our proposed implementation. \autoref{ch:limitations} discusses the limitations of our work and identifies opportunities for future work. \autoref{ch:conclusion} concludes our work with the main takeaways and recommendations.
 
 \chapter{Related Work}
 \label{ch:related-work}
@@ -282,6 +284,7 @@ The schema features of these three databases are summarized in \autoref{tab:pg-s
 \end{table}
 
 \chapter{Property Graphs}
+\label{ch:data-model}
 
 We start by introducing our data model, which is based on the definition of \emph{property graph} established by the Working Group for Database Languages~(WG3) as part of ISO/IEC JTC1/SC32 \citep{deutsch2021gpml}. The data model we define next is used throughout this thesis.
 
@@ -751,7 +754,6 @@ To reduce the complexity of the implementation, we assume that the set of labels
 
 Under this assumption, we can simplify the conformance rules. Informally:
 
-% TODO: formalize this?
 \begin{enumerate}
   \item
         \begin{enumerate}
@@ -900,7 +902,7 @@ Finally, we check the cardinality constraints (\autoref{rule:simp-card-out} and 
     label=lst:neo4j-mandatory-edges
   ]
 MATCH (a:Actor)
-WHERE NOT (a)-[:ACTED_IN]->(:Movie)
+WHERE NOT (a)-[:ACTED_IN]->(:Movie,)
 RETURN a;
   \end{lstlisting}
 \end{figure}
@@ -1328,6 +1330,7 @@ If a database instance is frequently updated, the cost of scanning the entire gr
 \paragraph{Relation to other notions of schema conformance.} It may be of theoretical interest to investigate how our notion of conformance is related to other methods found in the literature, such as simulation \citep{buneman1997adding} and homomorphisms \citep{bonifati2019schema}. If they are equivalent, results from other work may be applied to our model as well.
 
 \chapter{Conclusion}
+\label{ch:conclusion}
 
 % TODO: conclusion
 
