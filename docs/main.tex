@@ -231,7 +231,7 @@ To summarize, \autoref{tab:pg-schema-literature} compares the main papers discus
 
 \section{Property Graph Databases}
 
-Current property graph database systems vary in their support and philosophy around schema. Some require the user to specify a schema, while others infer a schema from data. In this section, we discuss the difference in terms of data models and schema capabilities of three of the most popular\footnote{\url{https://db-engines.com/en/ranking/graph+dbms} (accessed July 2022)} property graph databases: \emph{Neo4j}, \emph{JanusGraph}, and \emph{TigerGraph}.
+Current property graph database systems vary in their support and philosophy around schema. Some require the user to specify a schema, while others infer a schema from data. In this section, we discuss the differences in terms of data models and schema capabilities of three of the most popular\footnote{\url{https://db-engines.com/en/ranking/graph+dbms} (accessed July 2022)} property graph databases: \emph{Neo4j}, \emph{JanusGraph}, and \emph{TigerGraph}.
 
 \paragraph{Neo4j.} Being one of the first to adopt the property graph data model, Neo4j has grown to become the most popular graph database engine today. Neo4j supports the Cypher query language \citep{francis2018cypher}. In their data model, edges have a single label, while nodes have one or more.
 
@@ -1069,11 +1069,11 @@ To explore the cost of validating property graph schema conformance using curren
 
 \section{Methodology}
 
-To answer our research questions, we perform a set of experiments which test the performance of our implementation described in \autoref{ch:practice} in various realistic scenarios. For each database, we apply the binary and full validation methods to datasets with different schemas and scales, and we investigate the effect of violations in the data. The next subsections describe the performance-related factors we considered.
+To answer our research questions, we perform a set of experiments which test the performance of our implementation described in \autoref{ch:practice} in various realistic scenarios. For each database, we apply the binary and full validation methods to datasets with different schemas and scales, and we investigate the effect of violations in the data. For each workload, we perform three subsequent runs, from which we report the average. The next subsections describe the performance-related factors we considered.
 
 \subsection{Dependent Variable}
 
-\paragraph{Validation time.} We are interested in the time it takes to validate conformance of a graph to a schema. For Neo4j and TigerGraph, we measure this using the execution time as listed in the internal query logs. Even though we depend on the logs to provide a fair and accurate measurement, we believe this method is best because it ignores irrelevant things, such as the time taken to print out results. JanusGraph does not provide such logs, so we use Java's \texttt{System.currentTimeMillis()} method, which reports the wall-clock time. If multiple queries are needed to produce an answer, we take the sum of their execution times.
+\paragraph{Validation time.} We are interested in the time it takes to validate conformance of a graph to a schema. For Neo4j and TigerGraph, we measure this using the execution time as listed in the internal query logs. Even though we depend on the logs to provide a fair and accurate measurement, we believe this method is best because it ignores irrelevant things, such as the time taken to print the results. JanusGraph does not provide such logs, so we use Java's \texttt{System.currentTimeMillis()} method, which reports the wall-clock time. If multiple queries are needed to produce an answer, we take the sum of their execution times.
 
 \subsection{Independent Variables}
 
@@ -1118,9 +1118,9 @@ These datasets are diverse in scale, ranging from roughly 200K to 20M objects. H
   \label{fig:schema-snb}
 \end{figure}
 
-\paragraph{Validation variant.} As described in \autoref{sec:variants}, we consider two variants of the validation problem: binary and full validation. For binary validation, we measure the time until the first violation is found (or until the last query has finished, if there are no violations). For the full variant, we measure until the last query has finished.
+\paragraph{Validation variant.} As described in \autoref{sec:variants}, we consider two variants of the validation problem: binary and full validation. For binary validation, we measure the time until the first schema violation is found (or until the last query has finished, if there are no violations). This is because a single violation is enough to determine that the data does not conform to the schema. For the full variant, we measure until the last query has finished, because all violations must be found.
 
-\paragraph{Violation rate.} We expect the validation time of the binary variant to be affected by the number of violations in the data. If the data graph conforms to the schema, the entire graph is scanned. However, as soon as a single violation is found, it can terminate. The higher the violation rate, the sooner we expect to terminate.
+\paragraph{Violation rate.} We expect the validation time of the binary variant to be affected by the number of violations in the data. If the data graph conforms to the schema, the entire graph is scanned. However, as soon as a single violation is found, the validation process can terminate. The higher the violation rate, the sooner we expect to terminate.
 
 We consider three levels of violation rate:
 
@@ -1132,13 +1132,13 @@ We consider three levels of violation rate:
 
 The way violations are introduced depends on the database system under test, due to their differences in schema capabilities and data model. For JanusGraph, we remove a mandatory property from nodes. Because TigerGraph requires every property to have a value, we set it to the default value instead. Because Neo4j supports constraints that prevent missing mandatory properties, we remove a mandatory edge instead. Edges are not modified, hence they do not violate any constraints.
 
-The choice to only introduce violations on nodes is convenient, but we expect it to be sufficient to have a measurable effect. If we assume the validation process to be a random search through all objects, we can see it as a sequence of random trials with probability $1-p$, where $p$ is the proportion of objects that violate a constraint. Then, the time until the first violation is detected shrinks exponentially with the number of violations in the data. While all of our datasets have more edges than nodes, the ratio of nodes to edges is large enough to make a significant difference in theoretical binary validation time between the levels of violation rate.
+The choice to only introduce violations on nodes is convenient, but we expect it to be sufficient to have a measurable effect. If we assume the validation process to be a random search through all objects, we can model it as a sequence of random trials with probability $1-p$, where $p$ is the proportion of objects that violate a constraint. Thus, the time until the first violation is detected shrinks exponentially when the number of violations in the data grows. Even though all of our datasets have more edges than nodes, introducing a violation in 50\% of nodes will significantly increase $p$, as compared to a single violation or none at all.
 
 \subsection{Parameters}
 
 We control the following parameters so that they are the same for every workload.
 
-\paragraph{Indexing and caching.} To enable a fair comparison between databases, we attempt to put an equal amount of effort into optimization for each of them. We use only indexes that the database system creates by default. Most of these are not useful to us, because their purpose is to find sets of objects with specific labels or properties. The exception is TigerGraph's outdegree index (see \autoref{sec:implementation}), which may speed up the validation of cardinality constraints. To improve independence between subsequent runs, caching is disabled for Neo4j and JanusGraph. TigerGraph does not provide any caching functionality that we know of.
+\paragraph{Indexing and caching.} To enable a fair comparison between databases, we attempt to put an equal amount of effort into optimization for each of them. We only use indexes that the database system creates by default. Most of these are not useful to us, because their purpose is to find sets of objects with specific labels or properties. The exception is TigerGraph's outdegree index (see \autoref{sec:implementation}), which may speed up the validation of cardinality constraints. To facilitate independence between subsequent runs, caching is disabled for Neo4j and JanusGraph. TigerGraph does not provide any caching functionality that we know of.
 
 \paragraph{Hardware.} All workloads are run on a single machine with 4 CPU cores, 6 gigabytes of dedicated memory, and a solid-state drive with enough capacity to store all data.
 
@@ -1148,7 +1148,7 @@ In this section, we show the results of our experiments. We attempt to answer ea
 
 \subsection{\ref*{rq:variant}: Validation Variant}
 
-We run both the binary and full validation queries on all datasets. For these workloads, no violations are introduced. While we are also interested in the effect of violations on the binary variant, this is addressed in \autoref{sec:results-violations}. We perform an independent two-sided T-test \citep{student1908probable} to test the null hypothesis that the mean validation time is the same for the full and binary variant, with all other variables fixed. The results for each database are shown in \autoref{fig:results-variant} and \autoref{tab:results-variant}. The queries for JanusGraph on the SNB dataset with scale factor larger than 0.1 did not complete within an hour, and are not shown here.
+We run both the binary and full validation queries on all datasets. For these workloads, no violations are introduced. While we are also interested in the effect of violations on the binary variant, this is addressed in \autoref{sec:results-violations}. We perform an independent two-sided T-test \citep{student1908probable} to test the null hypothesis that the mean validation time is the same for the full and binary variant, with all other variables fixed. The results for each database are shown in \autoref{fig:results-variant} and \autoref{tab:results-variant}. The queries for JanusGraph on the SNB dataset with scale factor 0.3 and larger did not complete within an hour, and are not shown here.
 
 \begin{figure}[p]
   \centering
@@ -1182,11 +1182,11 @@ We run both the binary and full validation queries on all datasets. For these wo
   \label{tab:results-variant}
 \end{table}
 
-For Neo4j, we find a statistically significant difference (p $< 0.05$) between the full and binary variants, for all datasets except the Recommendations. This difference could be explained by the use of Neo4j's schema statistics, which are retrieved in constant time and eliminate the need for some of the queries used in the full variant. However, on the smaller Recommendations dataset this advantage is no longer apparent, possibly because the constant lookup time outweighs the time saved by skipping some queries. We do not find evidence to suggest any difference between the two variants for JanusGraph and TigerGraph. This is expected, since the queries for both variants are very similar, and the binary variant cannot terminate early because the data conforms to the schema.
+For Neo4j, we find a statistically significant difference (p $< 0.05$) between the full and binary variants, for all datasets except the Recommendations Graph. This difference could be explained by Neo4j's schema statistics, which are retrieved in constant time and eliminate the need for some of the queries in the full variant. However, on the smaller Recommendations dataset this advantage is no longer apparent, possibly because the constant lookup time outweighs the time saved by skipping some queries. We do not find evidence to suggest a difference between the two variants for JanusGraph and TigerGraph. This is expected, since the queries for both variants are very similar, and the binary variant cannot terminate early because the data conforms to the schema.
 
 \subsection{\ref*{rq:scale}: Scale}
 
-To further illustrate the relationship between validation time and the scale of the data, \autoref{fig:results-scale} plots the validation time against the number of objects in the data graph. To keep the schema and structure constant, we only consider the SNB dataset, but at different scale factors. We do not plot the results for JanusGraph, because only the smallest scale factor could be successfully tested.
+To further investigate the relationship between validation time and the scale of the data, \autoref{fig:results-scale} plots the validation time against the number of objects in the data graph. To keep the schema and structure constant, we only consider the SNB dataset, but at different scale factors. We do not plot the results for JanusGraph, because only the smallest scale factor could be successfully tested.
 
 \begin{figure}[t]
   \centering
@@ -1195,12 +1195,12 @@ To further illustrate the relationship between validation time and the scale of 
   \label{fig:results-scale}
 \end{figure}
 
-These results suggest a linear relationship between number of objects and validation time. This conclusion is supported by fitting a simple linear regression model using the least squares method. We use the number of objects as the explanatory variable and the validation time as the response variable. The high $R^2$ values suggest a good fit. This linear relationship is expected, since our queries perform a linear scan of the nodes and edges in the data graph.
+These results suggest a linear relationship between the number of objects and validation time. This conclusion is supported by fitting a simple linear regression model using the least squares method. We use the number of objects as the explanatory variable and the validation time as the response variable. The high $R^2$ values suggest a good fit. This linear relationship is expected, since our queries perform a linear scan of the nodes and edges in the data graph.
 
 \subsection{\ref*{rq:violations}: Violation Rate}
 \label{sec:results-violations}
 
-The workloads so far have did not contain any schema violations, meaning that the data conformed to the schema. To evaluate how schema violations affect the validation time question, we choose a fixed dataset and introduce some errors into the data. We choose the SNB dataset at SF0.1, because all databases could succesfully complete full validation, and the scale is large enough to have potential for improvement. We only test the binary validation variant, because we do not expect the amount of violations to have a significant impact on the full variant. A one-way ANOVA is performed to test the null hypothesis that the mean validation time is the same for all violation rates for a particular database. The results are shown in \autoref{fig:results-violations} and \autoref{tab:results-violations}.
+The workloads so far did not contain schema violations, meaning that the data conformed to the schema. To evaluate how schema violations affect validation time, we choose a fixed dataset and introduce some errors into the data. We choose the SNB dataset at SF0.1, because all databases could succesfully complete full validation, and the results of \ref*{rq:variant} suggested there was more potential for improvement as compared to the Recommendations dataset. We only test the binary validation variant, because we do not expect the amount of violations to have a significant impact on the full variant. A one-way ANOVA is performed to test the null hypothesis that the mean validation time is the same for all violation rates for a particular database. The results are shown in \autoref{fig:results-violations} and \autoref{tab:results-violations}.
 
 \begin{figure}[t]
   \centering
@@ -1225,7 +1225,7 @@ The workloads so far have did not contain any schema violations, meaning that th
   \label{tab:results-violations}
 \end{table}
 
-The results show different patterns for each database. For Neo4j, increasing the violation rate decreases validation time, but not by a large amount. For JanusGraph, even a single violation cuts the validation time by an order of magnitude, and when half of all nodes violate a constraint, validation time is again significantly reduced. For TigerGraph, we found no evidence that increasing the violation rate reduces validation time.
+The results show different patterns for each database. For Neo4j, increasing the violation rate decreases validation time, but only by a small amount. For JanusGraph, even a single violation cuts the validation time by an order of magnitude, and when half of all nodes violate a constraint, validation time is reduced significantly once more. For TigerGraph, we found no evidence that increasing violation rate reduces validation time.
 
 The different patterns could be explained by the order in which different kinds of violations are checked in our queries. Recall that in Neo4j, we introduce violations by removing mandatory edges. This happens to be the last thing that is checked in our validation queries, hence all other checks still need to be completed. The fact that there is any improvement at all does suggest that Neo4j recognizes it can terminate the query as soon as it finds a violation. For JanusGraph, we only need two queries: the first checks all nodes and the second checks all edges. Since the violation always appears in one of the nodes, the edge query can be skipped. This yields significant time gains, since there are roughly 5 times more edges than nodes. By contrast, TigerGraph shows no indication of improvement when introducing violations, which suggests that it does not terminate early.
 
@@ -1242,8 +1242,8 @@ We summarize the main results of our experiment:
 \begin{itemize}
   \item Only Neo4j shows a significant difference in validation time between the full and binary variants when the data conforms to the schema, but this difference is no longer apparent when the data is small ($\sim$200K objects).
   \item Neo4j and TigerGraph scale approximately linearly with the size of the data.
-  \item Schema violations have a moderate impact on validation time for Neo4j, a very significant impact for JanusGraph, and no discernible impact for TigerGraph.
-  \item In nearly all scenarios, TigerGraph is much faster than Neo4j, which is much faster than JanusGraph. However, when the data does not conform to the schema, JanusGraph's performance quickly improves, even matching TigerGraph. 
+  \item Schema violations have a moderate impact on validation time for Neo4j, a very significant impact for JanusGraph, and no discernible impact for TigerGraph. This suggests Neo4j and JanusGraph terminate the query as soon as a violation is detected.
+  \item In nearly all scenarios, TigerGraph is much faster than Neo4j, and Neo4j is much faster than JanusGraph. However, when the data does not conform to the schema, JanusGraph's performance drastically improves, even matching TigerGraph. 
   \item Schema validation can feasibly be performed with Neo4j and TigerGraph for datasets of 20M objects. JanusGraph did not complete on a dataset of 5M objects.
 \end{itemize}
 
