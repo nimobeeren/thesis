@@ -149,7 +149,7 @@
 
 Graph databases are increasingly receiving attention from industry and academia, due in part to their flexibility; a schema is often not required. In particular, the property graph model enables natural expression of data from a wide variety of domains. However, schemas can significantly benefit query optimization, data integrity, and documentation. We present a property graph schema model based on conceptual data modeling methods, integrating constraints on mandatory and allowed properties, property data types, edge endpoints, and edge cardinality. Moreover, we specify schema validation semantics using first-order logic rules. These rules are implemented as graph queries for \emph{Neo4j}, \emph{JanusGraph}, and \emph{TigerGraph}, which we evaluate through a controlled experiment. Our results demonstrate feasibility of our approach, with execution times scaling linearly with the size of the data.
 
-\paragraph{Keywords:} graph databases, property graphs, data modeling, graph schemas, schema specification, schema validation
+\paragraph{Keywords:} graph databases, data modeling, property graphs, graph schemas, schema specification, schema validation
 
 \tableofcontents
 \listoffigures
@@ -1251,7 +1251,7 @@ We summarize the main results of our experiment:
 
 \begin{itemize}
   \item Schema validation can feasibly be performed with Neo4j and TigerGraph for datasets of 20M objects. JanusGraph did not complete on a dataset of 5M objects.
-  \item In nearly all scenarios, TigerGraph is much faster than Neo4j, and Neo4j is much faster than JanusGraph. However, when the data does not conform to the schema, JanusGraph's performance drastically improves, even matching TigerGraph. 
+  \item In nearly all scenarios, TigerGraph is much faster than Neo4j, and Neo4j is much faster than JanusGraph. However, when schema violations are introduced to the data, JanusGraph's performance drastically improves.
   \item Neo4j and TigerGraph scale approximately linearly with the size of the data.
   \item Schema violations have a moderate impact on validation time for Neo4j, a very significant impact for JanusGraph, and no discernible impact for TigerGraph. This suggests Neo4j and JanusGraph terminate the query as soon as a violation is detected.
   \item Only Neo4j shows a significant difference in validation time between the full and binary variants when the data conforms to the schema, but this difference is no longer apparent when the data is small ($\sim$200K objects).
@@ -1265,6 +1265,8 @@ Further discussion regarding the validity of our results can be found in \autore
 \section{Schema Formalism}
 
 We discuss limitations and opportunities for improvement of our schema formalism as defined in \autoref{ch:pg-schema}.
+
+\paragraph{Key constraints.} Our schema formalism does not support property uniqueness or key constraints. While key constraints were already present in ER models \citep{chen1976entity}, their application to property graphs is non-trivial. As argued in the \textsc{PG-Keys} proposal \citep{angles2021keys}, there is a need for granular and flexible key constraints. Keys should be applicable to nodes, edges, and properties, which could all represent concrete entities. Moreover, key scopes and descriptors should be defined in a way that allows objects to be keyed by their relations to other objects. Finally, keys may be \emph{exclusive}, \emph{mandatory}, \emph{singleton}, or any combination thereof. Future work should consolidate \textsc{PG-Keys} with a comprehensive schema formalism such as ours.
 
 \paragraph{Subtyping.} \citet{barker1990entity} introduced the concept of subtyping to the ER model, \citet{lbath2021inference} included subtyping in their schema inference method, and we have seen subtype relations appearing in the SNB property graph schema (\autoref{fig:schema-snb}). Clearly, there is a need for subtyping in property graph schemas. This would help model domains containing type hierarchies more accurately, and would reduce duplication of schema edges and properties.
 
@@ -1298,8 +1300,6 @@ In \autoref{fig:subtyping}, a constraint is specified which we can express in wo
   \caption[A schema illustrating a larger graph pattern constraint which cannot be captured by our schema formalism]{A schema illustrating a larger graph pattern constraint which cannot be captured by our schema formalism. While we can specify constraints on edge cardinalities, we cannot ensure that a person only drives a car if they have a driver's license.}
   \label{fig:drivers-license}
 \end{figure}
-
-\paragraph{Key constraints.} Our schema formalism does not support property uniqueness or key constraints. While key constraints were already present in ER models \citep{chen1976entity}, their application to property graphs is non-trivial. As argued in the \textsc{PG-Keys} proposal \citep{angles2021keys}, there is a need for granular and flexible key constraints. Keys should be applicable to nodes, edges, and properties, which could all represent concrete entities. Moreover, key scopes and descriptors should be defined in a way that allows objects to be keyed by their relations to other objects. Finally, keys may be \emph{exclusive}, \emph{mandatory}, \emph{singleton}, or any combination thereof. Future work should consolidate \textsc{PG-Keys} with a comprehensive schema formalism such as ours.
 
 \paragraph{Mutual exclusivity.} Another kind of constraint introduced by \citet{barker1990entity} is mutual exclusivity of edges. For example, a \texttt{Person} may have a \texttt{WORKS\_AT} edge to a \texttt{Bank} or a \texttt{TradingCompany}, but not both. Mutual exclusivity could be incorporated into our schema formalism, though we should carefully consider whether the benefits for users weigh up against the added complexity. Some constraints may be easier to understand and implement efficiently through seperate queries or another constraint language that sits on top of our schema validation queries.
 
@@ -1339,7 +1339,13 @@ If a database instance is frequently updated, the cost of scanning the entire gr
 \chapter{Conclusion}
 \label{ch:conclusion}
 
-% TODO: conclusion
+We have presented an end-to-end framework for property graph schema specification and validation, showing how common constraints based on conceptual data modeling methods can be captured in a unified schema model. Moreover, we have shown how a property graph can be validated against a schema using first-order logic rules. Through an empirical study, we have evaluated our prototypical implementation in various scenarios, demonstrating feasibility for many use-cases. We found that all database systems were able to complete some schema validation workloads, though there were significant differences in execution time.
+
+TigerGraph outperformed both Neo4j and JanusGraph by a clear margin in almost all scenarios. This difference can be explained at least partially by the fact that TigerGraph requires a schema to be specified before the database is instantiated. While this limits flexibility, other database vendors may be able to make significant performance gains if support for explicit schemas is improved. Interestingly, JanusGraph's performance vastly improved when schema violations were introduced into the data, whereas TigerGraph was unaffected. This highlights an opportunity for optimization in TigerGraph, which does not seem to terminate the query even though the final result is known.
+
+Our schema model is able to capture many kinds of constraints, but not all. We consider key constraints as one of the most important features to be added in the future. Furthermore, we have seen a need for subtyping to be included. Other kinds of constraints could be integrated into our model as needed, or they could be achieved by building on top of our framework.
+
+When it comes to the validation process, we see ample opportunity for performance improvements, whether it be through indexes or specialized algorithms. An incremental validation algorithm seems especially promising.
 
 \bibliography{main}
 
