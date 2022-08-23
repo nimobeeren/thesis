@@ -1333,7 +1333,7 @@ If a database instance is frequently updated, the cost of scanning the entire gr
 
 \paragraph{Schema-aware query optimization.} Schema knowledge may be used by the query engine to improve query planning. Such optimizations are widely employed in relational databases \citep{chakravarthy1990logic, meier2013semantic,silberschatz2011database}, and have been studied in the context of graph databases as well \citep{buneman1997adding,popa1999equational}. Similar methods could be applied to property graph databases when a schema is present.
 
-\paragraph{Query type checking and inference.} The presence of schemas may benefit the usability of graph databases. Through query type checking, incorrectly typed parameters could be detected. Moreover, the result type of a query could be inferred to ensure the result is of the expected type before execution. Query type inference could be integrated with type systems of programming languages to achieve type safety across the database and the application. A type inference approach like the one presented by \citet{colazzo2015typing} may be adapted to the property graph model.
+\paragraph{Query type checking and inference.} The presence of schemas may benefit the usability of graph databases. Through query type checking, incorrectly typed parameters can be detected. Moreover, the result type of a query could be inferred to ensure the result is of the expected type before execution. Query type inference could be integrated with type systems of programming languages to achieve type safety across the database and the application. A type inference approach like the one presented by \citet{colazzo2015typing} may be adapted to the property graph model.
 
 \paragraph{Relation to other notions of schema conformance.} It may be of theoretical interest to investigate how our notion of conformance is related to other methods found in the literature, such as simulation \citep{buneman1997adding} and homomorphisms \citep{bonifati2019schema}. If they are equivalent, results from other work may be applied to our model as well.
 
@@ -1348,9 +1348,7 @@ In our experiment, TigerGraph outperformed both Neo4j and JanusGraph by a clear 
 
 We see ample opportunity for performance improvements, either through specialized validation algorithms, indexes, or optimization of validation queries. We have already observed sub-second validation times on datasets of millions of objects, which encourages us to believe that schema validation will be possible on an interactive time scale, especially when incremental algorithms are employed.
 
-Tangential research challenges are plentiful.
-% TODO: sentence
-We are excited to see how the presence of types in graph databases will benefit people who work with data by enhancing query performance, aiding query specification, and bridging the gap between the programming language and the database.
+There are many open research challenges tangential to our work. We are excited to see how the presence of types in graph databases will benefit people who work with data by enhancing query performance, aiding query specification, and bridging the gap between the programming language and the database.
 
 \bibliography{main}
 
