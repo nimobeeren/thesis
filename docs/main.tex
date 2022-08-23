@@ -136,7 +136,7 @@
 % Paragraph separator
 \newcommand{\sep}{\begin{center}\color{muted}\rule{0.33333\textwidth}{0.4pt}\vspace{4pt}\end{center}}
 
-\title{Property Graph Schemas}
+\title{Formal Specification and Validation of Property Graph Schemas}
 \author{Nimo Beeren}
 \date{August 2022}
 
@@ -148,7 +148,7 @@
 
 \section*{Abstract}
 
-Graph databases are increasingly receiving attention from industry and academia, due in part to their flexibility; a schema is often not required. In particular, the property graph model enables natural expression of data from a wide variety of domains. However, schemas can significantly benefit query optimization, data integrity, and documentation. We present a property graph schema model based on conceptual data modeling methods, integrating constraints on mandatory and allowed properties, property data types, edge endpoints, and edge cardinality. Moreover, we specify schema validation semantics using first-order logic rules. These rules are implemented as graph queries for \emph{Neo4j}, \emph{JanusGraph}, and \emph{TigerGraph}, which we evaluate through a controlled experiment. Our results demonstrate feasibility of our approach, with execution times scaling linearly with the size of the data.
+Graph databases are increasingly receiving attention from industry and academia, due in part to their flexibility; a schema is often not required. In particular, the property graph model enables natural expression of data from a wide variety of domains. However, schemas can significantly benefit query optimization, data integrity, and documentation. We present a formal property graph schema model based on conceptual data modeling methods, integrating constraints on mandatory and allowed properties, property data types, edge endpoints, and edge cardinality. Moreover, we specify schema validation semantics using first-order logic rules. These rules are implemented using graph queries for \emph{Neo4j}, \emph{JanusGraph}, and \emph{TigerGraph}, which we evaluate through a controlled experiment. Our results demonstrate feasibility of our approach, with execution times scaling linearly with the size of the data.
 
 \paragraph{Keywords:} graph databases, data modeling, property graphs, graph schemas, schema specification, schema validation, integrity constraints
 
