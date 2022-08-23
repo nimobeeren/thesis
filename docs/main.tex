@@ -136,7 +136,7 @@
 % Paragraph separator
 \newcommand{\sep}{\begin{center}\color{muted}\rule{0.33333\textwidth}{0.4pt}\vspace{4pt}\end{center}}
 
-\title{Formal Specification and Validation of Property Graph Schemas}
+\title{Formal Specification and Practical Validation of\\Property Graph Schemas}
 \author{Nimo Beeren}
 \date{August 2022}
 
@@ -1340,13 +1340,17 @@ If a database instance is frequently updated, the cost of scanning the entire gr
 \chapter{Conclusion}
 \label{ch:conclusion}
 
-We have presented an end-to-end framework for property graph schema specification and validation, showing how common constraints based on conceptual data modeling methods can be captured in a unified schema model. Moreover, we have shown how a property graph can be validated against a schema using first-order logic rules. Through an empirical study, we have evaluated our prototypical implementation in various scenarios, demonstrating feasibility for many use-cases. We found that all database systems were able to complete some schema validation workloads, though there were significant differences in execution time.
+We have presented an end-to-end framework for property graph schema specification and validation, showing how common constraints based on conceptual data modeling methods can be captured in a unified schema model. Moreover, we have shown how a property graph can be validated against a schema using first-order logic rules. Through an empirical study, we have evaluated our prototypical implementation in various scenarios, demonstrating feasibility for many use-cases. All database systems that we tested were able to complete some schema validation workloads, although there were significant differences in execution time.
 
-TigerGraph outperformed both Neo4j and JanusGraph by a clear margin in almost all scenarios. This difference can be explained at least partially by the fact that TigerGraph requires a schema to be specified before the database is instantiated. While this limits flexibility, other database vendors may be able to make significant performance gains if support for explicit schemas is improved. Interestingly, JanusGraph's performance vastly improved when schema violations were introduced into the data, whereas TigerGraph was unaffected. This highlights an opportunity for optimization in TigerGraph, which does not seem to terminate the query even though the final result is known.
+Our schema model is able to capture many kinds of constraints, but not all. We consider key constraints as one of the most important features to be added in the future. Furthermore, the inclusion of subtyping would benefit data modeling capabilities. Other kinds of constraints could be integrated into our model as needed, or they could be realized as a separate layer on top of our framework.
 
-Our schema model is able to capture many kinds of constraints, but not all. We consider key constraints as one of the most important features to be added in the future. Furthermore, we have seen a need for subtyping to be included. Other kinds of constraints could be integrated into our model as needed, or they could be achieved by building on top of our framework.
+In our experiment, TigerGraph outperformed both Neo4j and JanusGraph by a clear margin in almost all scenarios. This advantage can be explained at least partially by TigerGraph's focus on schema. While a fixed schema limits flexibility, other database vendors may be able to make significant performance gains if support for explicit schemas is improved. Interestingly, JanusGraph's performance vastly improved when schema violations were introduced into the data, whereas TigerGraph was unaffected. This highlights an opportunity for optimization in TigerGraph, which does not seem to terminate queries even though the final result is known.
 
-When it comes to the validation process, we see ample opportunity for performance improvements, whether it be through indexes or specialized algorithms. An incremental validation algorithm seems especially promising.
+We see ample opportunity for performance improvements, either through specialized validation algorithms, indexes, or query optimization. We have already observed sub-second validation times on datasets of millions of objects, which encourages us to believe that schema validation will be possible on an interactive time scale, especially when incremental algorithms are employed.
+
+% TODO: research opportunities
+We are excited to see how the presence of types in graph databases will benefit people who work with data by enhancing query performance, aiding query specification, and
+% TODO: type safety?
 
 \bibliography{main}
 
