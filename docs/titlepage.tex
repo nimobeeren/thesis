@@ -1,0 +1,45 @@
+\makeatletter
+\let\thetitle\@title
+\let\theauthor\@author
+\let\thedate\@date
+\makeatother
+
+\begin{titlepage}
+  \begin{center}
+    \pdftooltip{
+      \includegraphics[width=0.8\textwidth]{figures/tue-logo}
+    }{
+      Eindhoven University of Technology
+    }
+    \Large
+    Department of Mathematics and Computer Science
+
+    \Large
+    Databases Research Group
+
+    \vfill
+
+    \Huge
+    \textbf{\thetitle}
+
+    \vspace*{0.25cm}
+
+    \LARGE
+    \textit{Master Thesis}
+
+    \vfill
+
+    \LARGE
+    \theauthor
+
+    \vfill
+
+    \Large
+    Supervisor: George Fletcher
+
+    \vspace*{0.5cm}
+
+    \Large
+    Eindhoven, \thedate
+  \end{center}
+\end{titlepage}
