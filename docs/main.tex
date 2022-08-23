@@ -1346,11 +1346,11 @@ Our schema model is able to capture many kinds of constraints, but not all. We c
 
 In our experiment, TigerGraph outperformed both Neo4j and JanusGraph by a clear margin in almost all scenarios. This advantage can be explained at least partially by TigerGraph's focus on schema. While a fixed schema limits flexibility, other database vendors may be able to make significant performance gains if support for explicit schemas is improved. Interestingly, JanusGraph's performance vastly improved when schema violations were introduced into the data, whereas TigerGraph was unaffected. This highlights an opportunity for optimization in TigerGraph, which does not seem to terminate queries even though the final result is known.
 
-We see ample opportunity for performance improvements, either through specialized validation algorithms, indexes, or query optimization. We have already observed sub-second validation times on datasets of millions of objects, which encourages us to believe that schema validation will be possible on an interactive time scale, especially when incremental algorithms are employed.
+We see ample opportunity for performance improvements, either through specialized validation algorithms, indexes, or optimization of validation queries. We have already observed sub-second validation times on datasets of millions of objects, which encourages us to believe that schema validation will be possible on an interactive time scale, especially when incremental algorithms are employed.
 
-% TODO: research opportunities
-We are excited to see how the presence of types in graph databases will benefit people who work with data by enhancing query performance, aiding query specification, and
-% TODO: type safety?
+Tangential research challenges are plentiful.
+% TODO: sentence
+We are excited to see how the presence of types in graph databases will benefit people who work with data by enhancing query performance, aiding query specification, and bridging the gap between the programming language and the database.
 
 \bibliography{main}
 
