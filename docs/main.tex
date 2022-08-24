@@ -15,6 +15,7 @@
 \usepackage{enumitem}
 \usepackage[defaultlines=4,all]{nowidow}
 \usepackage{pdfcomment}
+\usepackage{thmtools}
 
 % Fonts
 \usepackage{pxfonts}
@@ -89,7 +90,6 @@
 % Definitions
 \theoremstyle{definition}
 \newtheorem{definition}{Definition}
-\newcommand{\definitionautorefname}{Definition}
 
 % Natural numbers
 \newcommand{\N}{\mathbb{N}}
@@ -155,6 +155,7 @@ Graph databases are increasingly receiving attention from industry and academia,
 \tableofcontents
 \listoffigures
 \listoftables
+\listoftheorems[title={List of Definitions}, swapnumber]
 \lstlistoflistings
 \addcontentsline{toc}{chapter}{List of Listings}
 % TODO: list of definitions?
