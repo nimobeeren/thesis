@@ -147,7 +147,7 @@
 
 \section*{Abstract}
 
-Graph databases are increasingly receiving attention from industry and academia, due in part to their flexibility; a schema is often not required. In particular, the property graph model enables natural expression of data from a wide variety of domains. However, schemas can significantly benefit query optimization, data integrity, and documentation. We present a formal property graph schema model based on conceptual data modeling methods, integrating constraints on mandatory and allowed properties, property data types, edge endpoints, and edge cardinality. Moreover, we specify schema validation semantics using first-order logic rules. These rules are implemented using graph queries for \emph{Neo4j}, \emph{JanusGraph}, and \emph{TigerGraph}, which we evaluate through a controlled experiment. Our results demonstrate feasibility of our approach, with execution times scaling linearly with the size of the data.
+Graph databases are increasingly receiving attention from industry and academia, due in part to their flexibility; a schema is often not required. In particular, the \emph{property graph} model enables natural expression of data from a wide variety of domains. However, schemas can significantly benefit query optimization, data integrity, and documentation. We present a formal property graph schema model based on conceptual data modeling methods, integrating constraints on mandatory and allowed properties, property data types, edge endpoints, and edge cardinality. Moreover, we specify schema validation semantics using first-order logic rules. These rules are implemented using graph queries for \emph{Neo4j}, \emph{JanusGraph}, and \emph{TigerGraph}, which we evaluate through a controlled experiment. Our results demonstrate feasibility of our approach, with execution times scaling linearly with the size of the data.
 
 \paragraph{Keywords:} graph databases, data modeling, property graphs, graph schemas, schema specification, schema validation, integrity constraints
 
@@ -812,7 +812,7 @@ We describe how each conformance rule can be validated using the three databases
 \begin{figure}[H]
   \begin{lstlisting}[
     language=Cypher,
-    caption={[Creation of Cypher constraints which require the existence of some mandatory properties on nodes]Creation of Cypher constraints which require the existence of some mandatory properties on \texttt{Movie} nodes.},
+    caption={[A set of Cypher statements to create constraints which require the existence of some mandatory properties on nodes]A set of Cypher statements to create constraints which require the existence of some mandatory properties on \texttt{Movie} nodes.},
     label=lst:neo4j-mandatory-props
   ]
 CREATE CONSTRAINT FOR (m:Movie) REQUIRE m.imdbId IS NOT NULL;
@@ -1108,7 +1108,7 @@ These datasets are diverse in scale, ranging from roughly 200K to 20M objects. H
     SNB (SF1)        & 3,181,724  & 17,256,038 & 14          & 20          & 1109              \\
     \hline
   \end{tabular}
-  \caption[SIze statistics of the datasets used in our experiments]{Size statistics of the datasets used in our experiments. $|N|$ and $|E|$ represent the number of nodes and edges. $|N'|$ and $|E'|$ represent the number of schema nodes and schema edges. The raw size is measured as the combined size of all CSV files from which the data is loaded.}
+  \caption[Size statistics of the datasets used in our experiments]{Size statistics of the datasets used in our experiments. $|N|$ and $|E|$ represent the number of nodes and edges. $|N'|$ and $|E'|$ represent the number of schema nodes and schema edges. The raw size is measured as the combined size of all CSV files from which the data is loaded.}
   \label{tab:dataset-statistics}
 \end{table}
 
@@ -1337,7 +1337,7 @@ If a database instance is frequently updated, the cost of scanning the entire gr
 \chapter{Conclusion}
 \label{ch:conclusion}
 
-We have presented an end-to-end framework for property graph schema specification and validation, showing how common constraints based on conceptual data modeling methods can be captured in a unified schema model. Moreover, we have shown how a property graph can be validated against a schema using first-order logic rules. Through an empirical study, we have evaluated our prototypical implementation in various scenarios, demonstrating feasibility for many use-cases. All database systems that we tested were able to complete some schema validation workloads, although there were significant differences in execution time.
+We have presented an end-to-end framework for property graph schema specification and validation, showing how constraints based on common conceptual data modeling methods can be captured in a unified schema model. Moreover, we have shown how a property graph can be validated against a schema using first-order logic rules. Through an empirical study, we have evaluated our prototypical implementation in various scenarios, demonstrating feasibility for many use-cases. All database systems that we tested were able to complete some schema validation workloads, although there were significant differences in execution time.
 
 Our schema model is able to capture many kinds of constraints, but not all. We consider key constraints as one of the most important features to be added in the future. Furthermore, the inclusion of subtyping would benefit data modeling capabilities. Other kinds of constraints could be integrated into our model as needed, or they could be realized as a separate layer on top of our framework.
 
