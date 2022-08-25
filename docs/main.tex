@@ -170,7 +170,7 @@ Our overarching goal is to develop an end-to-end framework for property graph sc
 
 Evaluating the property graph database systems \emph{Neo4j}, \emph{JanusGraph}, and \emph{TigerGraph}, we find that our implementation enables schema validation with acceptable execution times, which scale linearly with the size of the data. We observe a significant difference in performance between databases, where TigerGraph is fastest, followed by Neo4j, then JanusGraph. However, JanusGraph shows drastic improvement when the data does not conform to the schema.
 
-The rest of this thesis is organized as follows. \autoref{ch:related-work} describes related work on graphs and schemas in academia and industry. In \autoref{ch:data-model}, we formally specify our property graph data model. \autoref{ch:pg-schema} details the design and formalisation of our property graph schema model, and specifies the rules for schema conformance. \autoref{ch:practice} addresses the translation of our formal rules to graph queries. In \autoref{ch:experiment}, we empirically evaluate our proposed implementation. \autoref{ch:limitations} discusses the limitations of our work and identifies opportunities for future work. \autoref{ch:conclusion} concludes our work with the main takeaways and recommendations.
+The rest of this thesis is organized as follows. \autoref{ch:related-work} describes related work on graphs and schemas in academia and industry. In \autoref{ch:data-model}, we formally specify our property graph data model. \autoref{ch:pg-schema} details the design and formalization of our property graph schema model and specifies the rules for schema conformance. \autoref{ch:practice} addresses the translation of our formal rules to graph queries. In \autoref{ch:experiment}, we empirically evaluate our proposed implementation. \autoref{ch:limitations} discusses the limitations of our work and identifies opportunities for future work. \autoref{ch:conclusion} concludes our work with the main takeaways and recommendations.
 
 \chapter{Related Work}
 \label{ch:related-work}
@@ -187,11 +187,11 @@ While integrity constraints are typically scoped to a subset of the database, a 
 
 \citet{colazzo2015typing} introduce another schema formalism for edge-labeled data graphs. They define a schema as a set of pairs $(r_{in}, r_{out})$, where $r_{in}$ and $r_{out}$ are regular expressions. The semantics is that every node must match a schema element $(r_{in}, r_{out})$, meaning that the node's incoming edges match $r_{in}$ and its outgoing edges match $r_{out}$. Using Regular Path Queries (RPQs), edge cardinality can be exactly specified. When extending the language to Nested Regular Expressions (NREs), it is possible to specify structural constraints over arbitrarily large graph patterns.
 
-SHACL\footnote{\url{https://www.w3.org/TR/shacl/}} is a language for specifying constraints on RDF graphs \citep{pan2009rdf}. These constraints themselves are also represented as RDF graphs, and are called \emph{shapes}. Constraints on values, data types and cardinality are supported. This enables specification of allowed, optional, and mandatory edges. A review of the formal frameworks used to study the SHACL language and the validation of RDF graphs against SHACL schemas can be found in \citet{pareti2022shacl}.
+SHACL\footnote{\url{https://www.w3.org/TR/shacl/}} is a language for specifying constraints on RDF graphs \citep{pan2009rdf}. These constraints themselves are also represented as RDF graphs and are called \emph{shapes}. Constraints on values, data types and cardinality are supported. This enables specification of allowed, optional, and mandatory edges. A review of the formal frameworks used to study the SHACL language and the validation of RDF graphs against SHACL schemas can be found in \citet{pareti2022shacl}.
 
 \section{Property Graph Schemas}
 
-The property graph data model has been adopted by numerous contemporary graph database systems (dating back to at least 2007 with the first release of Neo4j\footnote{\url{https://neo4j.com/open-source-project/}}), but a formal specification was missing until one was proposed by \citet{angles2018property}. The author also brought integrity constraints to the property graph model, and defined a basic notion of schema using first-order logic rules. In this work, no distinction was made between mandatory and optional properties, nor were cardinality constraints addressed.
+The property graph data model has been adopted by numerous contemporary graph database systems (dating back to at least 2007 with the first release of Neo4j\footnote{\url{https://neo4j.com/open-source-project/}}), but a formal specification was missing until one was proposed by \citet{angles2018property}. The author also brought integrity constraints to the property graph model and defined a basic notion of schema using first-order logic rules. In this work, no distinction was made between mandatory and optional properties, nor were cardinality constraints addressed.
 
 \citet{pokorny2017integrity} describe and implement several integrity constraints for property graphs, including mandatory properties, endpoint constraints, data type constraints, cardinality constraints, and property uniqueness. In addition, they introduce \emph{label coexistence} constraints, which express that two particular labels may not occur on the same node, or that one label may only occur together with another label. However, these constraints are not formally specified, and they are not integrated into a schema model. To specify these kinds of constraints, a syntax extension for the Cypher query language \citep{francis2018cypher} is proposed. A prototypical implementation for Neo4j is given, which is briefly evaluated.
 
@@ -201,7 +201,7 @@ The property graph data model has been adopted by numerous contemporary graph da
 
 \citet{lei2021thesis} proposes a semi-automated method for schema extraction which incorporates expert knowledge. The user can adjust parameters and similarity measures which affect how the schema is generated. An implementation and experimental results are given. Cardinality constraints are not covered.
 
-To summarize, \autoref{tab:pg-schema-literature} compares the main papers discussed in this section in terms of schema features, and places them alongside our schema formalism which is detailed in \autoref{ch:pg-schema}. We elaborate here on the meaning of the listed features. Mandatory property constraints express that some property must exist on a node or edge. Allowed property constraints express that no properties other than the ones explicitly specified may exist. Endpoint constraints express that edges may not connect nodes which do not conform to some specified types. Data type constraints express that the value of a property must be of a particular data type. Maximum and minimum cardinality constraints express that a node must have a particular number of incoming or outgoing edges of a particular type. Property uniqueness constraints express that no two nodes may have the same value for a particular property. Subtype relations express that an object inherits properties or incident edges from another object. Label coexistence express which labels may or may not occur together on the same object.
+To summarize, \autoref{tab:pg-schema-literature} compares the main papers discussed in this section in terms of schema features, and places them alongside our schema formalism which is detailed in \autoref{ch:pg-schema}. We elaborate here on the meaning of the listed features. Mandatory property constraints express that some property must exist on a node or edge. Allowed property constraints express that no properties other than the ones explicitly specified may exist. Endpoint constraints express that edges may not connect nodes which do not conform to some specified types. Data type constraints express that the value of a property must be of a particular data type. Maximum and minimum cardinality constraints express that a node must have a particular number of incoming or outgoing edges of a particular type. Property uniqueness constraints express that no two nodes may have the same value for a particular property. Subtype relations express that an object inherits properties or incident edges from another object. Label coexistence constraints express which labels may or may not occur together on the same object.
 
 \defcitealias{angles2018property}{Angles}
 \defcitealias{pokorny2017integrity}{Pokorn\'{y}}
@@ -245,7 +245,7 @@ Current property graph database systems vary in their support and philosophy aro
 
 Neo4j's approach to schema is primarily implicit: after inserting data, a schema that describes the data can be automatically constructed using built-in functions. In addition, some constraints can be explicitly specified, namely existence of mandatory properties and key constraints (enterprise edition only), and uniqueness of property values. Note that if a property is a key, then it is mandatory and unique.
 
-\paragraph{JanusGraph.} Originating from the open source Titan project, JanusGraph is a continuation of the effort to create a distributed and highly scalable graph database. The Gremlin query language \citep{rodriguez2015gremlin} enables pattern matching by means of graph traversals. In JanusGraph's data model, nodes and edges always have one label. Properties can have sets and lists as values, and there may exist multiple properties with the same key on the same node. Furthermore, properties themselves can have properties. In this sense, the data model is like a blend of property graphs and RDF \citep{pan2009rdf}.
+\paragraph{JanusGraph.} Originating from the open-source Titan project, JanusGraph is a continuation of the effort to create a distributed and highly scalable graph database. The Gremlin query language \citep{rodriguez2015gremlin} enables pattern matching by means of graph traversals. In JanusGraph's data model, nodes and edges always have one label. Properties can have sets and lists as values, and there may exist multiple properties with the same key on the same node. Furthermore, properties themselves can have properties. In this sense, the data model is like a blend of property graphs and RDF \citep{pan2009rdf}.
 
 JanusGraph has the largest set of schema features among all systems we have investigated. Similarly to Neo4j, JanusGraph can automatically generate a schema during operation. However, this functionality can be disabled, in which case the schema must be explicitly defined. There is built-in support for specifying which node labels, edge labels, and property names may exist. Furthermore, it can be specified which properties may exist depending on the label of a node or edge. Property values are restricted to a data type and may be single-valued or multi-valued (lists or sets). In addition, the types of the source and target nodes that may be connected by an edge with a particular label can be constrained. Edge cardinality can be constrained to one-to-one, one-to-many, many-to-one, many-to-many, or ``simple'' (at most one edge of a particular label between any pair of nodes). Finally, there are features to support static (immutable) nodes, time-to-live (TTL), and unidirectional edges which can only be traversed from source to target.
 
@@ -377,7 +377,7 @@ In this section, we define a notion of property graph schema which incorporates 
   \label{tab:er-pg}
 \end{table}
 
-To formally define property graph schemas and schema conformance, we first assume the existence of a set of property types $\mathcal{T}$. Next, we introduce a number of supporting concepts.
+To formally define property graph schemas and schema conformance, we first assume the existence of a set of property types $\mathcal{T}$. Next, we introduce several supporting concepts.
 
 \begin{definition}[Basic property conformance]
   \label{def:property-conformance-basic}
@@ -663,7 +663,7 @@ Compared to \autoref{def:schema-conformance-basic}, \autoref{rule:node} and \ref
     \label{fig:conformance-out}
   \end{subfigure}
 
-  \caption[Property graphs validated against \autoref{fig:pg-schema}]{Examples of property graphs validated against the schema of \autoref{fig:pg-schema}. Violating nodes and edges have are marked and have a red outline.}
+  \caption[Property graphs validated against \autoref{fig:pg-schema}]{Examples of property graphs validated against the schema of \autoref{fig:pg-schema}. Violating nodes and edges are marked and have a red outline.}
   \label{fig:conformance}
 \end{figure}
 
@@ -696,7 +696,7 @@ We adjust the definitions of property conformance, record type, and record confo
   We say that a record $r$ \emph{conforms} to a record type $\rtype$, denoted $r \in \sem{\rtype}$, if and only if for each property name $k \in \mathcal{N}$ it holds that $r(k) \in \sem{\rtype(k)}$.
 \end{definition}
 
-An example of a schema containing an optional property is shown in \autoref{fig:optional-property}. This examples illustrates that optional properties may be omitted, but if they are present, they must have a value of the right type.
+An example of a schema containing an optional property is shown in \autoref{fig:optional-property}. This example illustrates that optional properties may be omitted, but if they are present, they must have a value of the right type.
 
 \begin{figure}[t]
   \centering
@@ -732,7 +732,7 @@ An example of a schema containing an open record type is shown in \autoref{fig:o
   \begin{subfigure}[t]{0.8\textwidth}
     \centering
     \includegraphics[scale=0.75]{figures/conformance-open-record.pdf}
-    \caption{A property graph consisting of three disconnected nodes. The node with \texttt{id}~:~\texttt{2} violates \autoref{rule:node} because the \texttt{birthday} property value is of the the wrong type.}
+    \caption{A property graph consisting of three disconnected nodes. The node with \texttt{id}~:~\texttt{2} violates \autoref{rule:node} because the \texttt{birthday} property value is of the wrong type.}
   \end{subfigure}
   \caption[A property graph validated against a schema with an open record type]{A property graph validated against a schema with an open record type.}
   \label{fig:open-record}
@@ -742,7 +742,7 @@ An example of a schema containing an open record type is shown in \autoref{fig:o
 
 In \autoref{ch:related-work}, we compared the capabilities of existing property graph schema implementation. We can now see how most of the features in \autoref{tab:pg-schema-databases} can be mapped to one of our conformance rules.
 
-Mandatory and allowed properties are captured by our notion of record conformance (\autoref{def:record-conformance}), which corresponds to \autoref{rule:node}. Endpoint constraints correspond to \autoref{rule:edge}. Data type constraints are captured by our notion of object conformance (\autoref{def:object-conformance}), and correspond to \autoref{rule:node}. Cardinality constraints correspond to \autoref{rule:out} and \ref{rule:in}. Property uniqueness, label coexistence, and subtype relations are not covered by our formalism.
+Mandatory and allowed properties are captured by our notion of record conformance (\autoref{def:record-conformance}), which corresponds to \autoref{rule:node}. Endpoint constraints correspond to \autoref{rule:edge}. Data type constraints are captured by our notion of object conformance (\autoref{def:object-conformance}) and correspond to \autoref{rule:node}. Cardinality constraints correspond to \autoref{rule:out} and \ref{rule:in}. Property uniqueness, label coexistence, and subtype relations are not covered by our formalism.
 
 \chapter{Schema Validation in Practice}
 \label{ch:practice}
@@ -751,7 +751,7 @@ Our property graph schema formalism is capable of expressing constraints in comm
 
 In this chapter, we describe how existing database systems can be extended to support all kinds of constraints that can be expressed with our schema formalism. Where possible, we make use of the schema functionality exposed by the database engine. For constraints that cannot be validated in this way, we provide graph queries.
 
-We focus here on the same three databases we covered in \autoref{ch:related-work}: \emph{Neo4j}, \emph{JanusGraph}, and \emph{TigerGraph}. This is choice is motivated by the diversity of schema approaches employed by these systems. Neo4j's schemas are mostly inferred from data, whereas TigerGraph requires an explicit schema, and JanusGraph is schema-optional.
+We focus here on the same three databases we covered in \autoref{ch:related-work}: \emph{Neo4j}, \emph{JanusGraph}, and \emph{TigerGraph}. This choice is motivated by the diversity of schema approaches employed by these systems. Neo4j's schemas are mostly inferred from data, whereas TigerGraph requires an explicit schema, and JanusGraph is schema-optional.
 
 \section{Assumptions}
 
@@ -839,7 +839,7 @@ RETURN n
 \begin{figure}[H]
   \begin{lstlisting}[
     language=Cypher,
-    caption={[A Cypher query to check if there are any edge labels that are not allowed]A Cypher query to check if there are any edge labels that are not allowed. Note that this query returns a Boolean, and does not explain which edges have an illegal label.},
+    caption={[A Cypher query to check if there are any edge labels that are not allowed]A Cypher query to check if there are any edge labels that are not allowed. Note that this query returns a Boolean and does not explain which edges have an illegal label.},
     label=lst:neo4j-edge-labels
   ]
 WITH ["ACTED_IN", "DIRECTED", ...] AS allowedEdgeLabels
@@ -848,7 +848,7 @@ RETURN all(type IN collect(allTypes) WHERE type IN allowedEdgeLabels)
   \end{lstlisting}
 \end{figure}
 
-Next, we look at the properties. The functions \texttt{db.schema.nodeTypeProperties()} and \texttt{db.schema.relTypeProperties()} provide useful information about the properties that exist on nodes and edges, as well as their data types. This allows us to determine if there are any nodes or edges that have properties that are not allowed (\autoref{rule:simp-node-allowed-props} and \ref{rule:simp-edge-allowed-props}), or have the wrong data type (\autoref{rule:simp-node-datatype} and \ref{rule:simp-edge-datatype}). See \autoref{lst:neo4j-allowed-props-binary} for an example of such a query. Again, if we want to find the violating objects, we need to use a \texttt{MATCH} query that scans all properties of all objects in the database. In that case, we use the \texttt{apoc.meta.type()} function (provided by the APOC library\footnote{\url{https://neo4j.com/labs/apoc/}}) to get the data type of a property at query-time. \autoref{lst:neo4j-allowed-props-full} shows an example.
+Next, we look at the properties. The functions \texttt{db.schema.nodeTypeProperties()} and \texttt{db.schema.relTypeProperties()} provide useful information about the properties that exist on nodes and edges, as well as their data types. This allows us to determine if there are any nodes or edges that have properties that are not allowed (\autoref{rule:simp-node-allowed-props} and \ref{rule:simp-edge-allowed-props}) or have the wrong data type (\autoref{rule:simp-node-datatype} and \ref{rule:simp-edge-datatype}). See \autoref{lst:neo4j-allowed-props-binary} for an example of such a query. Again, if we want to find the violating objects, we need to use a \texttt{MATCH} query that scans all properties of all objects in the database. In that case, we use the \texttt{apoc.meta.type()} function (provided by the APOC library\footnote{\url{https://neo4j.com/labs/apoc/}}) to get the data type of a property at query-time. \autoref{lst:neo4j-allowed-props-full} shows an example.
 
 \begin{figure}[H]
   \begin{lstlisting}[
@@ -877,12 +877,12 @@ WITH {
     name: "STRING"
 } AS propertyTypes
 MATCH (n:User)
-WHERE NOT all(pKey IN keys(n) WHERE pKey IN keys(propertTypes) AND apoc.meta.type(n[pKey]) = propertyTypes[pKey])
+WHERE NOT all(pKey IN keys(n) WHERE pKey IN keys(propertyTypes) AND apoc.meta.type(n[pKey]) = propertyTypes[pKey])
 RETURN n
   \end{lstlisting}
 \end{figure}
 
-To check \autoref{rule:simp-edge-endpoints}, we do a \texttt{MATCH} query for every edge label, and look at the source and target nodes. For every edge, there must exist a schema edge such that the labels of the source and target in the data match the labels of the source and target in the schema.
+To check \autoref{rule:simp-edge-endpoints}, we do a \texttt{MATCH} query for every edge label and look at the source and target nodes. For every edge, there must exist a schema edge such that the labels of the source and target in the data match the labels of the source and target in the schema.
 % An example of such a query is shown in \autoref{lst:neo4j-endpoints}.
 
 \begin{figure}[H]
@@ -1091,7 +1091,7 @@ To answer our research questions, we perform a set of experiments which test the
 
 \begin{itemize}
   \item The \textbf{Recommendations Graph}\footnote{\url{https://github.com/neo4j-graph-examples/recommendations}} is a relatively small dataset with a simple schema, provided by Neo4j. It consists of real data sourced from \emph{Open Movie Database}\footnote{\url{https://www.omdbapi.com/}} and \emph{MovieLens}\footnote{\url{https://grouplens.org/datasets/movielens/}}. It contains movies, actors, directors, and users who rate movies. The schema is given in \autoref{fig:schema-recommendations}. This dataset is intended as a working example for people who want to explore the functionality of a graph database. The small size makes it suitable as a proof-of-concept for our schema validation methods.
-  \item The \textbf{LDBC Social Network Benchmark} (SNB) \citep{angles2020snb} is a synthetic dataset, designed to evaluate graph-like data management technologies in a realistic setting. The dataset consists of users, messages, likes, and other concepts that can be found in the domain of social networks. The schema is of moderate size, and is visualized in \autoref{fig:schema-snb}. The data is made available at various scales, ranging from less than a gigabyte up to a terabyte of raw data. We run multiple workloads with scale factor 0.1, 0.3, and 1. This lets us analyze how our solution scales with the size of the data.
+  \item The \textbf{LDBC Social Network Benchmark} (SNB) \citep{angles2020snb} is a synthetic dataset, designed to evaluate graph-like data management technologies in a realistic setting. The dataset consists of users, messages, likes, and other concepts that can be found in the domain of social networks. The schema is of moderate size and is visualized in \autoref{fig:schema-snb}. The data is made available at various scales, ranging from less than a gigabyte up to a terabyte of raw data. We run multiple workloads with scale factor 0.1, 0.3, and 1. This lets us analyze how our solution scales with the size of the data.
 \end{itemize}
 
 These datasets are diverse in scale, ranging from roughly 200K to 20M objects. However, they are all small enough to fit entirely in memory. This choice is motivated primarily by convenience, keeping validation times relatively short and allowing us to perform tests in many different scenarios. Some statistics regarding the size of the datasets are given in \autoref{tab:dataset-statistics}.
@@ -1208,7 +1208,7 @@ These results suggest a linear relationship between the number of objects and va
 \subsection{\ref*{rq:violations}: Violation Rate}
 \label{sec:results-violations}
 
-The workloads so far did not contain schema violations, meaning that the data conformed to the schema. To evaluate how schema violations affect validation time, we choose a fixed dataset and introduce some errors into the data. We choose the SNB dataset at SF0.1, because all databases could succesfully complete full validation, and the results of \ref*{rq:variant} suggested there was more potential for improvement as compared to the Recommendations dataset. We only test the binary validation variant, because we do not expect the amount of violations to have a significant impact on the full variant. A one-way ANOVA is performed to test the null hypothesis that the mean validation time is the same for all violation rates for a particular database. The results are shown in \autoref{fig:results-violations} and \autoref{tab:results-violations}.
+The workloads so far did not contain schema violations, meaning that the data conformed to the schema. To evaluate how schema violations affect validation time, we choose a fixed dataset and introduce some errors into the data. We choose the SNB dataset at SF0.1, because all databases could successfully complete full validation, and the results of \ref*{rq:variant} suggested there was more potential for improvement as compared to the Recommendations dataset. We only test the binary validation variant, because we do not expect the amount of violations to have a significant impact on the full variant. A one-way ANOVA is performed to test the null hypothesis that the mean validation time is the same for all violation rates for a particular database. The results are shown in \autoref{fig:results-violations} and \autoref{tab:results-violations}.
 
 \begin{figure}[t]
   \centering
@@ -1299,7 +1299,7 @@ In \autoref{fig:subtyping}, a constraint is specified which we can express in wo
   \label{fig:drivers-license}
 \end{figure}
 
-\paragraph{Mutual exclusivity.} Another kind of constraint introduced by \citet{barker1990entity} is mutual exclusivity of edges. For example, a \texttt{Person} may have a \texttt{WORKS\_AT} edge to a \texttt{Bank} or a \texttt{TradingCompany}, but not both. Mutual exclusivity could be incorporated into our schema formalism, though we should carefully consider whether the benefits for users weigh up against the added complexity. Some constraints may be easier to understand and implement efficiently through seperate queries or another constraint language that sits on top of our schema validation queries.
+\paragraph{Mutual exclusivity.} Another kind of constraint introduced by \citet{barker1990entity} is mutual exclusivity of edges. For example, a \texttt{Person} may have a \texttt{WORKS\_AT} edge to a \texttt{Bank} or a \texttt{TradingCompany}, but not both. Mutual exclusivity could be incorporated into our schema formalism, though we should carefully consider whether the benefits for users weigh up against the added complexity. Some constraints may be easier to understand and implement efficiently through separate queries or another constraint language that sits on top of our schema validation queries.
 
 \section{Empirical Evaluation}
 \label{sec:limitations-experiment}
@@ -1310,7 +1310,7 @@ We discuss limitations and threats to the validity of our experiments of \autore
 
 Furthermore, some variance in validation time can be explained by background processes and low-level CPU optimizations. We suspect this factor to have a small impact, though possibly significant when measuring on a sub-second timescale.
 
-\paragraph{Construct validity.} This concerns the way our variables of interest were operationalized. One threat to construct validity comes from the way we introduced schema violations into the data. This was done by either removing a mandatory property or a mandatory edge for a node (depending on the database). In reality, different kinds of violations could occur: extraneous properties, incorrect datatypes, or incorrect edge cardinality and others. These could have differing effects on validation time.
+\paragraph{Construct validity.} This concerns the way our variables of interest were operationalized. One threat to construct validity comes from the way we introduced schema violations into the data. This was done by either removing a mandatory property or a mandatory edge for a node (depending on the database). In reality, different kinds of violations could occur: extraneous properties, incorrect data types, or incorrect edge cardinality and others. These could have differing effects on validation time.
 
 \paragraph{External validity.} This concerns the generalization of our results. One such threat comes from the scale of the datasets used in our experiment, which ranged from roughly 200K to 20M objects. We observed a linear relationship between the number of objects and the validation time. However, this relationship may not generalize to very large datasets, especially when they are too large to fit on a single disk.
 
