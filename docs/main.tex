@@ -1029,7 +1029,7 @@ To cover the final remaining rules, cardinality constraints are validated using 
 \begin{figure}[H]
   \begin{lstlisting}[
     language=GSQL,
-    caption={[A GSQL query to find nodes which are missing a outgoing edge]A GSQL query to find \texttt{Actor} nodes which are missing a outgoing \texttt{ACTED\_IN} edge.},
+    caption={[A GSQL query to find nodes which are missing an outgoing edge]A GSQL query to find \texttt{Actor} nodes which are missing an outgoing \texttt{ACTED\_IN} edge.},
     label=lst:tigergraph-mandatory-edges-out
   ]
 SELECT actor
@@ -1041,7 +1041,7 @@ WHERE actor.outdegree("ACTED_IN") == 0
 \begin{figure}[H]
   \begin{lstlisting}[
     language=GSQL,
-    caption={[A GSQL query to find nodes which are missing an incoming edge]A GSQL query to find \texttt{Post} nodes which are missing a incoming \texttt{CONTAINER\_OF} edge.},
+    caption={[A GSQL query to find nodes which are missing an incoming edge]A GSQL query to find \texttt{Post} nodes which are missing an incoming \texttt{CONTAINER\_OF} edge.},
     label=lst:tigergraph-mandatory-edges-in
   ]
 SumAccum<int> @numContainerOf;
