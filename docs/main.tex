@@ -907,7 +907,7 @@ Finally, we check the cardinality constraints (\autoref{rule:simp-card-out} and 
     label=lst:neo4j-mandatory-edges
   ]
 MATCH (a:Actor)
-WHERE NOT (a)-[:ACTED_IN]->(:Movie,)
+WHERE NOT (a)-[:ACTED_IN]->(:Movie)
 RETURN a;
   \end{lstlisting}
 \end{figure}
