@@ -882,8 +882,7 @@ RETURN n
   \end{lstlisting}
 \end{figure}
 
-To check \autoref{rule:simp-edge-endpoints}, we do a \texttt{MATCH} query for every edge label and look at the source and target nodes. For every edge, there must exist a schema edge such that the labels of the source and target in the data match the labels of the source and target in the schema.
-% An example of such a query is shown in \autoref{lst:neo4j-endpoints}.
+To check \autoref{rule:simp-edge-endpoints}, we do a \texttt{MATCH} query for every edge label and look at the source and target nodes. For every edge, there must exist a schema edge such that the labels of the source and target in the data match the labels of the source and target in the schema. An example of such a query is shown in \autoref{lst:neo4j-endpoints}.
 
 \begin{figure}[H]
   \begin{lstlisting}[
