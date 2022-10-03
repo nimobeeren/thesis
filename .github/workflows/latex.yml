@@ -3,6 +3,7 @@ on:
   push:
     paths:
       - 'docs/**'
+      - .github/workflows/latex.yml
 jobs:
   build_latex:
     runs-on: ubuntu-latest
