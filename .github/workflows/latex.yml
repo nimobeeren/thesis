@@ -13,9 +13,9 @@ jobs:
         uses: xu-cheng/latex-action@v2
         with:
           working_directory: docs
-          root_file: main.tex
+          root_file: thesis.tex
       - name: Upload PDF
         uses: actions/upload-artifact@v2
         with:
           name: Thesis PDF
-          path: docs/main.pdf
+          path: docs/thesis.pdf
