@@ -253,7 +253,7 @@ All of JanusGraph's schema features are centered around specifying what is allow
 
 \paragraph{TigerGraph.} A unique aspect of TigerGraph \citep{deutsch2019tigergraph} is that it is schema-first: the entire schema must be specified before a database is instantiated. This allows for more powerful optimizations, building on decades of research on relational databases. The query language is GSQL: an extension of SQL with graph pattern matching capabilities. In TigerGraph's data model, nodes and edges have exactly one label, but nodes can be associated with any number of \emph{tags}, which are conceptually similar to labels. Edges can be directed or undirected.
 
-TigerGraph's schema is strict, in the sense that every node label, edge label, and property must be explicitly defined. All properties are mandatory and have a fixed data type, which may be singular or multi-valued. There are no null values; if a property value is missing during insertion, a default value is used. All nodes have a primary key, which may be a single property or a composite key. Schema edges must specify a source and target node type, though it is possible to specify multiple types on either side. By default, directed edges can only be traversed from source to target, though a reverse edge can be automatically constructed if desired.
+TigerGraph's schema is strict, in the sense that every node label, edge label, and property must be explicitly defined. All properties have a fixed data type, which may be singular or multi-valued. There are no null values; if a property value is missing during insertion, a default value is used. All nodes have a primary key, which may be a single property or a composite key. Schema edges must specify a source and target node type, though it is possible to specify multiple types on either side. By default, directed edges can only be traversed from source to target, though a reverse edge can be automatically constructed if desired.
 
 \sep
 
@@ -265,9 +265,9 @@ The schema features of these three databases are summarized in \autoref{tab:pg-s
     \hline
      & \makecell{\textbf{Neo4j}\\\textbf{Community}}     & \makecell{\textbf{Neo4j}\\\textbf{Enterprise}}      & \textbf{JanusGraph} & \textbf{TigerGraph} & \textbf{Ours} \\
     \hline
-    \makecell[l]{Mandatory                                                                                     \\properties}   & \no                & \yes                & \no                 & \yes                & \yes          \\
+    \makecell[l]{Mandatory                                                                                     \\properties}   & \no                & \yes                & \no                 & \no                & \yes          \\
     \hline
-    \makecell[l]{Allowed                                                                                       \\properties}     & \no                & \no                 & \yes                & \no                 & \yes          \\
+    \makecell[l]{Allowed                                                                                       \\properties}     & \no                & \no                 & \yes                & \yes                 & \yes          \\
     \hline
     \makecell[l]{Endpoint                                                                                      \\constraints}    & \no                & \no                 & \yes                & \yes                & \yes          \\
     \hline
