@@ -2,7 +2,7 @@
 
 [![Build thesis PDF](https://github.com/nimobeeren/thesis/actions/workflows/latex.yml/badge.svg)](https://github.com/nimobeeren/thesis/actions/workflows/latex.yml)
 
-This repository contains the source code and result data of my Master thesis: _Formal Specification and Practical Validation of Property Graph Schemas_.
+This repository contains the source code and result data of my master thesis: _Formal Specification and Practical Validation of Property Graph Schemas_.
 
 ## Abstract
 
