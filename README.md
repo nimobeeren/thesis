@@ -4,11 +4,11 @@
 
 This repository contains the source code and result data of my master thesis: _Formal Specification and Practical Validation of Property Graph Schemas_.
 
+[**📄 Full PDF**](docs/thesis.pdf)
+
 ## Abstract
 
 > Graph databases are increasingly receiving attention from industry and academia, due in part to their flexibility; a schema is often not required. In particular, the _property graph_ model enables natural expression of data from a wide variety of domains. However, schemas can significantly benefit query optimization, data integrity, and documentation. We present a formal property graph schema model based on conceptual data modeling methods, integrating constraints on mandatory and allowed properties, property data types, edge endpoints, and edge cardinality. Moreover, we specify schema validation semantics using first-order logic rules. These rules are implemented using graph queries for _Neo4j_, _JanusGraph_, and _TigerGraph_, which we evaluate through a controlled experiment. Our results demonstrate feasibility of our approach, with execution times scaling linearly with the size of the data.
-
-[**📄 Full PDF**](docs/thesis.pdf)
 
 ## Repository Structure
 
